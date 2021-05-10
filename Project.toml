@@ -3,6 +3,11 @@ uuid = "2526459f-0e84-440c-98d6-63172703d9a4"
 authors = ["Francesca Capel <capel.francesca@gmail.com> and contributors"]
 version = "0.1.0"
 
+[deps]
+Parameters = "d96e819e-fc66-5662-9728-84c9c7592b0a"
+Roots = "f2b01f46-fcfa-551c-844a-d8ac1e96c665"
+SpecialFunctions = "276daf66-3868-5448-9aa4-cd146d93841b"
+
 [compat]
 julia = "1"
 
