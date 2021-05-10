@@ -1,5 +1,5 @@
 module PartonDensity
 
-# Write your package code here.
+include("parametrisation.jl")
 
 end
