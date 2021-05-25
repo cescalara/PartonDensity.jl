@@ -16,7 +16,7 @@ jupyter:
 ```julia
 using QCDNUM, PartonDensity 
 using Distributions, Plots, Random, Printf
-pd = PartonDensity
+pd = PartonDensity;
 ```
 
 ### Select hyperparameters
@@ -89,7 +89,7 @@ Set input parameters
 ```julia
 QCDNUM.setord(2); # NLO in pQCD
 QCDNUM.setalf(0.364, 2.0); # α_S = 0.364, μ_R^2 = 2.0
-QCDNUM.setcbt(5, 10, 20, 30); # 5 flavours in FFNS
+QCDNUM.setcbt(5, 1, 1, 1); # 5 flavours in FFNS
 iq0 = QCDNUM.iqfrmq(2.0); # Get index of μ_F^2 = 2.0 = μ_R^2
 ```
 
@@ -173,8 +173,70 @@ jtype = 10*iset1+itype
 eps = QCDNUM.evolfg(jtype, input_pdfs, map, iq0)
 ```
 
+Make function to pass structure function evaluations to SPLINT
+
 ```julia
-pdf = QCDNUM.allfxq(itype, x, q, 0, 1)
+# Assume proton structure weights
+proton_weights = [4.,1.,4.,1.,4.,1.,0.,1.,4.,1.,4.,1.,4.]/9.0;
+```
+
+```julia
+function _func_to_integrate(ix, iq, first)::Float64
+    
+    ix = ix[] # deref ptr
+    iq = iq[]
+
+    # Get x, qq values
+    x = Float64.([QCDNUM.xfrmix(ix)])
+    q2 = Float64.([QCDNUM.qfrmiq(iq)])
+    
+    # Get structure functions
+    F_L = QCDNUM.zmstfun(1, proton_weights, x, q2, 1, 1)[1]
+    F_2 = QCDNUM.zmstfun(2, proton_weights, x, q2, 1, 1)[1] 
+    xF_3 = QCDNUM.zmstfun(3, proton_weights, x, q2, 1, 1)[1]
+    
+    return F_L + F_2 + xF_3
+    
+end
+
+func_to_integrate = @cfunction(_func_to_integrate, Float64, (Ref{Int32}, Ref{Int32}, Ref{UInt8}))
+```
+
+```julia
+Nx = size(qcdnum_x_grid)[1]
+Nq = size(qcdnum_qq_grid)[1]
+F = zeros(Nx, Nq);
+
+for ix in 1:Nx
+    for iq in 1:Nq
+        F[ix, iq] = _func_to_integrate(ix, iq, false)
+    end
+end
+```
+
+```julia
+# What does this function look like?
+
+#pcolormesh(log10.(qcdnum_x_grid), log10.(qcdnum_qq_grid), 
+#    log10.(F'))
+#scatter(log10.(x), log10.(qq), color="k", s=1, alpha=0.5)
+#colorbar(label="log10(F)")
+#grid(color="k", lw=2)
+#xlabel("log10(x)")
+#ylabel("log10(qq)");
+```
+
+Make spline object
+
+```julia
+QCDNUM.ssp_spinit(1000)
+iasp = QCDNUM.isp_s2make(5, 5)
+
+# Fill the spline and set no kinematic limit
+QCDNUM.ssp_s2fill(iasp, func_to_integrate, 0.0)
+
+# Print spline summary
+QCDNUM.ssp_nprint(iasp)
 ```
 
 ```julia
