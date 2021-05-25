@@ -1,6 +1,3 @@
-#%%
-module MyModule
-
 """
 // ****************************************
 // R. Aggarwal
@@ -14,7 +11,7 @@ module MyModule
 """
 
 
-include("data_T.jl")
+include("../data/data_T.jl")
 
 export Get_Pred_N
 export Get_data_events
@@ -64,7 +61,7 @@ end
 function Get_Pred_N(Integ_xsec, eMPp)
 
     TM = Get_TM_Elements(eMPp);
-    K=Get_K_Elements(eMPp)
+    K = Get_K_Elements(eMPp)
 
     xsec_pred = zeros(153)
     for j in 1:153
@@ -79,7 +76,3 @@ function Get_Pred_N(Integ_xsec, eMPp)
     return xsec_pred;
 
 end
-
-end #end of module
-
-#%%
