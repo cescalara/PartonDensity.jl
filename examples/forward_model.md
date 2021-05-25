@@ -240,5 +240,14 @@ QCDNUM.ssp_nprint(iasp)
 ```
 
 ```julia
+# Integrate over required ranges
+x1 = 0.01
+x2 = 0.1
+q1 = 10.0
+q2 = 100.0
+QCDNUM.dsp_ints2(iasp, x1, x2, q1, q2)
+```
+
+```julia
 
 ```

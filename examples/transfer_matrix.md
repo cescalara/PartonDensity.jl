@@ -17,10 +17,10 @@ using PartonDensity, CSV, DelimitedFiles
 ```
 
 ```julia
-eMPp = 1
+eMPp = 1 # e+/e- switch 0/1
 numbers = readdlm("data/HERAPDF20_NNLO_EIG_ePp.txt")
-Intig = numbers[:,3]
-prediction = Get_Pred_N(Intig,eMPp);
+Intig = numbers[:,3] # List of integrated corss section values (429)
+prediction = Get_Pred_N(Intig, eMPp); # List of expected event numbers
 ```
 
 ```julia
