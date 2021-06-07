@@ -176,6 +176,10 @@ eps = QCDNUM.evolfg(jtype, input_pdfs, map, iq0)
 Make function to pass structure function evaluations to SPLINT
 
 ```julia
+dd_xsecnc_xq2_i(0.1, 200.0)
+```
+
+```julia
 function _func_to_integrate(ix, iq, first)::Float64
     
     ix = ix[] # deref ptr

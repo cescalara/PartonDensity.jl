@@ -54,9 +54,9 @@ function f2_lo(x::Float64, q2::Float64)::Float64
     weights = [0., Ad, Au, Ad, Au, Ad, 0., Ad, Au, Ad, Au, Ad, 0.]
 
     # Structure function calculation
-    sum = QCDNUM.zmstfun(2, weights, [x], [q2], 1, 0)
+    output = QCDNUM.zmstfun(2, weights, [x], [q2], 1, 0)
     
-    sum[1]
+    output[1]
 end
 
 """
@@ -80,9 +80,9 @@ function xf3_lo(x::Float64, q2::Float64)::Float64
     weights = [0., -Bd, -Bu, -Bd, -Bu, -Bd, 0.,  Bd, Bu, Bd, Bu, Bd, 0.] 
 
     # Structure function calculation
-    QCDNUM.zmstfun(3, weights, [x], [q2], 1, 0)
+    output = QCDNUM.zmstfun(3, weights, [x], [q2], 1, 0)
 
-    sum[1]
+    output[1]
 end
 
 """
@@ -103,9 +103,9 @@ function fl_lo(x::Float64, q2::Float64)::Float64
     # As in HERAPDF (top set to 0)
     weights = [0., Ad, Au, Ad, Au, Ad, 0.,  Ad, Au, Ad, Au, Ad, 0.]
 
-    QCDNUM.zmstfun(1, weights, [x], [q2], 1, 0)
+    output = QCDNUM.zmstfun(1, weights, [x], [q2], 1, 0)
 
-    sum[1]
+    output[1]
 end
 
 """
@@ -191,7 +191,7 @@ function dd_xsecnc_xq2_i(x::Float64, q2::Float64)
 
     dd_xsec = -1.0
     
-    dd_xsec = nc_propagator(q2, x) * Rxsecnc_xq2_i(x, q2)
+    dd_xsec = nc_propagator(q2, x) * rxsecnc_xq2_i(x, q2)
     
     dd_xsec
 end
