@@ -59,7 +59,7 @@ iwt = Int32.([1, 2, 4, 8, 16]) # Weights for more grid points at higher x
 nxin = 100 # Request 100 x grid points
 iord = 3 # Quadratic interpolation
 
-qlim = Float64.([2e0, 1e4]) # Limits of qq grid
+qlim = Float64.([2, 1e4]) # Limits of qq grid
 wt = Float64.([1e0, 1e0]) # Weights for even grid points
 nqin = 50 # Request 50 qq grid points
 ```
@@ -214,26 +214,78 @@ p1 = heatmap(log10.(qcdnum_x_grid), log10.(qcdnum_qq_grid[sel]), log10.(F[:, sel
 plot(p1, xlabel="log10(x)", ylabel="log10(q2)", title="log10(func_to_integ)")
 ```
 
+```julia
+# But isn't smooth over full grid...
+sel = qcdnum_qq_grid .> 2.0
+p1 = heatmap(log10.(qcdnum_x_grid), log10.(qcdnum_qq_grid[sel]), F[:, sel]')
+plot(p1, xlabel="log10(x)", ylabel="log10(q2)", title="log10(func_to_integ)")
+```
+
 Make spline object
 
 ```julia
 QCDNUM.ssp_spinit(1000)
-iasp = QCDNUM.isp_s2make(5, 5)
+iasp = QCDNUM.isp_s2make(5, 3)
 
 # Fill the spline and set no kinematic limit
 QCDNUM.ssp_s2fill(iasp, func_to_integrate, 0.0)
+
+# Set user nodes to avoid numerical issues
+#x_nodes = Vector(range(3e-3, stop=0.9, length=20))
+#qq_nodes = Vector(range(3e2, stop=2e3, length=10))
+#nx = length(x_nodes)
+#nq = length(qq_nodes)
+#iasp = QCDNUM.isp_s2user(x_nodes, nx, qq_nodes, nq)
 
 # Print spline summary
 QCDNUM.ssp_nprint(iasp)
 ```
 
+Define binning
+
 ```julia
-# Integrate over required ranges
-x1 = 0.01
-x2 = 0.1
-q1 = 10.0
-q2 = 100.0
-QCDNUM.dsp_ints2(iasp, x1, x2, q1, q2)
+x_bins = 10 .^ range(log10(3e-2), stop=log10(0.8), length=20)
+qq_bins = 10 .^ range(log10(3e2), stop=log10(900), length=20)
+Nx = length(x_bins)
+Nq = length(qq_bins);
+```
+
+Visualise the spline
+
+```julia
+spline = zeros(Nx, Nq)
+
+for ix = 1:Nx
+    for iq = 1:Nq
+        spline[ix, iq] = QCDNUM.dsp_funs2(iasp, x_bins[ix], 
+            qq_bins[iq], 1)
+    end
+end
+```
+
+```julia
+#plot(vline(x_nodes, color="black", label="x nodes"), xaxis=:log)
+#plot(hline!(qq_nodes, color="black", label="qq nodes"), xlims=(1e-2, 1), yaxis=:log)
+heatmap(log10.(x_bins), log10.(qq_bins), spline')
+#plot!(xlims=(3e-3, 1), ylims=(3e2, 1e3))
+```
+
+Integrated cross section
+
+```julia
+integ_xsec = zeros(19, 19);
+
+for ix = 1:length(x_bins)-1
+    for iq = 1:length(qq_bins)-1
+        integ_xsec[ix, iq] = QCDNUM.dsp_ints2(iasp, x_bins[ix], x_bins[ix+1], 
+            qq_bins[iq], qq_bins[iq+1])
+    end
+end
+```
+
+```julia
+p1 = heatmap(log10.(x_bins[1:19]), log10.(qq_bins[1:19]), integ_xsec')
+plot(p1, xlabel="log10(x)", ylabel="log10(q2)", title="integrated cross section")
 ```
 
 ```julia
