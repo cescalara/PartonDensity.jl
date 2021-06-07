@@ -176,26 +176,18 @@ eps = QCDNUM.evolfg(jtype, input_pdfs, map, iq0)
 Make function to pass structure function evaluations to SPLINT
 
 ```julia
-dd_xsecnc_xq2_i(0.1, 200.0)
-```
-
-```julia
 function _func_to_integrate(ix, iq, first)::Float64
     
-    ix = ix[] # deref ptr
+    # Deref pointers
+    ix = ix[] 
     iq = iq[]
 
     # Get x, qq values
-    x = Float64.([QCDNUM.xfrmix(ix)])
-    q2 = Float64.([QCDNUM.qfrmiq(iq)])
+    x = QCDNUM.xfrmix(ix)
+    q2 = QCDNUM.qfrmiq(iq)
     
-    # Get structure functions
-    F_L = QCDNUM.zmstfun(1, proton_weights, x, q2, 1, 1)[1]
-    F_2 = QCDNUM.zmstfun(2, proton_weights, x, q2, 1, 1)[1] 
-    xF_3 = QCDNUM.zmstfun(3, proton_weights, x, q2, 1, 1)[1]
-    
-    return F_L + F_2 + xF_3
-    
+    # Get double differential cross section    
+    return dd_xsecnc_xq2_i(x, q2)    
 end
 
 func_to_integrate = @cfunction(_func_to_integrate, Float64, (Ref{Int32}, Ref{Int32}, Ref{UInt8}))
@@ -205,24 +197,21 @@ func_to_integrate = @cfunction(_func_to_integrate, Float64, (Ref{Int32}, Ref{Int
 Nx = size(qcdnum_x_grid)[1]
 Nq = size(qcdnum_qq_grid)[1]
 F = zeros(Nx, Nq);
+F_test = zeros(Nx, Nq)
 
-for ix in 1:Nx
-    for iq in 1:Nq
+for ix = 1:Nx
+    for iq = 1:Nq
         F[ix, iq] = _func_to_integrate(ix, iq, false)
+        F_test[ix, iq] = f2_lo(qcdnum_x_grid[ix], qcdnum_qq_grid[iq]) 
     end
 end
 ```
 
 ```julia
 # What does this function look like?
-
-#pcolormesh(log10.(qcdnum_x_grid), log10.(qcdnum_qq_grid), 
-#    log10.(F'))
-#scatter(log10.(x), log10.(qq), color="k", s=1, alpha=0.5)
-#colorbar(label="log10(F)")
-#grid(color="k", lw=2)
-#xlabel("log10(x)")
-#ylabel("log10(qq)");
+sel = qcdnum_qq_grid .> 300; # For useful bins
+p1 = heatmap(log10.(qcdnum_x_grid), log10.(qcdnum_qq_grid[sel]), log10.(F[:, sel]'))
+plot(p1, xlabel="log10(x)", ylabel="log10(q2)", title="log10(func_to_integ)")
 ```
 
 Make spline object

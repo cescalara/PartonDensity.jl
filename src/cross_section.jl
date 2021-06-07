@@ -34,7 +34,10 @@ sqrt_s = 318.1 # Should be configurable for calculation of y
 Lepcharge = 1 # Should be configurable for calculation of Y
 
 export dd_xsecnc_xq2_i
-
+export f2_lo
+export xf3_lo
+export fl_lo
+    
 """
     f2_lo(x, q2)
 
