@@ -13,12 +13,11 @@
 
 include("../data/zeus_transfer_matrix.jl")
 
-export Get_Pred_N
-export Get_data_events
+export get_pred_N
+export get_data_events
 
 
-
-function Get_data_events(eMPp)
+function get_data_events(eMPp)
     if eMPp == 0
         return Data_Events_ePp
     else
@@ -27,7 +26,7 @@ function Get_data_events(eMPp)
 end
 
 
-function Get_K_Elements(eMPp)
+function get_K_elements(eMPp)
     if eMPp == 0
         return Kii_ePp
     else
@@ -36,7 +35,7 @@ function Get_K_Elements(eMPp)
 end
 
 
-function Get_L_data(eMPp)
+function get_L_data(eMPp)
     if eMPp == 0
         return Ld_ePp
     else
@@ -44,8 +43,8 @@ function Get_L_data(eMPp)
     end
 end
 
-function Get_TM_Elements(eMPp)
-    lumi_data = Get_L_data(eMPp)
+function get_TM_elements(eMPp)
+    lumi_data = get_L_data(eMPp)
     TM_elements = TM_Elements_eMp
     if eMPp == 0
         TM_elements = TM_Elements_ePp
@@ -58,10 +57,10 @@ function Get_TM_Elements(eMPp)
     return TM_elements
 end
 
-function Get_Pred_N(Integ_xsec, eMPp)
+function get_pred_N(Integ_xsec, eMPp)
 
-    TM = Get_TM_Elements(eMPp);
-    K = Get_K_Elements(eMPp)
+    TM = get_TM_elements(eMPp);
+    K = get_K_elements(eMPp)
 
     xsec_pred = zeros(153)
     for j in 1:153
