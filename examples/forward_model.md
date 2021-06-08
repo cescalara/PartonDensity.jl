@@ -59,7 +59,7 @@ iwt = Int32.([1, 2, 4, 8, 16]) # Weights for more grid points at higher x
 nxin = 100 # Request 100 x grid points
 iord = 3 # Quadratic interpolation
 
-qlim = Float64.([2, 1e4]) # Limits of qq grid
+qlim = Float64.([300, 3e4]) # Limits of qq grid
 wt = Float64.([1e0, 1e0]) # Weights for even grid points
 nqin = 50 # Request 50 qq grid points
 ```
@@ -88,9 +88,9 @@ Set input parameters
 
 ```julia
 QCDNUM.setord(2); # NLO in pQCD
-QCDNUM.setalf(0.364, 2.0); # α_S = 0.364, μ_R^2 = 2.0
+QCDNUM.setalf(0.364, 300.0); # α_S = 0.364, μ_R^2 = 2.0
 QCDNUM.setcbt(5, 1, 1, 1); # 5 flavours in FFNS
-iq0 = QCDNUM.iqfrmq(2.0); # Get index of μ_F^2 = 2.0 = μ_R^2
+iq0 = QCDNUM.iqfrmq(100.0); # Get index of μ_F^2 = 2.0 = μ_R^2
 ```
 
 Pass input PDF function
@@ -208,17 +208,26 @@ end
 ```
 
 ```julia
+#for i = 1:20000
+#    f2_lo(qcdnum_x_grid[1], qcdnum_qq_grid[1]) 
+#end
+```
+
+### Updated QCDNUM grid
+
+x bounds = (1e-3, 1)
+q2 bounds = (1e2, 3e4)
+
+```julia
 # What does this function look like?
 sel = qcdnum_qq_grid .> 300; # For useful bins
-p1 = heatmap(log10.(qcdnum_x_grid), log10.(qcdnum_qq_grid[sel]), log10.(F[:, sel]'))
-plot(p1, xlabel="log10(x)", ylabel="log10(q2)", title="log10(func_to_integ)")
+p1 = heatmap(qcdnum_x_grid, qcdnum_qq_grid, F_test[:, :]')
+plot(p1, xlabel="x", ylabel="q2", title="differential cross section", 
+    xaxis=:log, yaxis=:log)
 ```
 
 ```julia
-# But isn't smooth over full grid...
-sel = qcdnum_qq_grid .> 2.0
-p1 = heatmap(log10.(qcdnum_x_grid), log10.(qcdnum_qq_grid[sel]), F[:, sel]')
-plot(p1, xlabel="log10(x)", ylabel="log10(q2)", title="log10(func_to_integ)")
+minimum(F)
 ```
 
 Make spline object
