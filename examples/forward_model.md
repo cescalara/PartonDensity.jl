@@ -24,9 +24,12 @@ pd = PartonDensity;
 ```julia
 Random.seed!(5);
 dirichlet = Dirichlet([5., 4., 1, 0.5, 0.3, 0.2, 0.1, 0.1, 0.1])
+input_random_dirichlet = rand(dirichlet)
+```
 
+```julia
 hp = NamedTuple{(:λ_u, :λ_d, :λ_g1, :λ_g2, :K_g, :λ_q, :θ)}((0.7, 0.5, 0.7, -0.7, 1.0, 
-        -0.5, rand(dirichlet)))
+        -0.5, input_random_dirichlet))
 ```
 
 ### Plot input PDFs
@@ -59,7 +62,7 @@ iwt = Int32.([1, 2, 4, 8, 16]) # Weights for more grid points at higher x
 nxin = 100 # Request 100 x grid points
 iord = 3 # Quadratic interpolation
 
-qlim = Float64.([300, 3e4]) # Limits of qq grid
+qlim = Float64.([100, 3e4]) # Limits of qq grid
 wt = Float64.([1e0, 1e0]) # Weights for even grid points
 nqin = 50 # Request 50 qq grid points
 ```
@@ -88,7 +91,7 @@ Set input parameters
 
 ```julia
 QCDNUM.setord(2); # NLO in pQCD
-QCDNUM.setalf(0.364, 300.0); # α_S = 0.364, μ_R^2 = 2.0
+QCDNUM.setalf(0.364, 100.0); # α_S = 0.364, μ_R^2 = 2.0
 QCDNUM.setcbt(5, 1, 1, 1); # 5 flavours in FFNS
 iq0 = QCDNUM.iqfrmq(100.0); # Get index of μ_F^2 = 2.0 = μ_R^2
 ```
@@ -153,16 +156,16 @@ This acts as a mapping between your input function and quark species.
 
 ```julia
 #               tb  bb  cb  sb  ub  db  g   d   u   s   c   b   t
-map = Float64.([0., 0., 0., 0.,-1., 0., 0., 0., 1., 0., 0., 0., 0., # 1
-                0., 0., 0., 0., 0.,-1., 0., 1., 0., 0., 0., 0., 0., # 2
-                0., 0., 0., 0., 1., 0., 0., 0., 0., 0., 0., 0., 0., # 3
-                0., 0., 0., 0., 0., 1., 0., 0., 0., 0., 0., 0., 0., # 4
-                0., 0., 0., 0., 0., 0., 0., 0., 0., 1., 0., 0., 0., # 5
-                0., 0., 0., 1., 0., 0., 0., 0., 0., 0., 0., 0., 0., # 6
-                0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 1., 0., 0., # 7
-                0., 0., 1., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., # 8 
-                0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 1., 0., # 9
-                0., 1., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., # 10
+map = Float64.([0., 0., 0., 0.,-1., 0., 0., 0., 1., 0., 0., 0., 0., # 1 # U valence
+                0., 0., 0., 0., 0.,-1., 0., 1., 0., 0., 0., 0., 0., # 2 # D valence
+                0., 0., 0., 0., 1., 0., 0., 0., 0., 0., 0., 0., 0., # 3 # u sea
+                0., 0., 0., 0., 0., 1., 0., 0., 0., 0., 0., 0., 0., # 4 # d sea
+                0., 0., 0., 0., 0., 0., 0., 0., 0., 1., 0., 0., 0., # 5 # s
+                0., 0., 0., 1., 0., 0., 0., 0., 0., 0., 0., 0., 0., # 6 # sbar
+                0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 1., 0., 0., # 7 # c
+                0., 0., 1., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., # 8 # cbar
+                0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 1., 0., # 9 # b
+                0., 1., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., # 10 # bbar
                 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., # 11
                 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0.]); # 12
 ```
@@ -194,6 +197,56 @@ func_to_integrate = @cfunction(_func_to_integrate, Float64, (Ref{Int32}, Ref{Int
 ```
 
 ```julia
+# These globals will later be set by user
+ZMass = 91.1876
+WMass = 80.398 
+AlphaEM = 7.297352570e-03
+GFermi = 1.16637e-05 
+TopMass = 171.2 
+BottomMass = 4.20
+
+Vub = 41.2e-3
+Vcb = 3.93e-3
+
+Sin2ThetaW = 0.23127 
+Sin2ThetaC = 0.05 
+vu = 0.19164
+vd = -0.34582
+ve = -0.03746
+
+au = 0.5
+ad = -0.5
+ae = -0.5
+```
+
+```julia
+"""
+    f2_lo(x, q2)
+
+Calculate the f2_lo structure function term. 
+To be run after the evolution of PDFs with QCDNUM.
+"""
+function new_f2_lo(x::Float64, q2::Float64)::Float64
+
+    # For weights
+    pz = q2 / ((ZMass^2 + q2) * (4*Sin2ThetaW * (1 - Sin2ThetaW)))
+
+    Au = 4.0/9.0 #-2*pz*(2.0/3.0)*vu*ve + pz^2*(ve^2 + ae^2)*(vu^2 + au^2)
+
+    Ad = 1.0/9.0 #-2*pz*(-1.0/3.0)*vd*ve + pz^2*(ve^2 + ae^2)*(vd^2 + ad^2)
+
+    # As in HERAPDF (top set to 0)
+    weights = [0., Ad, Au, Ad, Au, Ad, 0., Ad, Au, Ad, Au, Ad, 0.]
+
+    # Structure function calculation
+    output = QCDNUM.zmstfun(2, weights, [x], [q2], 1, 0)
+    
+    output[1]
+end
+
+```
+
+```julia
 Nx = size(qcdnum_x_grid)[1]
 Nq = size(qcdnum_qq_grid)[1]
 F = zeros(Nx, Nq);
@@ -202,7 +255,7 @@ F_test = zeros(Nx, Nq)
 for ix = 1:Nx
     for iq = 1:Nq
         F[ix, iq] = _func_to_integrate(ix, iq, false)
-        F_test[ix, iq] = f2_lo(qcdnum_x_grid[ix], qcdnum_qq_grid[iq]) 
+        F_test[ix, iq] = new_f2_lo(qcdnum_x_grid[ix], qcdnum_qq_grid[iq]) 
     end
 end
 ```
@@ -222,7 +275,7 @@ q2 bounds = (1e2, 3e4)
 # What does this function look like?
 sel = qcdnum_qq_grid .> 300; # For useful bins
 p1 = heatmap(qcdnum_x_grid, qcdnum_qq_grid, F_test[:, :]')
-plot(p1, xlabel="x", ylabel="q2", title="differential cross section", 
+plot(p1, xlabel="x", ylabel="q2", title="Testing", 
     xaxis=:log, yaxis=:log)
 ```
 
