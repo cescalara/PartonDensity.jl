@@ -32,6 +32,25 @@ hp = NamedTuple{(:λ_u, :λ_d, :λ_g1, :λ_g2, :K_g, :λ_q, :θ)}((0.7, 0.5, 0.7
         -0.5, input_random_dirichlet))
 ```
 
+### For simple comparison
+
+```julia
+using SpecialFunctions, Roots
+const sf = SpecialFunctions
+```
+
+```julia
+w = hp.θ[1]
+f(K_u) = w - 2 * (sf.beta(hp.λ_u + 1, K_u + 1) / sf.beta(hp.λ_u, K_u + 1))    
+K_u = find_zero(f, 1)
+```
+
+```julia
+w = hp.θ[2]
+f(K_d) = w - (sf.beta(hp.λ_d + 1, K_d + 1) / sf.beta(hp.λ_d, K_d + 1))    
+K_d = find_zero(f, 1)
+```
+
 ### Plot input PDFs
 
 ```julia
