@@ -299,6 +299,22 @@ plot(p1, xlabel="x", ylabel="q2", title="Testing",
 ```
 
 ```julia
+qcdnum_qq_grid[1]
+```
+
+```julia
+my_x_grid = qcdnum_x_grid[10:19]
+```
+
+```julia
+F_test[10:19, 1]
+```
+
+```julia
+F[10:19, 1]
+```
+
+```julia
 minimum(F)
 ```
 
