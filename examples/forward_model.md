@@ -15,14 +15,23 @@ jupyter:
 
 ```julia
 using QCDNUM, PartonDensity 
-using Distributions, Plots, Random, Printf
+using Distributions, Plots, Random, Printf, NaNMath
 pd = PartonDensity;
 ```
 
 ### Select hyperparameters
 
 ```julia
-Random.seed!(5);
+#seed = 5
+seed = 100;
+#seed = 200; 
+#seed = 300;
+#seed = 42
+#seed = rand(10:10000)
+```
+
+```julia
+Random.seed!(seed);
 dirichlet = Dirichlet([5., 4., 1, 0.5, 0.3, 0.2, 0.1, 0.1, 0.1])
 input_random_dirichlet = rand(dirichlet)
 ```
@@ -54,7 +63,7 @@ K_d = find_zero(f, 1)
 ### Plot input PDFs
 
 ```julia
-x_grid = range(1e-3, stop=1, length=50)
+x_grid = range(1e-2, stop=1, length=50)
 
 plot(x_grid, [pd.x_uv_x(x, hp.λ_u, hp.θ[1]) for x in x_grid], label="x uv(x)", lw=3)
 plot!(x_grid, [pd.x_dv_x(x, hp.λ_d, hp.θ[2]) for x in x_grid], label="x dv(x)", lw=3)
@@ -66,6 +75,8 @@ plot!(x_grid, [pd.x_q_x(x, hp.λ_q, hp.θ[7]) for x in x_grid], label="x s(x)", 
 plot!(x_grid, [pd.x_q_x(x, hp.λ_q, hp.θ[8]) for x in x_grid], label="x c(x)", lw=3)
 plot!(x_grid, [pd.x_q_x(x, hp.λ_q, hp.θ[9]) for x in x_grid], label="x b(x)", lw=3)
 plot!(xlabel="x")
+ylims!(1e-8, 10)
+plot!(xaxis=:log, yaxis=:log, legend=:outertopright)
 ```
 
 ### Evolve using QCDNUM
@@ -110,7 +121,7 @@ Set input parameters
 
 ```julia
 QCDNUM.setord(2); # NLO in pQCD
-QCDNUM.setalf(0.364, 100.0); # α_S = 0.364, μ_R^2 = 2.0
+QCDNUM.setalf(0.118, 100.0); # α_S = 0.364, μ_R^2 = 2.0
 QCDNUM.setcbt(5, 1, 1, 1); # 5 flavours in FFNS
 iq0 = QCDNUM.iqfrmq(100.0); # Get index of μ_F^2 = 2.0 = μ_R^2
 ```
@@ -255,8 +266,9 @@ function new_f2_lo(x::Float64, q2::Float64)::Float64
     Ad = 1.0/9.0 #-2*pz*(-1.0/3.0)*vd*ve + pz^2*(ve^2 + ae^2)*(vd^2 + ad^2)
 
     # As in HERAPDF (top set to 0)
-    weights = [0., Ad, Au, Ad, Au, Ad, 0., Ad, Au, Ad, Au, Ad, 0.]
-
+    #weights = [0., Ad, Au, Ad, Au, Ad, 0., Ad, Au, Ad, Au, Ad, 0.]
+    weights =  [0., 1/9., 4/9., 1/9., 4/9., 1/9., 0., 1/9., 4/9., 1/9., 4/9., 1/9., 0.]
+    
     # Structure function calculation
     output = QCDNUM.zmstfun(2, weights, [x], [q2], 1, 0)
     
@@ -294,7 +306,14 @@ q2 bounds = (1e2, 3e4)
 # What does this function look like?
 sel = qcdnum_qq_grid .> 300; # For useful bins
 p1 = heatmap(qcdnum_x_grid, qcdnum_qq_grid, F_test[:, :]')
-plot(p1, xlabel="x", ylabel="q2", title="Testing", 
+plot(p1, xlabel="x", ylabel="q2", title="F2 LO", 
+    xaxis=:log, yaxis=:log)
+```
+
+```julia
+# What does this function look like?
+p1 = heatmap(qcdnum_x_grid, qcdnum_qq_grid, NaNMath.log10.(F[:, :]'))
+plot(p1, xlabel="x", ylabel="q2", title="log10(Diff. cross section)", 
     xaxis=:log, yaxis=:log)
 ```
 
@@ -322,7 +341,7 @@ Make spline object
 
 ```julia
 QCDNUM.ssp_spinit(1000)
-iasp = QCDNUM.isp_s2make(5, 3)
+iasp = QCDNUM.isp_s2make(5, 5)
 
 # Fill the spline and set no kinematic limit
 QCDNUM.ssp_s2fill(iasp, func_to_integrate, 0.0)
@@ -341,48 +360,45 @@ QCDNUM.ssp_nprint(iasp)
 Define binning
 
 ```julia
-x_bins = 10 .^ range(log10(3e-2), stop=log10(0.8), length=20)
-qq_bins = 10 .^ range(log10(3e2), stop=log10(900), length=20)
-Nx = length(x_bins)
-Nq = length(qq_bins);
+Nx = size(qcdnum_x_grid)[1]
+Nq = size(qcdnum_qq_grid)[1]
+spline = zeros(Nx, Nq);
+
+for ix = 1:Nx
+    for iq = 1:Nq
+        spline[ix, iq] = QCDNUM.dsp_funs2(iasp, qcdnum_x_grid[ix], 
+            qcdnum_qq_grid[iq], 1)
+    end
+end
 ```
 
 Visualise the spline
 
 ```julia
-spline = zeros(Nx, Nq)
-
-for ix = 1:Nx
-    for iq = 1:Nq
-        spline[ix, iq] = QCDNUM.dsp_funs2(iasp, x_bins[ix], 
-            qq_bins[iq], 1)
-    end
-end
-```
-
-```julia
-#plot(vline(x_nodes, color="black", label="x nodes"), xaxis=:log)
-#plot(hline!(qq_nodes, color="black", label="qq nodes"), xlims=(1e-2, 1), yaxis=:log)
-heatmap(log10.(x_bins), log10.(qq_bins), spline')
-#plot!(xlims=(3e-3, 1), ylims=(3e2, 1e3))
+p1 = heatmap(qcdnum_x_grid, qcdnum_qq_grid, NaNMath.log10.(spline[:, :]'))
+plot(p1, xlabel="x", ylabel="q2", title="log10(Spline)", 
+    xaxis=:log, yaxis=:log)
 ```
 
 Integrated cross section
 
 ```julia
-integ_xsec = zeros(19, 19);
+integ_xsec = zeros(length(qcdnum_x_grid)-1, length(qcdnum_qq_grid)-1);
 
-for ix = 1:length(x_bins)-1
-    for iq = 1:length(qq_bins)-1
-        integ_xsec[ix, iq] = QCDNUM.dsp_ints2(iasp, x_bins[ix], x_bins[ix+1], 
-            qq_bins[iq], qq_bins[iq+1])
+for ix = 1:length(qcdnum_x_grid)-1
+    for iq = 1:length(qcdnum_qq_grid)-1
+        integ_xsec[ix, iq] = QCDNUM.dsp_ints2(iasp, qcdnum_x_grid[ix],
+            qcdnum_x_grid[ix+1], 
+            qcdnum_qq_grid[iq], qcdnum_qq_grid[iq+1])
     end
 end
 ```
 
 ```julia
-p1 = heatmap(log10.(x_bins[1:19]), log10.(qq_bins[1:19]), integ_xsec')
-plot(p1, xlabel="log10(x)", ylabel="log10(q2)", title="integrated cross section")
+p1 = heatmap(qcdnum_x_grid[1:end-1], qcdnum_qq_grid[1:end-1], 
+    NaNMath.log10.(integ_xsec[:, :]'))
+plot(p1, xlabel="x", ylabel="q2", title="log10(Int. cross section)", 
+    xaxis=:log, yaxis=:log)
 ```
 
 ```julia
