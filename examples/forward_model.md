@@ -63,6 +63,10 @@ K_d = find_zero(f, 1)
 ### Plot input PDFs
 
 ```julia
+[pd.x_dv_x(x, hp.λ_d, hp.θ[2]) for x in x_grid]
+```
+
+```julia
 x_grid = range(1e-2, stop=1, length=50)
 
 plot(x_grid, [pd.x_uv_x(x, hp.λ_u, hp.θ[1]) for x in x_grid], label="x uv(x)", lw=3)

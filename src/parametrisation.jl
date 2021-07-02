@@ -57,9 +57,9 @@ function x_g_x(x::Float64, λ_g1::Float64, λ_g2::Float64, K_g::Float64,
     
     x_g1_x = A_g1 * x^λ_g1 * (1 - x)^K_g
 
-    A_g2 = w2 / sf.beta(λ_g2 + 1, 1)
+    A_g2 = w2 / sf.beta(λ_g2 + 1, 0.2 + 1)
     
-    x_g2_x = A_g2 * x^λ_g2
+    x_g2_x = A_g2 * x^λ_g2 * (1 - x)^0.2
 
     return x_g1_x + x_g2_x
     
@@ -75,9 +75,9 @@ Amplitude is set by weight `w`
 """
 function x_q_x(x::Float64, λ_q::Float64, w::Float64)
     
-    A_q = (w / 2) / sf.beta(λ_q + 1, 1)
+    A_q = (w / 2) / sf.beta(λ_q + 1, 0.2 + 1)
     
-    return A_q * x^λ_q
+    return A_q * x^λ_q * (1 - x)^0.2
     
 end
 
