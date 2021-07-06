@@ -14,7 +14,7 @@ function x_uv_x(x::Float64, λ_u::Float64, w::Float64)
     
     f(K_u) = w - 2 * (sf.beta(λ_u + 1, K_u + 1) / sf.beta(λ_u, K_u + 1))
     
-    K_u = find_zero(f, 1)
+    K_u = find_zero(f, (-1.1, 100))
     
     A_u = 2 / sf.beta(λ_u, K_u + 1)
     
@@ -108,4 +108,50 @@ function xtotx(x::Float64, λ_u::Float64, λ_d::Float64, λ_g1::Float64, λ_g2::
     
     return xuvx + xdvx + xgx + xubarx + xdbarx + xsx + xcx + xbx
     
+end
+
+"""
+        int_xtotx(λ_u, λ_d, λ_g1, λ_g2, K_g, λ_q, θ)
+
+Total integrated momentum density. Should equal 1.
+"""
+function int_xtotx(λ_u::Float64, λ_d::Float64, λ_g1::Float64, λ_g2::Float64,
+                            K_g::Float64, λ_q::Float64, θ::Array{Float64})
+
+    # Amplitudes
+    fu(K_u) = θ[1] - 2 * (sf.beta(λ_u + 1, K_u + 1) / sf.beta(λ_u, K_u + 1))
+    K_u = find_zero(fu, 1)
+    A_u = 2 / sf.beta(λ_u, K_u + 1)
+
+    fd(K_d) = θ[2] - (sf.beta(λ_d + 1, K_d + 1) / sf.beta(λ_d, K_d + 1))
+    K_d = find_zero(fd, 1)
+    A_d = 1 / sf.beta(λ_d, K_d + 1)
+
+    A_g1 = θ[3] / sf.beta(λ_g1 + 1, K_g + 1)
+    A_g2 = θ[4] / sf.beta(λ_g2 + 1, 0.2 + 1)
+    
+    
+    A_ubar = (θ[5] / 2) / sf.beta(λ_q + 1, 0.2 + 1)
+
+    A_dbar = (θ[6] / 2) / sf.beta(λ_q + 1, 0.2 + 1)
+
+    A_s = (θ[7] / 2) / sf.beta(λ_q + 1, 0.2 + 1)
+
+    A_c = (θ[8] / 2) / sf.beta(λ_q + 1, 0.2 + 1)
+
+    A_b = (θ[9] / 2) / sf.beta(λ_q + 1, 0.2 + 1)
+    
+    
+    # Integrate
+    I_u = A_u * sf.beta(λ_u+1, K_u+1)
+
+    I_d = A_d * sf.beta(λ_d+1, K_d+1)
+
+    I_g = A_g1 * sf.beta(λ_g1 + 1, K_g + 1) + A_g2 * sf.beta(λ_g2 + 1, 0.2 + 1)
+
+    I_q = 2 * (A_ubar + A_dbar + A_s + A_c + A_b) * sf.beta(λ_q + 1, 0.2 + 1)
+
+    I_tot = I_u + I_d + I_g + I_q
+    
+    I_tot
 end
