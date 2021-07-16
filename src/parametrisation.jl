@@ -57,9 +57,9 @@ function x_g_x(x::Float64, λ_g1::Float64, λ_g2::Float64, K_g::Float64,
     
     x_g1_x = A_g1 * x^λ_g1 * (1 - x)^K_g
 
-    A_g2 = w2 / sf.beta(λ_g2 + 1, 0.2 + 1)
+    A_g2 = w2 / sf.beta(λ_g2 + 1, 5 + 1)
     
-    x_g2_x = A_g2 * x^λ_g2 * (1 - x)^0.2
+    x_g2_x = A_g2 * x^λ_g2 * (1 - x)^5
 
     return x_g1_x + x_g2_x
     
@@ -75,9 +75,9 @@ Amplitude is set by weight `w`
 """
 function x_q_x(x::Float64, λ_q::Float64, w::Float64)
     
-    A_q = (w / 2) / sf.beta(λ_q + 1, 0.2 + 1)
+    A_q = (w / 2) / sf.beta(λ_q + 1, 5 + 1)
     
-    return A_q * x^λ_q * (1 - x)^0.2
+    return A_q * x^λ_q * (1 - x)^5
     
 end
 
@@ -128,18 +128,18 @@ function int_xtotx(λ_u::Float64, λ_d::Float64, λ_g1::Float64, λ_g2::Float64,
     A_d = 1 / sf.beta(λ_d, K_d + 1)
 
     A_g1 = θ[3] / sf.beta(λ_g1 + 1, K_g + 1)
-    A_g2 = θ[4] / sf.beta(λ_g2 + 1, 0.2 + 1)
+    A_g2 = θ[4] / sf.beta(λ_g2 + 1, 5 + 1)
     
     
-    A_ubar = (θ[5] / 2) / sf.beta(λ_q + 1, 0.2 + 1)
+    A_ubar = (θ[5] / 2) / sf.beta(λ_q + 1, 5 + 1)
 
-    A_dbar = (θ[6] / 2) / sf.beta(λ_q + 1, 0.2 + 1)
+    A_dbar = (θ[6] / 2) / sf.beta(λ_q + 1, 5 + 1)
 
-    A_s = (θ[7] / 2) / sf.beta(λ_q + 1, 0.2 + 1)
+    A_s = (θ[7] / 2) / sf.beta(λ_q + 1, 5 + 1)
 
-    A_c = (θ[8] / 2) / sf.beta(λ_q + 1, 0.2 + 1)
+    A_c = (θ[8] / 2) / sf.beta(λ_q + 1, 5 + 1)
 
-    A_b = (θ[9] / 2) / sf.beta(λ_q + 1, 0.2 + 1)
+    A_b = (θ[9] / 2) / sf.beta(λ_q + 1, 5 + 1)
     
     
     # Integrate
@@ -147,9 +147,9 @@ function int_xtotx(λ_u::Float64, λ_d::Float64, λ_g1::Float64, λ_g2::Float64,
 
     I_d = A_d * sf.beta(λ_d+1, K_d+1)
 
-    I_g = A_g1 * sf.beta(λ_g1 + 1, K_g + 1) + A_g2 * sf.beta(λ_g2 + 1, 0.2 + 1)
+    I_g = A_g1 * sf.beta(λ_g1 + 1, K_g + 1) + A_g2 * sf.beta(λ_g2 + 1, 5 + 1)
 
-    I_q = 2 * (A_ubar + A_dbar + A_s + A_c + A_b) * sf.beta(λ_q + 1, 0.2 + 1)
+    I_q = 2 * (A_ubar + A_dbar + A_s + A_c + A_b) * sf.beta(λ_q + 1, 5 + 1)
 
     I_tot = I_u + I_d + I_g + I_q
     
