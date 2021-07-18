@@ -93,7 +93,7 @@ Make x-qq grid
 ```julia
 xmin = Float64.([1e-3, 0.2, 0.4, 0.6, 0.75]) # Where grid density changes
 iwt = Int32.([1, 2, 4, 8, 16]) # Weights for more grid points at higher x
-nxin = 100 # Request 100 x grid points
+nxin = 200 # Request 100 x grid points
 iord = 3 # Quadratic interpolation
 
 qlim = Float64.([100, 3e4]) # Limits of qq grid
@@ -231,29 +231,6 @@ func_to_integrate = @cfunction(_func_to_integrate, Float64, (Ref{Int32}, Ref{Int
 ```
 
 ```julia
-# These globals will later be set by user
-ZMass = 91.1876
-WMass = 80.398 
-AlphaEM = 7.297352570e-03
-GFermi = 1.16637e-05 
-TopMass = 171.2 
-BottomMass = 4.20
-
-Vub = 41.2e-3
-Vcb = 3.93e-3
-
-Sin2ThetaW = 0.23127 
-Sin2ThetaC = 0.05 
-vu = 0.19164
-vd = -0.34582
-ve = -0.03746
-
-au = 0.5
-ad = -0.5
-ae = -0.5
-```
-
-```julia
 Nx = size(qcdnum_x_grid)[1]
 Nq = size(qcdnum_qq_grid)[1]
 F = zeros(Nx, Nq);
@@ -267,32 +244,59 @@ for ix = 1:Nx
 end
 ```
 
-```julia
-#for i = 1:20000
-#    f2_lo(qcdnum_x_grid[1], qcdnum_qq_grid[1]) 
-#end
-```
-
-## Input vs interpolated PDFs
+### Input vs interpolated PDFs
 
 ```julia
+# Find interpolated PDFs with sumfxq
+ichk = 1
+
+wd = Float64.([0., 0., 0., 0., 0., 0., 0., 1., 0., 0., 0., 0., 0.]);
+wu = Float64.([0., 0., 0., 0.,0., 0., 0., 0., 1., 0., 0., 0., 0.]);
+wdbar = Float64.([0., 0., 0., 0., 0.,1., 0., 0., 0., 0., 0., 0., 0.]);
+wubar = Float64.([0., 0., 0., 0.,1., 0., 0., 0., 0., 0., 0., 0., 0.]);
+ws = Float64.([0., 0., 0., 0., 0.,0., 0., 0., 0., 1., 0., 0., 0.]);
+wc = Float64.([0., 0., 0., 0.,0., 0., 0., 0., 0., 0., 1., 0., 0.]);
+wsbar = Float64.([0., 0., 0., 1., 0.,0., 0., 0., 0., 0., 0., 0., 0.]);
+wcbar = Float64.([0., 0., 1., 0.,0., 0., 0., 0., 0., 0., 0., 0., 0.]);
+wb = Float64.([0., 0., 0., 0.,0., 0., 0., 0., 0., 0., 0., 1., 0.]);
+wbbar = Float64.([0., 1., 0., 0., 0.,0., 0., 0., 0., 0., 0., 0., 0.]);
+
+q_ = 100.0
 x_grid = range(0.01, stop=1, length=500)
 
-plot(x_grid, [pd.x_uv_x(x, hp.λ_u, hp.θ[1]) for x in x_grid], label="x uv(x)", lw=3)
-#plot!(x_grid, [pd.x_dv_x(x, hp.λ_d, hp.θ[2]) for x in x_grid], label="x dv(x)", lw=3)
-#plot!(x_grid, [pd.x_g_x(x, hp.λ_g1, hp.λ_g2, hp.K_g, hp.θ[3], hp.θ[4]) 
-#        for x in x_grid], label="x g2(x)", lw=3)
-#plot!(x_grid, [pd.x_q_x(x, hp.λ_q, hp.θ[5]) for x in x_grid], label="x ubar(x)", lw=3)
-#plot!(x_grid, [pd.x_q_x(x, hp.λ_q, hp.θ[6]) for x in x_grid], label="x dbar(x)", lw=3)
-#plot!(x_grid, [pd.x_q_x(x, hp.λ_q, hp.θ[7]) for x in x_grid], label="x s(x)", lw=3)
-#plot!(x_grid, [pd.x_q_x(x, hp.λ_q, hp.θ[8]) for x in x_grid], label="x c(x)", lw=3)
-#plot!(x_grid, [pd.x_q_x(x, hp.λ_q, hp.θ[9]) for x in x_grid], label="x b(x)", lw=3)
+u = [QCDNUM.sumfxq(iset1,wu,1,x,q_,ichk) for x in x_grid];
+ubar = [QCDNUM.sumfxq(iset1,wubar,1,x,q_,ichk) for x in x_grid];
+d = [QCDNUM.sumfxq(iset1,wd,1,x,q_,ichk) for x in x_grid];
+dbar = [QCDNUM.sumfxq(iset1,wdbar,1,x,q_,ichk) for x in x_grid];
+s = [QCDNUM.sumfxq(iset1,ws,1,x,q_,ichk) for x in x_grid];
+sbar = [QCDNUM.sumfxq(iset1,wsbar,1,x,q_,ichk) for x in x_grid];
+c = [QCDNUM.sumfxq(iset1,wc,1,x,q_,ichk) for x in x_grid];
+cbar = [QCDNUM.sumfxq(iset1,wcbar,1,x,q_,ichk) for x in x_grid];
+b = [QCDNUM.sumfxq(iset1,wb,1,x,q_,ichk) for x in x_grid]
+bbar = [QCDNUM.sumfxq(iset1,wbbar,1,x,q_,ichk) for x in x_grid];
+g = [QCDNUM.sumfxq(iset1, wu, 0, x, q_, ichk) for x in x_grid];
+```
+
+```julia
+# Plot comparison
+#plot(x_grid, [pd.x_uv_x(x, hp.λ_u, hp.θ[1]) for x in x_grid], label="x u(x) input", 
+#    lw=3, alpha=1)
+#plot(x_grid, [pd.x_dv_x(x, hp.λ_d, hp.θ[2]) for x in x_grid], label="x d(x)", lw=3)
+plot(x_grid, [pd.x_g_x(x, hp.λ_g1, hp.λ_g2, hp.K_g, hp.θ[3], hp.θ[4]) 
+        for x in x_grid], label="x g(x)", lw=3)
+#plot(x_grid, [pd.x_q_x(x, hp.λ_q, hp.θ[5]) for x in x_grid], label="x ubar(x)", lw=3)
+#plot(x_grid, [pd.x_q_x(x, hp.λ_q, hp.θ[6]) for x in x_grid], label="x dbar(x)", lw=3)
+#plot(x_grid, [pd.x_q_x(x, hp.λ_q, hp.θ[7]) for x in x_grid], label="x s(x)", lw=3)
+#plot(x_grid, [pd.x_q_x(x, hp.λ_q, hp.θ[8]) for x in x_grid], label="x c(x)", lw=3)
+#plot(x_grid, [pd.x_q_x(x, hp.λ_q, hp.θ[9]) for x in x_grid], label="x b(x)", lw=3)
+
+plot!(x_grid, g, label="x g(x) interp", lw=3, linestyle=:dash)
 plot!(xlabel="x")
 #ylims!(1e-8, 10)
 plot!(xaxis=:log, legend=:outertopright)
 ```
 
-### Updated QCDNUM grid
+### F2 and differential cross-section
 
 x bounds = (1e-3, 1)
 q2 bounds = (1e2, 3e4)
@@ -310,6 +314,7 @@ qcdnum_qq_grid[41]
 ```
 
 ```julia
+# Slices in Q2
 plot(qcdnum_x_grid, F_test[:, 1], label="Q2=100 (input scale)")
 plot!(qcdnum_x_grid, F_test[:, 22], label="Q2=1026")
 plot!(qcdnum_x_grid, F_test[:,35], label="Q2=5234")
@@ -318,30 +323,10 @@ plot!(xaxis=:log, legend=:topleft)
 ```
 
 ```julia
-# What does this function look like?
+# Differential cross section
 p1 = heatmap(qcdnum_x_grid, qcdnum_qq_grid, NaNMath.log10.(F[:, :]'))
 plot(p1, xlabel="x", ylabel="q2", title="log10(Diff. cross section)", 
     xaxis=:log, yaxis=:log)
-```
-
-```julia
-qcdnum_qq_grid[1]
-```
-
-```julia
-my_x_grid = qcdnum_x_grid[10:19]
-```
-
-```julia
-F_test[10:19, 1]
-```
-
-```julia
-F[10:19, 1]
-```
-
-```julia
-minimum(F)
 ```
 
 Make spline object
