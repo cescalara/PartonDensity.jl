@@ -133,7 +133,7 @@ iq0 = QCDNUM.iqfrmq(100.0); # Get index of μ_F^2 = 100.0 = μ_R^2
 Pass input PDF function
 * See https://www.nikhef.nl/~h24/qcdnum-files/doc/qcdnum170115.pdf under `evolfg`
 
-```julia code_folding=[0]
+```julia code_folding=[]
 function _input_pdfs(i, x)::Float64
     i = i[]
     x = x[]
@@ -208,6 +208,7 @@ map = Float64.([0., 0., 0., 0.,-1., 0., 0., 0., 1., 0., 0., 0., 0., # 1 # U vale
 iset1 = 1                                       
 jtype = 10*iset1+itype
 eps = QCDNUM.evolfg(jtype, input_pdfs, map, iq0)
+#eps = QCDNUM.evolfg(jtype, func_c, def, iq0) - need to evolve to correct scales...
 ```
 
 Make function to pass structure function evaluations to SPLINT
