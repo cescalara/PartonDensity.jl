@@ -12,6 +12,10 @@ jupyter:
     name: julia-1.6
 ---
 
+## Test pdf
+
+Checking the implementation of a test PDF. Based on the `batune**.f` testjobs. 
+
 ```julia
 using QCDNUM, PartonDensity 
 using Distributions, Plots, Random, Printf, NaNMath
@@ -46,17 +50,17 @@ ngx = 5
 nxin = 100
 iosp = 3
 qq = Float64.([1.0, 2.0, 25, 3e4])
-wt = Float64.([1.0, 1.0, 1.0 , 1.0])
+wt = Float64.([1.0, 1.0, 1.0, 1.0])
 ngq = 4 
 nqin = 50
 ```
 
-```julia
+```julia code_folding=[]
 function func(ipdf, x)::Float64
     i = ipdf[]
     xb = x[]
-    adbar = 0.1939875
-    f = 0
+    
+    f = 0.0
     if (i == 0) 
         ag = 1.7
         f = ag * xb^-0.1 * (1.0-xb)^5.0
@@ -66,19 +70,22 @@ function func(ipdf, x)::Float64
         f = ad * xb^0.8 * (1.0-xb)^4.0
     end
     if (i == 2)
+        adbar = 0.1939875
+        f = adbar * xb^-0.1 * (1.0-xb)^6.0
+    end
+    if (i == 3) 
         au = 5.107200
         f = au * xb^0.8 * (1.0-xb)^3.0
     end
-    if (i == 3) 
-        f = 0.0
-    end
     if (i == 4)
-        f = adbar * xb^-0.1 * (1.0-xb)^6.0
-    end
-    if (i == 5) 
+        adbar = 0.1939875
         f = adbar * xb^-0.1 * (1.0-xb)^6.0 * (1.0-xb)
     end
+    if (i == 5) 
+        f = 0.0
+    end
     if (i == 6)
+        adbar = 0.1939875
         xdbar = adbar * xb^-0.1 * (1.0-xb)^6.0
         xubar = adbar * xb^-0.1 * (1.0-xb)^6.0 * (1.0-xb)
         f = 0.2 * (xdbar + xubar)
@@ -110,19 +117,18 @@ func_c = @cfunction(func, Float64, (Ref{Int32}, Ref{Float64}))
 What do the test PDFs look like?
 
 ```julia
-x_grid = range(0.01, stop=1, length=500)
-
-plot(x_grid, [func(0, x) for x in x_grid], lw=3, label="x glu(x)")
-plot!(x_grid, [func(1, x) for x in x_grid], lw=3, label="x dval(x)")
-plot!(x_grid, [func(2, x) for x in x_grid], lw=3, label="x dbar(x)")
-plot!(x_grid, [func(3, x) for x in x_grid], lw=3, label="x uval(x)")
-plot!(x_grid, [func(4, x) for x in x_grid], lw=3, label="x ubar(x)")
-plot!(x_grid, [func(5, x) for x in x_grid], lw=3, label="x sval(x)")
-plot!(x_grid, [func(6, x) for x in x_grid], lw=3, label="x sbar(x)")
+x_grid = range(0.001, stop=1, length=500)
+ids = [0, 1, 2, 3, 4, 5, 6]
+labels = ["x glu(x)", "x dval(x)", "x dbar(x)", "x uval(x)", "x ubar(x)", 
+    "x sval(x)", "x sbar(x)"]
+plot()
+for (id, label) in zip(ids, labels)
+    plot!(x_grid, [func(id, x) for x in x_grid], lw=3, label=label)
+end
 plot!(xaxis=:log, xlabel="x")
 ```
 
-Evolve the test PDF over the defined qq grid.
+Evolve the test PDF over the defined qq grid. We use VFNS NNLO evolution.
 
 ```julia
 QCDNUM.qcinit("/usr/local/lib/libQCDNUM.dylib", -6, " ")
@@ -134,20 +140,79 @@ QCDNUM.setord(iord)
 QCDNUM.setalf(as0, r20)
 iqc = QCDNUM.iqfrmq(qq[2])
 iqb = QCDNUM.iqfrmq(qq[3])
-QCDNUM.setcbt(0, iqc, iqb, 999)
+QCDNUM.setcbt(nfin, iqc, iqb, 999)
 iq0 = QCDNUM.iqfrmq(qq[1])
 iq1 = nq
 qq1 = QCDNUM.qfrmiq(iq1)
 eps = QCDNUM.evolfg(1, func_c, def, iq0);
 ```
 
-Plot slices in F2
+Plot input scale vs. evolved PDFs
 
 ```julia
 # Copy grids locally
 qcdnum_x_grid = QCDNUM.gxcopy(nx);
 qcdnum_qq_grid = QCDNUM.gqcopy(nq);
+
+f_ids = [(0, 0, 0), (1, -1, -1), (-1, 0, 0), (2, -2, -1), 
+    (-2, 0, 0), (3, -3, -1), (-3, 0, 0)];
 ```
+
+```julia
+# Compare with inputs
+plot()
+for (f_id, label) in zip(f_ids, labels)
+    id1, id2, s = f_id
+    pdf = ([QCDNUM.fvalij(1, id1, ix, 1, 1) for ix=1:nx] 
+        .+ s*[QCDNUM.fvalij(1, id2, ix, 1, 1) for ix=1:nx])
+    plot!(qcdnum_x_grid, pdf, label=label, lw=3)     
+end
+for (id, label) in zip(ids, labels)
+    plot!(x_grid, [func(id, x) for x in x_grid], lw=3, label=label, 
+        color="black", linestyle=:dash)
+end
+plot!(xaxis=:log, xlabel="x", title="Input scale, Q2=1")
+```
+
+```julia
+iq = QCDNUM.iqfrmq(100.0)
+plot()
+for (f_id, label) in zip(f_ids, labels)
+    id1, id2, s = f_id
+    pdf = ([QCDNUM.fvalij(1, id1, ix, iq, 1) for ix=1:nx] 
+        .+ s*[QCDNUM.fvalij(1, id2, ix, iq, 1) for ix=1:nx])
+    plot!(qcdnum_x_grid, pdf, label=label, lw=3)     
+end
+plot!(xaxis=:log, legend=:topright, xlabel="x", title="Evolved scale, Q2=100")
+```
+
+```julia
+plot()
+for (f_id, label) in zip(f_ids, labels)
+    id1, id2, s = f_id
+    pdf = ([QCDNUM.fvalij(1, id1, ix, nq, 1) for ix=1:nx] 
+        .+ s*[QCDNUM.fvalij(1, id2, ix, nq, 1) for ix=1:nx])
+    plot!(qcdnum_x_grid, pdf, label=label, lw=3)     
+end
+plot!(xaxis=:log, legend=:topright, xlabel="x", title="Evolved scale, Q2=3e4")
+```
+
+Compare with `batune00.f` at Q2 = 100 GeV.
+
+```julia
+iq = QCDNUM.iqfrmq(100.0)
+sel = 6:7
+plot()
+for (f_id, label) in zip(f_ids[sel], labels[sel])
+    id1, id2, s = f_id
+    pdf = ([QCDNUM.fvalij(1, id1, ix, iq, 1) for ix=1:nx] 
+        .+ s*[QCDNUM.fvalij(1, id2, ix, iq, 1) for ix=1:nx])
+    plot!(qcdnum_x_grid, pdf, label=label, lw=3)     
+end
+plot!(xaxis=:log, legend=:topright, xlabel="x", title="Evolved scale, Q2=100")
+```
+
+Plot slices in F2
 
 ```julia
 # These globals will later be set by user
@@ -195,12 +260,10 @@ end
 ```
 
 ```julia
-Nx = size(qcdnum_x_grid)[1]
-Nq = size(qcdnum_qq_grid)[1]
-F_test = zeros(Nx, Nq)
+F_test = zeros(nx, nq)
 
-for ix = 1:Nx
-    for iq = 1:Nq
+for ix = 1:nx
+    for iq = 1:nq
         F_test[ix, iq] = test_f2_lo(qcdnum_x_grid[ix], qcdnum_qq_grid[iq]) 
     end
 end
