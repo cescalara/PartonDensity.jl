@@ -31,13 +31,23 @@ seed = 5
 ```
 
 ```julia
-Random.seed!(seed);
-dirichlet = Dirichlet([5., 4., 1, 0.5, 0.3, 0.2, 0.1, 0.1, 0.1])
-input_random_dirichlet = rand(dirichlet)
+#Random.seed!(seed);
+#dirichlet = Dirichlet([5., 4., 1, 0.5, 0.3, 0.2, 0.1, 0.1, 0.1])
+#input_random_dirichlet = rand(dirichlet)
+
+#hp = NamedTuple{(:λ_u, :λ_d, :λ_g1, :λ_g2, :K_g, :λ_q, :θ)}((0.99, 0.99, 0.7, -0.7, 1.1, -0.5, input_random_dirichlet));
 ```
 
 ```julia
-hp = NamedTuple{(:λ_u, :λ_d, :λ_g1, :λ_g2, :K_g, :λ_q, :θ)}((0.99, 0.99, 0.7, -0.7, 1.1, -0.5, input_random_dirichlet))
+Random.seed!(seed);
+dirichlet = Dirichlet([4., 4., 50., 0.5, 5., 5., 3., 2., 1.])
+input_random_dirichlet = rand(dirichlet)
+
+hp = NamedTuple{(:λ_u, :λ_d, :λ_g1, :λ_g2, :K_g, :λ_q, :θ)}((0.5, 0.6, -0.37, -0.7, 6., -0.5, input_random_dirichlet));
+```
+
+```julia
+input_random_dirichlet
 ```
 
 ### For simple comparison
@@ -62,20 +72,21 @@ K_d = find_zero(f, 1)
 ### Plot input PDFs
 
 ```julia
-x_grid = range(0.01, stop=1, length=500)
+x_grid = range(0.001, stop=1, length=1000)
 
 plot(x_grid, [pd.x_uv_x(x, hp.λ_u, hp.θ[1]) for x in x_grid], label="x uv(x)", lw=3)
 plot!(x_grid, [pd.x_dv_x(x, hp.λ_d, hp.θ[2]) for x in x_grid], label="x dv(x)", lw=3)
 plot!(x_grid, [pd.x_g_x(x, hp.λ_g1, hp.λ_g2, hp.K_g, hp.θ[3], hp.θ[4]) 
-        for x in x_grid], label="x g2(x)", lw=3)
+        for x in x_grid], label="x g(x)", lw=3)
 plot!(x_grid, [pd.x_q_x(x, hp.λ_q, hp.θ[5]) for x in x_grid], label="x ubar(x)", lw=3)
 plot!(x_grid, [pd.x_q_x(x, hp.λ_q, hp.θ[6]) for x in x_grid], label="x dbar(x)", lw=3)
 plot!(x_grid, [pd.x_q_x(x, hp.λ_q, hp.θ[7]) for x in x_grid], label="x s(x)", lw=3)
 plot!(x_grid, [pd.x_q_x(x, hp.λ_q, hp.θ[8]) for x in x_grid], label="x c(x)", lw=3)
 plot!(x_grid, [pd.x_q_x(x, hp.λ_q, hp.θ[9]) for x in x_grid], label="x b(x)", lw=3)
 plot!(xlabel="x")
-ylims!(1e-8, 10)
+ylims!(1e-8, 30)
 plot!(xaxis=:log, yaxis=:log, legend=:outertopright)
+#plot!(xaxis=:log, legend=:outertopright)
 ```
 
 ```julia
@@ -125,7 +136,7 @@ Set input parameters
 
 ```julia
 QCDNUM.setord(2); # 1 <=> LO, 2<=> NLO in pQCD
-QCDNUM.setalf(0.118, 100.0); # α_S = 0.364, μ_R^2 = 100.0
+QCDNUM.setalf(0.118, 100.0); # α_S = 0.118, μ_R^2 = 100.0
 QCDNUM.setcbt(5, 1, 1, 1); # 5 flavours in FFNS
 iq0 = QCDNUM.iqfrmq(100.0); # Get index of μ_F^2 = 100.0 = μ_R^2
 ```

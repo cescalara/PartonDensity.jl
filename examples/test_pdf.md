@@ -201,7 +201,7 @@ Compare with `batune00.f` at Q2 = 100 GeV.
 
 ```julia
 iq = QCDNUM.iqfrmq(100.0)
-sel = 6:7
+sel = 2:3
 plot()
 for (f_id, label) in zip(f_ids[sel], labels[sel])
     id1, id2, s = f_id
@@ -280,6 +280,75 @@ plot(qcdnum_x_grid, F_test[:, 1], label="Q2=1 (input scale)", lw=3)
 #plot!(qcdnum_x_grid, F_test[:,40], label="Q2=3,700", lw=3)
 #plot!(qcdnum_x_grid, F_test[:,49], label="Q2=24,000", lw=3)
 plot!(xaxis=:log, legend=:topright, xlabel="x")
+```
+
+## Fit parametrisation to the test pdf
+
+Start with the evolved PDFs at Q2=100.
+
+```julia
+using SpecialFunctions, Roots
+sf = SpecialFunctions
+```
+
+```julia
+iq = QCDNUM.iqfrmq(100.0)
+sel = 4:5
+plot()
+for (f_id, label) in zip(f_ids[sel], labels[sel])
+    id1, id2, s = f_id
+    pdf = ([QCDNUM.fvalij(1, id1, ix, iq, 1) for ix=1:nx] 
+        .+ s*[QCDNUM.fvalij(1, id2, ix, iq, 1) for ix=1:nx])
+    plot!(qcdnum_x_grid, pdf, label=label, lw=3)     
+end
+plot!(xaxis=:log, legend=:topright, xlabel="x", title="Evolved scale, Q2=100")
+```
+
+Compare with your parametrisation
+
+```julia
+seed = 5
+Random.seed!(seed);
+dirichlet = Dirichlet([4., 4., 50., 0.5, 5., 5., 3., 2., 1.])
+input_random_dirichlet = rand(dirichlet)
+
+hp = NamedTuple{(:λ_u, :λ_d, :λ_g1, :λ_g2, :K_g, :λ_q, :θ)}((0.5, 0.6, -0.37, -0.7, 6., -0.5, input_random_dirichlet));
+```
+
+```julia
+input_random_dirichlet
+```
+
+```julia
+x_grid = qcdnum_x_grid
+plot()
+plot!(x_grid, [pd.x_uv_x(x, hp.λ_u, hp.θ[1]) for x in x_grid], label="x uv(x)", lw=3)
+#plot!(x_grid, [pd.x_dv_x(x, hp.λ_d, hp.θ[2]) for x in x_grid], label="x dv(x)", lw=3)
+plot!(x_grid, [pd.x_g_x(x, hp.λ_g1, hp.λ_g2, hp.K_g, hp.θ[3], hp.θ[4]) 
+        for x in x_grid], label="x g(x)", lw=3)
+plot!(x_grid, [pd.x_q_x(x, hp.λ_q, hp.θ[5]) for x in x_grid], label="x ubar(x)", lw=3)
+#plot!(x_grid, [pd.x_q_x(x, hp.λ_q, hp.θ[6]) for x in x_grid], label="x dbar(x)", lw=3)
+#plot!(x_grid, [pd.x_q_x(x, hp.λ_q, hp.θ[7]) for x in x_grid], label="x s(x)", lw=3)
+#plot!(x_grid, [pd.x_q_x(x, hp.λ_q, hp.θ[8]) for x in x_grid], label="x c(x)", lw=3)
+#plot!(x_grid, [pd.x_q_x(x, hp.λ_q, hp.θ[9]) for x in x_grid], label="x b(x)", lw=3)
+plot!(xlabel="x")
+plot!(xaxis=:log, legend=:outertopright)
+```
+
+```julia
+w = hp.θ[1]
+f(K_u) = w - 2 * (sf.beta(hp.λ_u + 1, K_u + 1) / sf.beta(hp.λ_u, K_u + 1))    
+K_u = find_zero(f, 1)
+```
+
+```julia
+w = hp.θ[2]
+f(K_d) = w - (sf.beta(hp.λ_d + 1, K_d + 1) / sf.beta(hp.λ_d, K_d + 1))    
+K_d = find_zero(f, 1)
+```
+
+```julia
+pd.int_xtotx(hp.λ_u, hp.λ_d, hp.λ_g1, hp.λ_g2, hp.K_g, hp.λ_q, hp.θ)
 ```
 
 ```julia
