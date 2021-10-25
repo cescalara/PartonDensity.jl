@@ -14,6 +14,9 @@ include("../data/zeus_transfer_matrix.jl")
 
 export get_pred_N
 export get_data_events
+export get_TM_elements
+export get_K_elements
+
 export q2bins_M_begin
 export q2bins_M_end
 export xbins_M_begin
