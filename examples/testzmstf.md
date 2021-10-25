@@ -219,127 +219,35 @@ QCDNUM.ssp_uwrite(5, Float64(iaFLup));
 QCDNUM.ssp_uwrite(6, Float64(iaFLdn));
 ```
 
-Define cross section and cross section splines.
+Define cross section splines.
 
 
-```julia code_folding=[25, 48, 58, 68]
-# These globals will later be set by user
-ZMass = 91.1876
-WMass = 80.398 
-AlphaEM = 7.297352570e-03
-GFermi = 1.16637e-05 
-TopMass = 171.2 
-BottomMass = 4.20
-
-Vub = 41.2e-3
-Vcb = 3.93e-3
-
-Sin2ThetaW = 0.23127 
-Sin2ThetaC = 0.05 
-vu = 0.19164
-vd = -0.34582
-ve = -0.03746
-
-au = 0.5
-ad = -0.5
-ae = -0.5
-
-# Variables for Rxsecnc_xq2 
-sqrt_s = 318.1 # Should be configurable for calculation of y
-Lepcharge = 1 # Should be configurable for calculation of Y
-
-function my_rxsecnc_xq2_i(x::Float64, q2::Float64, F2::Float64, 
-        xF3::Float64, FL::Float64)::Float64
-
-    rxsec = -1.0 #?
-    y = 0.04  #?
-    
-    y = q2 / sqrt_s / sqrt_s / x
-    Y_plus = 1 + (1 - y)^2
-    Y_minus = 1 - (1 - y)^2
-
-    if (Lepcharge == 1)
-        
-        rxsec =  F2 - (Y_minus / Y_plus)*xF3 - (y^2 / Y_plus) * FL
-        
-    elseif (Lepcharge == -1)
-
-        rxsec =  F2 + (Y_minus / Y_plus)*xF3 - (y^2 / Y_plus) * FL
-        
-    end
-
-    rxsec
-end
-
-function my_nc_propagator(q2::Float64, x::Float64)::Float64
-
-    y = q2 / sqrt_s / sqrt_s / x
-    Yplus = 1 + (1 - y)^2
-    alpha = AlphaEM
-    conversion_factor = 0.3894e9;  # GeV^2 -> pb^2
-    
-    conversion_factor*2*π*Yplus*alpha^2 / (x * q2^2)
-end
-
-function my_dd_xsecnc_xq2_i(x::Float64, q2::Float64, F2::Float64, 
-        xF3::Float64, FL::Float64)::Float64
-
-    dd_xsec = -1.0
-    
-    dd_xsec = my_nc_propagator(q2, x) * my_rxsecnc_xq2_i(x, q2, F2, xF3, FL)
-    
-    return dd_xsec
-end
-
+```julia code_folding=[]
 function _my_fun_xsec_i(ipx, ipq, first)::Float64
     
     ix = ipx[]
     iq = ipq[]
     
-    # get q2 and x values
-    q2 = QCDNUM.qfrmiq(iq);
-    x = QCDNUM.xfrmix(ix);
+    xsec = _fun_xsec_i(ix, iq)
     
-    # get spline addresses
-    iF2up = Int32(QCDNUM.dsp_uread(1));
-    iF2dn = Int32(QCDNUM.dsp_uread(2));
-    iF3up = Int32(QCDNUM.dsp_uread(3));
-    iF3dn = Int32(QCDNUM.dsp_uread(4));
-    iFLup = Int32(QCDNUM.dsp_uread(5));
-    iFLdn = Int32(QCDNUM.dsp_uread(6));
-    
-    # structure function calculation
-    pz = q2 / ((ZMass*ZMass+q2) * (4*(Sin2ThetaW) * (1-Sin2ThetaW)));
-    Au = 4.0/9.0 -2*pz*(2.0/3.0)*(vu)*(ve) + pz*pz*(ve*ve+ae*ae)*(vu*vu+au*au);
-    Ad = 1.0/9.0 -2*pz*(-1.0/3.0)*(vd)*(ve) + pz*pz*(ve*ve+ae*ae)*(vd*vd+ad*ad);
-    Bu = -2*(2.0/3.0)*au*ae*pz + 4*au*ae*vu*ve*pz*pz;
-    Bd = -2*(-1.0/3.0)*ad*ae*pz + 4*ad*ae*vd*ve*pz*pz;
-    
-    F2 = Au * QCDNUM.dsp_funs2(iF2up, x, q2, 1) + Ad * QCDNUM.dsp_funs2(iF2dn, x, q2, 1);
-    F3 = Bu * QCDNUM.dsp_funs2(iF3up, x, q2, 1) + Bd * QCDNUM.dsp_funs2(iF3dn, x, q2, 1);
-    FL = Au * QCDNUM.dsp_funs2(iFLup, x, q2, 1) + Ad * QCDNUM.dsp_funs2(iFLdn, x, q2, 1);
-    
-    xsec = my_dd_xsecnc_xq2_i(x, q2, F2, F3, FL);
-
-    return xsec;    
+    return xsec
 end
 
 my_fun_xsec_i = @cfunction(_my_fun_xsec_i, Float64, (Ref{Int32}, Ref{Int32}, Ref{UInt8}))
 ```
 
 ```julia
-# cross section spline
 istx_2 = 1;
 istq_2 = 2;
 rscut = 370.0;
 rs = 318.0;
 
-Lepcharge = 1;
+set_lepcharge(1)
 iaF_7 = QCDNUM.isp_s2make(istx_2, istq_2);
 QCDNUM.ssp_uwrite(7, Float64(iaF_7));
 QCDNUM.ssp_s2fill(iaF_7, my_fun_xsec_i, rscut);
 
-Lepcharge = -1;
+set_lepcharge(-1)
 iaF_8 = QCDNUM.isp_s2make(istx_2, istq_2);
 QCDNUM.ssp_uwrite(8, Float64(iaF_8));
 QCDNUM.ssp_s2fill(iaF_8, my_fun_xsec_i, rscut);
@@ -389,6 +297,14 @@ for j in 1:nbins_out
     xsec_pred_eM[j] *= get_L_data(eMp);
     
 end
+```
+
+```julia
+
+```
+
+```julia
+
 ```
 
 ```julia

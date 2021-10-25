@@ -29,11 +29,18 @@ au = 0.5
 ad = -0.5
 ae = -0.5
 
-# Variables for Rxsecnc_xq2 
-sqrt_s = 318.1 # Should be configurable for calculation of y
-Lepcharge = 1 # Should be configurable for calculation of Y
+# Should be configurable 
+sqrt_s = 318.1  
+Lepcharge = 1 
 
-export fun_xsec_i
+export _fun_xsec_i
+export set_lepcharge
+
+function set_lepcharge(value::Integer)
+
+    global Lepcharge = value;
+    
+end
 
 """
     f2_lo(x, q2)
@@ -223,26 +230,24 @@ function dd_xsecnc_xq2(x_bin_cen::Array{Float64},
 end
 
 """
-    _fun_xsec_i(ipx, ipq, first)
+    _fun_xsec_i(ix iq)
 
 Input function for cross section spline.
+Must be wrapped for interface to SPLINT.
 """
-function _fun_xsec_i(ipx, ipq, first)::Float64
-    
-    ix = ipx[]
-    iq = ipq[]
+function _fun_xsec_i(ix, iq)::Float64
     
     # get q2 and x values
     q2 = QCDNUM.qfrmiq(iq);
     x = QCDNUM.xfrmix(ix);
     
     # get spline addresses
-    iF2up = Int32(QCDNUM.dsp_uread(spline_f2_Up));
-    iF2dn = Int32(QCDNUM.dsp_uread(spline_f2_Dn));
-    iF3up = Int32(QCDNUM.dsp_uread(spline_f3_Up));
-    iF3dn = Int32(QCDNUM.dsp_uread(spline_f3_Dn));
-    iFLup = Int32(QCDNUM.dsp_uread(spline_fl_Up));
-    iFLdn = Int32(QCDNUM.dsp_uread(spline_fl_Dn));
+    iF2up = Int32(QCDNUM.dsp_uread(1));
+    iF2dn = Int32(QCDNUM.dsp_uread(2));
+    iF3up = Int32(QCDNUM.dsp_uread(3));
+    iF3dn = Int32(QCDNUM.dsp_uread(4));
+    iFLup = Int32(QCDNUM.dsp_uread(5));
+    iFLdn = Int32(QCDNUM.dsp_uread(6));
     
     # structure function calculation
     pz = q2 / ((ZMass*ZMass+q2) * (4*(Sin2ThetaW) * (1-Sin2ThetaW)));
@@ -252,19 +257,12 @@ function _fun_xsec_i(ipx, ipq, first)::Float64
     Bd = -2*(-1.0/3.0)*ad*ae*pz + 4*ad*ae*vd*ve*pz*pz;
     
     F2 = Au * QCDNUM.dsp_funs2(iF2up, x, q2, 1) + Ad * QCDNUM.dsp_funs2(iF2dn, x, q2, 1);
-    F3 = Bu * QCDNUM.dsp_funs2(iF3up, x, q2, 1) + Bd * QCDNUM.dsp_funs2(iF3dn, x, q2, 1);
+    xF3 = Bu * QCDNUM.dsp_funs2(iF3up, x, q2, 1) + Bd * QCDNUM.dsp_funs2(iF3dn, x, q2, 1);
     FL = Au * QCDNUM.dsp_funs2(iFLup, x, q2, 1) + Ad * QCDNUM.dsp_funs2(iFLdn, x, q2, 1);
     
-    xsec = dd_xsecnc_xq2_i(x, q2, F2, F3, FL);
+    xsec = dd_xsecnc_xq2_i(x, q2, F2, xF3, FL);
     
     return  xsec;
     
 end
-
-"""
-    fun_xsec_i
-
-Conversion to C-stype pointer.
-"""
-fun_xsec_i = @cfunction(_fun_xsec_i, Float64, (Ref{Int32}, Ref{Int32}, Ref{UInt8}))
 
