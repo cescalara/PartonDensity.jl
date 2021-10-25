@@ -154,6 +154,10 @@ warr = Float64.([4., 4., 4., 4.]);
 ngq = 4;
 QCDNUM.gqmake(qarr, warr, ngq, n_q);
 
+# copy locally
+qcdnum_x_grid = QCDNUM.gxcopy(n_x);
+qcdnum_qq_grid = QCDNUM.gqcopy(n_q);
+
 # VFNS
 iq0 = QCDNUM.iqfrmq(qarr[1]);
 iqc = QCDNUM.iqfrmq(hqmass[1] * hqmass[1]);
@@ -237,6 +241,30 @@ my_fun_xsec_i = @cfunction(_my_fun_xsec_i, Float64, (Ref{Int32}, Ref{Int32}, Ref
 ```
 
 ```julia
+# plot
+xsec_on_grid = zeros(n_x, n_q);
+
+for ix = 1:n_x
+    for iq = 1:n_q
+        xsec_on_grid[ix, iq] = _fun_xsec_i(ix, iq)
+    end
+end
+
+p1 = heatmap(qcdnum_x_grid, qcdnum_qq_grid, log10.(xsec_on_grid[:, :]'))
+plot(p1, xlabel="x", ylabel="q2", 
+    xaxis=:log, yaxis=:log)
+```
+
+```julia
+plot(qcdnum_x_grid, xsec_on_grid[:, 4], label="Q2=2 (input scale)", lw=3)
+plot!(qcdnum_x_grid, xsec_on_grid[:, 22], label="Q2=130", lw=3)
+plot!(qcdnum_x_grid, xsec_on_grid[:, 35], label="Q2=2859", lw=3)
+plot!(qcdnum_x_grid, xsec_on_grid[:, 41], label="Q2=11851", lw=3)
+plot!(xaxis=:log, yaxis=:log, legend=:bottomleft, xlabel="x", 
+    ylabel="cross section spline input")
+```
+
+```julia
 istx_2 = 1;
 istq_2 = 2;
 rscut = 370.0;
@@ -251,6 +279,22 @@ set_lepcharge(-1)
 iaF_8 = QCDNUM.isp_s2make(istx_2, istq_2);
 QCDNUM.ssp_uwrite(8, Float64(iaF_8));
 QCDNUM.ssp_s2fill(iaF_8, my_fun_xsec_i, rscut);
+```
+
+```julia
+# plot spline
+spline = zeros(n_x, n_q);
+
+for ix = 1:n_x
+    for iq = 1:n_q
+        spline[ix, iq] = QCDNUM.dsp_funs2(iaF_7, qcdnum_x_grid[ix], 
+            qcdnum_qq_grid[iq], 1)
+    end
+end
+
+p1 = heatmap(qcdnum_x_grid, qcdnum_qq_grid, log10.(spline[:, :]'))
+plot(p1, xlabel="x", ylabel="q2", 
+    xaxis=:log, yaxis=:log)
 ```
 
 Calculate the integrated cross sections.
@@ -297,14 +341,6 @@ for j in 1:nbins_out
     xsec_pred_eM[j] *= get_L_data(eMp);
     
 end
-```
-
-```julia
-
-```
-
-```julia
-
 ```
 
 ```julia
