@@ -33,11 +33,8 @@ ae = -0.5
 sqrt_s = 318.1 # Should be configurable for calculation of y
 Lepcharge = 1 # Should be configurable for calculation of Y
 
-export dd_xsecnc_xq2_i
-export f2_lo
-export xf3_lo
-export fl_lo
-    
+export fun_xsec_i
+
 """
     f2_lo(x, q2)
 
@@ -116,19 +113,15 @@ end
 
 Reduced cross section for single x, q2.
 """
-function rxsecnc_xq2_i(x::Float64, q2::Float64)::Float64
+function rxsecnc_xq2_i(x::Float64, q2::Float64, F2::Float64, xF3::Float64, FL::Float64)::Float64
 
     rxsec = -1.0 #?
     y = 0.04  #?
-    y = q2 / sqrt_s / sqrt_s / x
     
+    y = q2 / sqrt_s / sqrt_s / x
     Y_plus = 1 + (1 - y)^2
     Y_minus = 1 - (1 - y)^2
 
-    F2 = f2_lo(x, q2)
-    xF3 = xf3_lo(x, q2)
-    FL = fl_lo(x, q2)
-  
     if (Lepcharge == 1)
         
         rxsec =  F2 - (Y_minus / Y_plus)*xF3 - (y^2 / Y_plus) * FL
@@ -190,13 +183,13 @@ Double differential cross section for single
 x and q2 values. 
 NB: modifications needed to include pol and order.
 """
-function dd_xsecnc_xq2_i(x::Float64, q2::Float64)
+function dd_xsecnc_xq2_i(x::Float64, q2::Float64, F2::Float64, xF3::Float64, FL::Float64)::Float64
 
     dd_xsec = -1.0
     
-    dd_xsec = nc_propagator(q2, x) * rxsecnc_xq2_i(x, q2)
+    dd_xsec = nc_propagator(q2, x) * rxsecnc_xq2_i(x, q2, F2, xF3, FL)
     
-    dd_xsec
+    return dd_xsec
 end
 
 """
@@ -229,4 +222,49 @@ function dd_xsecnc_xq2(x_bin_cen::Array{Float64},
   xsec
 end
 
+"""
+    _fun_xsec_i(ipx, ipq, first)
+
+Input function for cross section spline.
+"""
+function _fun_xsec_i(ipx, ipq, first)::Float64
+    
+    ix = ipx[]
+    iq = ipq[]
+    
+    # get q2 and x values
+    q2 = QCDNUM.qfrmiq(iq);
+    x = QCDNUM.xfrmix(ix);
+    
+    # get spline addresses
+    iF2up = Int32(QCDNUM.dsp_uread(spline_f2_Up));
+    iF2dn = Int32(QCDNUM.dsp_uread(spline_f2_Dn));
+    iF3up = Int32(QCDNUM.dsp_uread(spline_f3_Up));
+    iF3dn = Int32(QCDNUM.dsp_uread(spline_f3_Dn));
+    iFLup = Int32(QCDNUM.dsp_uread(spline_fl_Up));
+    iFLdn = Int32(QCDNUM.dsp_uread(spline_fl_Dn));
+    
+    # structure function calculation
+    pz = q2 / ((ZMass*ZMass+q2) * (4*(Sin2ThetaW) * (1-Sin2ThetaW)));
+    Au = 4.0/9.0 -2*pz*(2.0/3.0)*(vu)*(ve) + pz*pz*(ve*ve+ae*ae)*(vu*vu+au*au);
+    Ad = 1.0/9.0 -2*pz*(-1.0/3.0)*(vd)*(ve) + pz*pz*(ve*ve+ae*ae)*(vd*vd+ad*ad);
+    Bu = -2*(2.0/3.0)*au*ae*pz + 4*au*ae*vu*ve*pz*pz;
+    Bd = -2*(-1.0/3.0)*ad*ae*pz + 4*ad*ae*vd*ve*pz*pz;
+    
+    F2 = Au * QCDNUM.dsp_funs2(iF2up, x, q2, 1) + Ad * QCDNUM.dsp_funs2(iF2dn, x, q2, 1);
+    F3 = Bu * QCDNUM.dsp_funs2(iF3up, x, q2, 1) + Bd * QCDNUM.dsp_funs2(iF3dn, x, q2, 1);
+    FL = Au * QCDNUM.dsp_funs2(iFLup, x, q2, 1) + Ad * QCDNUM.dsp_funs2(iFLdn, x, q2, 1);
+    
+    xsec = dd_xsecnc_xq2_i(x, q2, F2, F3, FL);
+    
+    return  xsec;
+    
+end
+
+"""
+    fun_xsec_i
+
+Conversion to C-stype pointer.
+"""
+fun_xsec_i = @cfunction(_fun_xsec_i, Float64, (Ref{Int32}, Ref{Int32}, Ref{UInt8}))
 

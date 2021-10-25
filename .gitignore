@@ -2,3 +2,5 @@
 
 # As using jupytext
 *.ipynb
+
+.ipynb_checkpoints
