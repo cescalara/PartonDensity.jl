@@ -16,6 +16,7 @@ export get_pred_N
 export get_data_events
 export get_TM_elements
 export get_K_elements
+export get_L_data
 
 export q2bins_M_begin
 export q2bins_M_end
