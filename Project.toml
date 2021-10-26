@@ -16,6 +16,7 @@ SpecialFunctions = "276daf66-3868-5448-9aa4-cd146d93841b"
 
 [compat]
 CSV = "0.8"
+Distributions = "0.25"
 Parameters = "0.12"
 Roots = "1.0"
 SpecialFunctions = "1"
