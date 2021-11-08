@@ -5,16 +5,16 @@ jupyter:
       extension: .md
       format_name: markdown
       format_version: '1.3'
-      jupytext_version: 1.11.0
+      jupytext_version: 1.13.0
   kernelspec:
-    display_name: Julia 1.6.1
+    display_name: Julia 1.7.0-beta4
     language: julia
-    name: julia-1.6
+    name: julia-1.7
 ---
 
-## Test pdf
+## Test PDF
 
-Checking the implementation of a test PDF. Based on the `batune**.f` testjobs. 
+Checking the implementation of a test PDF. Based on the `batune**.f` testjobs.
 
 ```julia
 using QCDNUM, PartonDensity 
@@ -131,6 +131,7 @@ plot!(xaxis=:log, xlabel="x")
 Evolve the test PDF over the defined qq grid. We use VFNS NNLO evolution.
 
 ```julia
+#Adjust the location  and name of Fortran QCDNUM library on your system, e.g. use /usr/local/lib/libQCDNUM.dylib or /usr/lib64/libQCDNUM.so.
 QCDNUM.qcinit("/usr/local/lib/libQCDNUM.dylib", -6, " ")
 nx = QCDNUM.gxmake(xmin, iwt, ngx, nxin, iosp)
 nq = QCDNUM.gqmake(qq, wt, ngq, nqin)
