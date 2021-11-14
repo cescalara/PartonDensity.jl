@@ -6,11 +6,11 @@ jupyter:
       extension: .md
       format_name: markdown
       format_version: '1.3'
-      jupytext_version: 1.11.0
+      jupytext_version: 1.13.0
   kernelspec:
-    display_name: Julia 1.6.1
+    display_name: Julia 1.7.0-beta4
     language: julia
-    name: julia-1.6
+    name: julia-1.7
 ---
 
 ```julia
@@ -104,18 +104,18 @@ Make x-qq grid
 ```julia
 xmin = Float64.([1e-3, 0.2, 0.4, 0.6, 0.75]) # Where grid density changes
 iwt = Int32.([1, 2, 4, 8, 16]) # Weights for more grid points at higher x
-nxin = 200 # Request 100 x grid points
-iord = 3 # Quadratic interpolation
+nxin = 100 # Request 100 x grid points
+iosp = 3 # Quadratic interpolation
 
-qlim = Float64.([100, 3e4]) # Limits of qq grid
-wt = Float64.([1e0, 1e0]) # Weights for even grid points
+qarr = Float64.([1.0, 2.0, 25.0, 1e5]) # Limits of qq grid
+wt = Float64.([4.0, 4.0, 4.0, 4.0]) # Weights for even grid points
 nqin = 50 # Request 50 qq grid points
 ```
 
 ```julia
-QCDNUM.qcinit("/usr/local/lib/libQCDNUM.dylib", -6, " ")
-nx = QCDNUM.gxmake(xmin, iwt, size(xmin,1), nxin, iord)
-nq = QCDNUM.gqmake(qlim, wt, size(qlim,1), nqin)
+QCDNUM.qcinit("/home/iwsatlas1/fran/qcdnum_lib/lib/libQCDNUM.so", -6, " ")
+nx = QCDNUM.gxmake(xmin, iwt, size(xmin,1), nxin, iosp)
+nq = QCDNUM.gqmake(qarr, wt, size(qarr,1), nqin)
 
 itype = 1 # Unpolarised
 nw = QCDNUM.fillwt(itype)
@@ -217,9 +217,25 @@ map = Float64.([0., 0., 0., 0.,-1., 0., 0., 0., 1., 0., 0., 0., 0., # 1 # U vale
 
 ```julia
 iset1 = 1                                       
-jtype = 10*iset1+itype
-eps = QCDNUM.evolfg(jtype, input_pdfs, map, iq0)
+eps = QCDNUM.evolfg(iset1, input_pdfs, map, iq0)
 #eps = QCDNUM.evolfg(jtype, func_c, def, iq0) - need to evolve to correct scales...
+```
+
+```julia
+QCDNUM.ssp_spinit(10)
+ia = QCDNUM.isp_s2make(5, 10)
+xnd = QCDNUM.ssp_unodes(ia, 100, 0)
+qnd = QCDNUM.ssp_vnodes(ia, 100, 0)
+QCDNUM.ssp_nprint(ia)
+#QCDNUM.ssp_erase(ia)
+xnd[90] = 0.13
+xnd[91] = 0.16
+xnd[92] = 0.33
+```
+
+```julia
+iaFLup = QCDNUM.isp_s2user(xnd, 100, qnd, 100)
+QCDNUM.ssp_s2f123(iaFLup, 1, )
 ```
 
 Make function to pass structure function evaluations to SPLINT
