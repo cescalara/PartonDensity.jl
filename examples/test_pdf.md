@@ -131,6 +131,7 @@ plot!(xaxis=:log, xlabel="x")
 Evolve the test PDF over the defined qq grid. We use VFNS NNLO evolution.
 
 ```julia
+#Adjust the location  and name of Fortran QCDNUM library on your system, e.g. use /usr/local/lib/libQCDNUM.dylib or /usr/lib64/libQCDNUM.so.
 QCDNUM.qcinit("/usr/local/lib/libQCDNUM.dylib", -6, " ")
 nx = QCDNUM.gxmake(xmin, iwt, ngx, nxin, iosp)
 nq = QCDNUM.gqmake(qq, wt, ngq, nqin)

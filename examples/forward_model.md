@@ -113,6 +113,7 @@ nqin = 50 # Request 50 qq grid points
 ```
 
 ```julia
+#Adjust the location  and name of Fortran QCDNUM library on your system, e.g. use /usr/local/lib/libQCDNUM.dylib or /usr/lib64/libQCDNUM.so.
 QCDNUM.qcinit("/home/iwsatlas1/fran/qcdnum_lib/lib/libQCDNUM.so", -6, " ")
 nx = QCDNUM.gxmake(xmin, iwt, size(xmin,1), nxin, iosp)
 nq = QCDNUM.gqmake(qarr, wt, size(qarr,1), nqin)
