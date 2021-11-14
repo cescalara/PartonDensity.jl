@@ -325,6 +325,9 @@ K_eP = get_K_elements(ePp);
 K_eM = get_K_elements(eMp);
 
 nbins_out = size(TM_eP)[2];
+```
+
+```julia
 xsec_pred_eP = zeros(nbins_out);
 xsec_pred_eM = zeros(nbins_out);
 
@@ -336,9 +339,6 @@ for j in 1:nbins_out
         xsec_pred_eM[j] += TM_eM[i, j] * (1.0/K_eM[i]) * IntXsec_eM[i];
     
     end
-    
-    xsec_pred_eP[j] *= get_L_data(ePp);
-    xsec_pred_eM[j] *= get_L_data(eMp);
     
 end
 ```
