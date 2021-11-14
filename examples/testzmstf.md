@@ -138,7 +138,7 @@ q0 = 2.e0;
 Initialise QCDNUM and make grids and wieght tables. Then evolve the PDF.
 
 ```julia
-QCDNUM.qcinit("/usr/local/lib/libQCDNUM.dylib", -6, " ")
+QCDNUM.qcinit(-6, " ")
 QCDNUM.setord(iord)
 QCDNUM.setalf(alf, q2a)
 

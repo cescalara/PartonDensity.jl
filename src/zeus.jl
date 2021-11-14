@@ -51,16 +51,21 @@ function get_L_data(eMPp)
 end
 
 function get_TM_elements(eMPp)
+    
     lumi_data = get_L_data(eMPp)
-    TM_elements = TM_Elements_eMp
-    if eMPp == 0
-        TM_elements = TM_Elements_ePp
+
+    if eMPp == 1
+        TM_elements = copy(TM_Elements_eMp)
+    elseif eMPp == 0
+        TM_elements = copy(TM_Elements_ePp)
     end
+    
     for i in 1:429
         for j in 1:153
-         TM_elements[i,j] =TM_elements[i,j] * lumi_data
+         TM_elements[i,j] = TM_elements[i,j] * lumi_data
         end
     end
+    
     return TM_elements
 end
 
