@@ -13,13 +13,17 @@ jupyter:
     name: julia-1.7
 ---
 
+# Forward model
+
+Here, we go through an example of simulating the full forward model, from the prior definition to the expected number of events in different bins of the detector response.
+
 ```julia
 using QCDNUM, PartonDensity 
 using Distributions, Plots, Random, Printf, NaNMath
 pd = PartonDensity;
 ```
 
-### Select hyperparameters
+##  Define input PDFs
 
 ```julia
 seed = 5
@@ -30,7 +34,7 @@ input_random_dirichlet = rand(dirichlet)
 hp = NamedTuple{(:λ_u, :λ_d, :λ_g1, :λ_g2, :K_g, :λ_q, :θ)}((0.5, 0.6, -0.37, -0.7, 6., -0.5, input_random_dirichlet));
 ```
 
-### Plot input PDFs
+Plot the input PDFs
 
 ```julia
 x_grid = range(0.001, stop=1, length=1000)
@@ -51,22 +55,20 @@ plot!(xaxis=:log, yaxis=:log, legend=:outertopright)
 
 ```julia
 # Sanity check that sum = 1
-pd.int_xtotx(hp.λ_u, hp.λ_d, hp.λ_g1, hp.λ_g2, hp.K_g, hp.λ_q, hp.θ)
+pd.int_xtotx(hp.λ_u, hp.λ_d, hp.λ_g1, hp.λ_g2, hp.K_g, hp.λ_q, hp.θ) ≈ 1
 ```
 
-### Evolve using QCDNUM
-
-```julia
-# more grid parameters
-iosp = 3; # spline order
-n_x = 100;
-n_q = 50;
-```
+## Define QCDNUM grids, weights and settings
 
 ```julia
 QCDNUM.qcinit(-6, " ")
 QCDNUM.setord(2); # 1 <=> LO, 2<=> NLO in pQCD
 QCDNUM.setalf(0.118, 100.0); # α_S = 0.118, μ_R^2 = 100.0
+
+# grid params
+iosp = 3; # spline order
+n_x = 100;
+n_q = 50;
 
 # x grid
 xmin = Float64.([1.e-3, 0.2e0, 0.4e0, 0.6e0, 0.75e0]);
@@ -91,14 +93,17 @@ itype = 1 # Unpolarised
 nw = QCDNUM.fillwt(itype)
 nw = QCDNUM.zmfillw()
 
-@printf("Generated grid with size nx = %i, nq = %i.\n", nx, nq)
+@printf("Generated grid with size nx = %i, nq = %i.\n", n_x, n_q)
 @printf("Filled weight tables.\n")
 ```
 
-Pass input PDF function
+## Evolve the PDFs using QCDNUM
+
+
+Define input PDF function
 * See https://www.nikhef.nl/~h24/qcdnum-files/doc/qcdnum170115.pdf under `evolfg`
 
-```julia code_folding=[]
+```julia code_folding=[0]
 function _input_pdfs(i, x)::Float64
     i = i[]
     x = x[]
@@ -151,7 +156,7 @@ end
 input_pdfs = @cfunction(_input_pdfs, Float64, (Ref{Int32}, Ref{Float64}))
 ```
 
-This acts as a mapping between your input function and quark species.
+Define mapping between your input function and quark species.
 
 ```julia
 #               tb  bb  cb  sb  ub  db  g   d   u   s   c   b   t
@@ -173,6 +178,8 @@ map = Float64.([0., 0., 0., 0.,-1., 0., 0., 0., 1., 0., 0., 0., 0., # 1 # U vale
 eps = QCDNUM.evolfg(1, input_pdfs, map, iq0)
 ```
 
+## Define necessary splines for cross section calculation
+
 ```julia
 # For splines
              # tb  bb  cb  sb  ub  db   g   d   u   s   c   b   t
@@ -189,7 +196,6 @@ proup = Float64.([0., 0., 1., 0., 1., 0., 0., 0., 1., 0., 1., 0., 0.]);
 prodn = Float64.([0., 1., 0., 1., 0., 1., 0., 1., 0., 1., 0., 1., 0.]);
 valup = Float64.([0.,0.,-1.,0.,-1.,0., 0., 0., 1., 0., 1., 0., 0.]);
 valdn = Float64.([0.,-1.,0.,-1.,0.,-1., 0., 1., 0., 1., 0., 1., 0.]);
-
 ```
 
 ```julia
@@ -305,6 +311,8 @@ p1 = heatmap(qcdnum_x_grid, qcdnum_qq_grid, NaNMath.log10.(spline[:, :]'))
 plot(p1, xlabel="x", ylabel="q2", 
     xaxis=:log, yaxis=:log)
 ```
+
+## Integrate over the cross section spline and find expected events numbers
 
 ```julia
 nbins = size(xbins_M_begin)[1]
