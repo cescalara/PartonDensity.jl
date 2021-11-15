@@ -1,4 +1,5 @@
 using SpecialFunctions, Roots
+using Plots
 const sf = SpecialFunctions
 
 """
@@ -111,7 +112,7 @@ function xtotx(x::Float64, λ_u::Float64, λ_d::Float64, λ_g1::Float64, λ_g2::
 end
 
 """
-        int_xtotx(λ_u, λ_d, λ_g1, λ_g2, K_g, λ_q, θ)
+    int_xtotx(λ_u, λ_d, λ_g1, λ_g2, K_g, λ_q, θ)
 
 Total integrated momentum density. Should equal 1.
 """
@@ -154,4 +155,49 @@ function int_xtotx(λ_u::Float64, λ_d::Float64, λ_g1::Float64, λ_g2::Float64,
     I_tot = I_u + I_d + I_g + I_q
     
     I_tot
+end
+
+"""
+    int_xtotx(λ_u, λ_d, λ_g1, λ_g2, K_g, λ_q, θ)
+
+Total integrated momentum density. Should equal 1.
+"""
+function int_xtotx(hyper_params::NamedTuple)
+
+    hp = hyper_params
+
+    result = int_xtotx(hp.λ_u, hp.λ_d, hp.λ_g1, hp.λ_g2,
+                       hp.K_g, hp.λ_q, hp.θ)
+    
+    return result
+end
+
+"""
+    plot_input_pdfs(hyper_params, xmin, xmax, nx)
+
+Plot the input PDFs defined by hyper_params over 
+the given x range.   
+"""
+function plot_input_pdfs(hyper_params::NamedTuple, xmin::Float64=1.0e-2,
+                         xmax::Float64=1.0, nx::Integer=1000)
+
+    x_grid = range(xmin, stop=xmax, length=nx)
+    hp = hyper_params
+
+    p = plot(x_grid, [x_uv_x(x, hp.λ_u, hp.θ[1]) for x in x_grid], label="x uv(x)", lw=3)
+    p = plot!(x_grid, [x_dv_x(x, hp.λ_d, hp.θ[2]) for x in x_grid], label="x dv(x)", lw=3)
+    p = plot!(x_grid, [x_g_x(x, hp.λ_g1, hp.λ_g2, hp.K_g, hp.θ[3], hp.θ[4]) 
+                   for x in x_grid], label="x g(x)", lw=3)
+    
+    p = plot!(x_grid, [x_q_x(x, hp.λ_q, hp.θ[5]) for x in x_grid], label="x ubar(x)", lw=3)
+    p = plot!(x_grid, [x_q_x(x, hp.λ_q, hp.θ[6]) for x in x_grid], label="x dbar(x)", lw=3)
+    p = plot!(x_grid, [x_q_x(x, hp.λ_q, hp.θ[7]) for x in x_grid], label="x s(x)", lw=3)
+    p = plot!(x_grid, [x_q_x(x, hp.λ_q, hp.θ[8]) for x in x_grid], label="x c(x)", lw=3)
+    p = plot!(x_grid, [x_q_x(x, hp.λ_q, hp.θ[9]) for x in x_grid], label="x b(x)", lw=3)
+    
+    p = plot!(xlabel="x")
+    p = plot!(xaxis=:log, yaxis=:log, legend=:outertopright)
+    p = ylims!(1e-8, 30)
+
+    return p
 end
