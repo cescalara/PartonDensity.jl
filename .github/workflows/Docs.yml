@@ -23,5 +23,5 @@ jobs:
         env: |
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # If authenticating with GitHub Actions token
           PLOTS_TEST: "true"
-          GKSwstype = "100"
+          GKSwstype: "100"
         run: julia --project=docs/ docs/make.jl
