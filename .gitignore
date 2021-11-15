@@ -1,6 +1,12 @@
-/Manifest.toml
+Manifest.toml
 
 # As using jupytext
 *.ipynb
 
 .ipynb_checkpoints
+
+# Docs
+docs/build/
+
+# Mac OS
+.DS_Store
