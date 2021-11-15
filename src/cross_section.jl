@@ -226,7 +226,7 @@ function dd_xsecnc_xq2(x_bin_cen::Array{Float64},
         
     end
     
-  xsec
+    xsec
 end
 
 """

@@ -15,7 +15,7 @@ jupyter:
 
 ```julia
 using QCDNUM, PartonDensity 
-using Distributions, Plots, Random, Printf, NaNMath
+using Distributions, Plots, Random, Printf, NaNMath, Parameters
 pd = PartonDensity;
 ```
 
@@ -27,9 +27,8 @@ Random.seed!(seed);
 dirichlet = Dirichlet([4., 4., 50., 0.5, 5., 5., 3., 2., 1.])
 input_random_dirichlet = rand(dirichlet)
 
-# hyperparameters
-hyper_params = NamedTuple{(:λ_u, :λ_d, :λ_g1, :λ_g2, :K_g, :λ_q, :θ)}((0.5, 0.6, -0.37,
-        -0.7, 6., -0.5, input_random_dirichlet));
+hyper_params = pd.PDFParameters(λ_u=0.5, λ_d=0.6, λ_g1=-0.37, λ_g2=-0.7, 
+    K_g=6.0, λ_q=0.5, θ=input_random_dirichlet);
 ```
 
 ```julia
@@ -44,45 +43,45 @@ pd.int_xtotx(hyper_params) ≈ 1
 ### Define grid, weights and evolve using QCDNUM
 
 ```julia
-# more grid parameters
-iosp = 3; # spline order
-n_x = 100;
-n_q = 50;
+qcdnum_grid = pd.QCDNUMGrid(x_bounds=[1.e-3, 0.2e0, 0.4e0, 0.6e0, 0.75e0], 
+    x_weights=[1, 2, 4, 8, 16], nx=100, qq_bounds=[1.e2, 3.e4], qq_weights=[1., 1.], 
+    nq=50, spline_interp=3)
+
+qcdnum_params = pd.QCDNUMParameters(order=2, α_S=0.118, q0=100.0, grid=qcdnum_grid, 
+    n_fixed_flav=5, iqc=1, iqb=1, iqt=1, weight_type=1);
 ```
 
 ```julia
 QCDNUM.qcinit(-6, " ")
-QCDNUM.setord(2); # 1 <=> LO, 2<=> NLO in pQCD
-QCDNUM.setalf(0.118, 100.0); # α_S = 0.118, μ_R^2 = 100.0
+QCDNUM.setord(qcdnum_params.order); # 1 <=> LO, 2<=> NLO in pQCD
+QCDNUM.setalf(qcdnum_params.α_S, qcdnum_params.q0); # α_S = 0.118, μ_R^2 = 100.0
 
-# x grid
-xmin = Float64.([1.e-3, 0.2e0, 0.4e0, 0.6e0, 0.75e0]);
-iwt = Int32.([1, 2, 4, 8, 16]);
-ngx = 5
-QCDNUM.gxmake(xmin, iwt, 1, n_x, iosp);
-
-# mu2 grid
-qarr = Float64.([1.e2, 3.e4]);
-warr = Float64.([1., 1.]);
-ngq = 2;
-QCDNUM.gqmake(qarr, warr, ngq, n_q);
+g = qcdnum_params.grid
+QCDNUM.gxmake(g.x_bounds, g.x_weights, g.x_num_bounds, g.nx, g.spline_interp);
+QCDNUM.gqmake(g.qq_bounds, g.qq_weights, g.qq_num_bounds, g.nq);
 
 # copy locally
-qcdnum_x_grid = QCDNUM.gxcopy(n_x);
-qcdnum_qq_grid = QCDNUM.gqcopy(n_q);
+qcdnum_x_grid = QCDNUM.gxcopy(g.nx);
+qcdnum_qq_grid = QCDNUM.gqcopy(g.nq);
 
-QCDNUM.setcbt(5, 1, 1, 1); # 5 flavours in FFNS
-iq0 = QCDNUM.iqfrmq(100.0); # Get index of μ_F^2 = 100.0 = μ_R^2
+qc = qcdnum_params
+QCDNUM.setcbt(qc.n_fixed_flav, qc.iqc, qc.iqb, qc.iqt); # 5 flavours in FFNS
+iq0 = QCDNUM.iqfrmq(qcdnum_params.q0); # Get index of μ_F^2 = 100.0 = μ_R^2
 
-itype = 1 # Unpolarised
-nw = QCDNUM.fillwt(itype)
+nw = QCDNUM.fillwt(qcdnum_params.weight_type)
 nw = QCDNUM.zmfillw()
 ```
 
 Pass input PDF function
 * See https://www.nikhef.nl/~h24/qcdnum-files/doc/qcdnum170115.pdf under `evolfg`
 
-```julia code_folding=[0]
+```julia
+my_func = pd.get_input_pdf_func(hyper_params)
+```
+
+```julia code_folding=[]
+hp = hyper_params
+
 function _input_pdfs(i, x)::Float64
     i = i[]
     x = x[]
@@ -133,24 +132,11 @@ function _input_pdfs(i, x)::Float64
 end
 
 input_pdfs = @cfunction(_input_pdfs, Float64, (Ref{Int32}, Ref{Float64}))
+#input_pdfs = @cfunction(my_func, Float64, (Ref{Int32}, Ref{Float64}))
 ```
 
-This acts as a mapping between your input function and quark species.
-
 ```julia
-#               tb  bb  cb  sb  ub  db  g   d   u   s   c   b   t
-map = Float64.([0., 0., 0., 0.,-1., 0., 0., 0., 1., 0., 0., 0., 0., # 1 # U valence
-                0., 0., 0., 0., 0.,-1., 0., 1., 0., 0., 0., 0., 0., # 2 # D valence
-                0., 0., 0., 0., 1., 0., 0., 0., 0., 0., 0., 0., 0., # 3 # u sea
-                0., 0., 0., 0., 0., 1., 0., 0., 0., 0., 0., 0., 0., # 4 # d sea
-                0., 0., 0., 0., 0., 0., 0., 0., 0., 1., 0., 0., 0., # 5 # s
-                0., 0., 0., 1., 0., 0., 0., 0., 0., 0., 0., 0., 0., # 6 # sbar
-                0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 1., 0., 0., # 7 # c
-                0., 0., 1., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., # 8 # cbar
-                0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 1., 0., # 9 # b
-                0., 1., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., # 10 # bbar
-                0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., # 11
-                0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0.]); # 12
+map = pd.input_pdf_map;
 ```
 
 ```julia
@@ -233,11 +219,19 @@ my_fun_xsec_i = @cfunction(_my_fun_xsec_i, Float64, (Ref{Int32}, Ref{Int32}, Ref
 ```
 
 ```julia
-# plot
-xsec_on_grid = zeros(n_x, n_q);
+_fun_xsec_i(100, 1)
+```
 
-for ix = 1:n_x
-    for iq = 1:n_q
+```julia
+g.nx
+```
+
+```julia
+# plot
+xsec_on_grid = zeros(g.nx, g.nq);
+
+for ix = 1:g.nx
+    for iq = 1:g.nq
         xsec_on_grid[ix, iq] = _fun_xsec_i(ix, iq)
     end
 end
