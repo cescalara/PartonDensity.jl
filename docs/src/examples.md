@@ -63,9 +63,8 @@ n_x = 100;
 n_q = 50;
 
 # x grid
-xmin = Float64.([1.e-3, 0.2e0, 0.4e0, 0.6e0, 0.75e0]);
-iwt = Int32.([1, 2, 4, 8, 16]);
-ngx = 5
+xmin = Float64.([1.e-3, 0.75e0]);
+iwt = Int32.([1]);
 QCDNUM.gxmake(xmin, iwt, 1, n_x, iosp);
 
 # mu2 grid
