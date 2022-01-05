@@ -1,5 +1,28 @@
 using SpecialFunctions, Roots
+using Parameters
+using Plots
 const sf = SpecialFunctions
+
+export PDFParameters
+export plot_input_pdfs, int_xtotx
+export get_input_pdf_func
+export input_pdf_map
+
+"""
+    PDFParameters
+
+Parameters of the input PDFs.
+"""
+@with_kw struct PDFParameters
+    λ_u::Float64
+    λ_d::Float64
+    λ_g1::Float64
+    λ_g2::Float64
+    K_g::Float64
+    λ_q::Float64
+    θ::Vector{Float64}
+end
+
 
 """
     x_uv_x(x, λ_u, w)
@@ -111,7 +134,7 @@ function xtotx(x::Float64, λ_u::Float64, λ_d::Float64, λ_g1::Float64, λ_g2::
 end
 
 """
-        int_xtotx(λ_u, λ_d, λ_g1, λ_g2, K_g, λ_q, θ)
+    int_xtotx(λ_u, λ_d, λ_g1, λ_g2, K_g, λ_q, θ)
 
 Total integrated momentum density. Should equal 1.
 """
@@ -155,3 +178,118 @@ function int_xtotx(λ_u::Float64, λ_d::Float64, λ_g1::Float64, λ_g2::Float64,
     
     I_tot
 end
+
+"""
+    int_xtotx(λ_u, λ_d, λ_g1, λ_g2, K_g, λ_q, θ)
+
+Total integrated momentum density. Should equal 1.
+"""
+function int_xtotx(hyper_params::PDFParameters)
+
+    hp = hyper_params
+
+    result = int_xtotx(hp.λ_u, hp.λ_d, hp.λ_g1, hp.λ_g2,
+                       hp.K_g, hp.λ_q, hp.θ)
+    
+    return result
+end
+
+"""
+    plot_input_pdfs(hyper_params, xmin, xmax, nx)
+
+Plot the input PDFs defined by hyper_params over 
+the given x range.   
+"""
+function plot_input_pdfs(hyper_params::PDFParameters, xmin::Float64=1.0e-2,
+                         xmax::Float64=1.0, nx::Integer=1000)
+
+    x_grid = range(xmin, stop=xmax, length=nx)
+    hp = hyper_params
+
+    p = plot(x_grid, [x_uv_x(x, hp.λ_u, hp.θ[1]) for x in x_grid], label="x uv(x)", lw=3)
+    p = plot!(x_grid, [x_dv_x(x, hp.λ_d, hp.θ[2]) for x in x_grid], label="x dv(x)", lw=3)
+    p = plot!(x_grid, [x_g_x(x, hp.λ_g1, hp.λ_g2, hp.K_g, hp.θ[3], hp.θ[4]) 
+                   for x in x_grid], label="x g(x)", lw=3)
+    
+    p = plot!(x_grid, [x_q_x(x, hp.λ_q, hp.θ[5]) for x in x_grid], label="x ubar(x)", lw=3)
+    p = plot!(x_grid, [x_q_x(x, hp.λ_q, hp.θ[6]) for x in x_grid], label="x dbar(x)", lw=3)
+    p = plot!(x_grid, [x_q_x(x, hp.λ_q, hp.θ[7]) for x in x_grid], label="x s(x)", lw=3)
+    p = plot!(x_grid, [x_q_x(x, hp.λ_q, hp.θ[8]) for x in x_grid], label="x c(x)", lw=3)
+    p = plot!(x_grid, [x_q_x(x, hp.λ_q, hp.θ[9]) for x in x_grid], label="x b(x)", lw=3)
+    
+    p = plot!(xlabel="x")
+    p = plot!(xaxis=:log, yaxis=:log, legend=:outertopright)
+    p = ylims!(1e-8, 30)
+
+    return p
+end
+
+function get_input_pdf_func(hyper_params::PDFParameters)
+
+    hp = hyper_params
+    
+    func = function _input_pdfs(i, x)::Float64
+        i = i[]
+        x = x[]
+
+        f = 0.0
+
+        # gluon
+        if (i == 0)
+            f = x_g_x(x, hp.λ_g1, hp.λ_g2, hp.K_g, hp.θ[3], hp.θ[4]) 
+        end
+
+        # u valence
+        if (i == 1)
+            f = x_uv_x(x, hp.λ_u, hp.θ[1])
+        end
+
+        # d valence
+        if (i == 2)
+            f = x_dv_x(x, hp.λ_d, hp.θ[2])
+        end
+
+        # ubar
+        if (i == 3)
+            f = x_q_x(x, hp.λ_q, hp.θ[5])
+        end
+
+        # dbar
+        if (i == 4)
+            f = x_q_x(x, hp.λ_q, hp.θ[6])
+        end
+
+        # s and sbar
+        if (i == 5) || (i == 6)
+            f = x_q_x(x, hp.λ_q, hp.θ[7])
+        end
+
+        # c and cbar
+        if (i == 7) || (i == 8)
+            f = x_q_x(x, hp.λ_q, hp.θ[8])
+        end
+
+        # d and dbar
+        if (i == 9) || (i == 10)
+            f = x_q_x(x, hp.λ_q, hp.θ[9])
+        end
+
+        return f
+    end
+
+    return func
+end
+
+#                         tb  bb  cb  sb  ub  db  g   d   u   s   c   b   t
+input_pdf_map = Float64.([0., 0., 0., 0.,-1., 0., 0., 0., 1., 0., 0., 0., 0., # 1 # U valence
+                          0., 0., 0., 0., 0.,-1., 0., 1., 0., 0., 0., 0., 0., # 2 # D valence
+                          0., 0., 0., 0., 1., 0., 0., 0., 0., 0., 0., 0., 0., # 3 # u sea
+                          0., 0., 0., 0., 0., 1., 0., 0., 0., 0., 0., 0., 0., # 4 # d sea
+                          0., 0., 0., 0., 0., 0., 0., 0., 0., 1., 0., 0., 0., # 5 # s
+                          0., 0., 0., 1., 0., 0., 0., 0., 0., 0., 0., 0., 0., # 6 # sbar
+                          0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 1., 0., 0., # 7 # c
+                          0., 0., 1., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., # 8 # cbar
+                          0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 1., 0., # 9 # b
+                          0., 1., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., # 10 # bbar
+                          0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., # 11
+                          0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0.]); # 12
