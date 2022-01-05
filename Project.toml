@@ -21,8 +21,9 @@ Distributions = "0.24, 0.25"
 NaNMath = "0.3"
 Parameters = "0.12"
 Plots = "1"
+QCDNUM = "0.1"
 Roots = "1.0"
-SpecialFunctions = "1"
+SpecialFunctions = "1, 2"
 julia = "1"
 
 [extras]
