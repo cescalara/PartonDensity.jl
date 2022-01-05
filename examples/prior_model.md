@@ -1,0 +1,267 @@
+---
+jupyter:
+  jupytext:
+    text_representation:
+      extension: .md
+      format_name: markdown
+      format_version: '1.3'
+      jupytext_version: 1.11.0
+  kernelspec:
+    display_name: Julia 1.7.0-rc2
+    language: julia
+    name: julia-1.7
+---
+
+# Input PDF parametrisation and priors
+
+An important part of PDF fitting is defining a useful parametrisation for the PDF shapes, as well as meaningful prior distributions that encode our knowledge of the problem.
+
+In this notebook, we explore two different approaches:
+* *Full Dirichlet*
+* *Valence shape + Dirichlet*
+
+In the end, it seems like the latter option makes more sense for us and is therefore implement elsewhere in the `PartonDensity` package. We demonstrate why below.
+
+```julia
+using Distributions, Plots, SpecialFunctions, Printf
+const sf = SpecialFunctions;
+```
+
+## "Full Dirichlet" approach
+
+A clean way to ensure the momentum sum rule would be to sample different contributions of the momentrum density integral from a Dirichlet distribution, then use these weights to set the parameters on the individual Beta distributions. However, in practice this is non-trvial as we also want to fix the normalisation of the *number densities* of the valance contributions.  
+
+```julia
+# 9 components of decreasing importance
+dirichlet = Dirichlet([3., 2., 1, 0.5, 0.3, 0.2, 0.1, 0.1, 0.1])
+data = rand(dirichlet, 1000);
+```
+
+```julia
+# Have a look
+plot()
+for i in 1:9
+    histogram!(data[i,:], bins=range(0, stop=1, length=20), alpha=0.7)
+end
+h = plot!(xlabel="I_i = A_i B_i");
+display(h)
+```
+
+```julia
+# This would be great as the sum rule is automatically conserved
+sum(data, dims=1)
+```
+
+```julia
+# But, it is non-trival to define valence params from this
+I = rand(dirichlet)
+
+# Valance u component
+λ_u =
+rand(Uniform(0, 1))
+K_u = rand(Uniform(0, 10))
+
+# Integral of number density must = 2
+A_u = 2 / sf.beta(λ_u, K_u+1) 
+
+# integral of momentum density can be fixed by I[1] 
+I_1 = A_u * sf.beta(λ_u+1, K_u+1);
+```
+
+```julia
+# Could use a root-finder to find K_u given I_1 and λ_u...
+# Could be nasty to sample from though... 
+I_1 = 2 * (sf.beta(λ_u+1, K_u+1)/sf.beta(λ_u, K_u+1));
+
+using Roots
+
+function func_to_solve(K_u)
+    return I_1 - 2 * (sf.beta(λ_u+1, K_u+1) / sf.beta(λ_u, K_u+1))
+end
+
+K_u ≈ find_zero(func_to_solve, (0, 10), Bisection())
+```
+
+While this approach might be nice, there are two issues in practice:
+* It is difficult to set sensible priors on $\lambda_u$ that imply priors on $K_u$, and similarly for $\lambda_d$ and $K_d$
+* The problem is overconstrained and we hav to use a root finder. This is rather fragile, and could fail for certain parameter combinations, such as we might find in a fit.
+
+
+## "Valence shape + Dirichlet" approach
+We can handle this more elegantly (maybe?) by specifying constraints on the valence params through the shape of their Beta distributions, then using a Dirichlet to specify the weights of the gluon and sea components. The problem here is it isn't clear how to specify that the d contribution must be less than the u contribution, but it is possible to do this indirectly through priors on the shape parameters. This will however require some further investigation.
+
+```julia
+x = range(0, stop=1, length=50)
+
+# High-level priors
+# Looks like we maybe want to change lambda and K priors to boost these components
+λ_u = 0.7 #rand(Uniform(0, 1))
+K_u = 4 #rand(Uniform(2, 10))
+λ_d = 0.5 #rand(Uniform(0, 1))
+K_d = 6 #rand(Uniform(2, 10))
+
+u_V = Beta(λ_u, K_u+1)
+A_u = 2 / sf.beta(λ_u, K_u+1)
+
+d_V = Beta(λ_d, K_d+1)
+A_d = 1 / sf.beta(λ_d, K_d+1)
+
+# Integral contributions
+I_u = A_u * sf.beta(λ_u+1, K_u+1)
+I_d = A_d * sf.beta(λ_d+1, K_d+1)
+
+plot(x, x.*pdf(u_V, x)*2, alpha=0.7, label="x u(x)", lw=3)
+plot!(x, x.*pdf(d_V, x), alpha=0.7, label="x d(x)", lw=3)
+plot!(xlabel="x", legend=:topright)
+```
+
+```julia
+@printf("I_u = %.2f\n", I_u)
+@printf("I_d = %.2f\n", I_d)
+```
+
+```julia
+# The remaining 7 integrals can be dirichlet-sampled with decreasing importance
+remaining = 1 - (I_u + I_d)
+dirichlet = Dirichlet([3., 2., 1, 0.5, 0.3, 0.2, 0.1])
+I = rand(dirichlet) * remaining;
+sum(I) ≈ remaining
+```
+
+```julia
+# Gluon contributions
+λ_g1 = rand(Uniform(-1, 0))
+λ_g2 = rand(Uniform(0, 1))
+K_g = rand(Uniform(2, 10))
+A_g2 = I[1] / sf.beta(λ_g2+1, K_g+1)
+A_g1 = I[2] / sf.beta(λ_g1+1, 5+1);
+```
+
+```julia
+# Sea quark contributions
+λ_q = rand(Uniform(-1, 0))
+A_ubar = I[3] / (2 * sf.beta(λ_q+1, 5+1))
+A_dbar = I[4] / (2 * sf.beta(λ_q+1, 5+1))
+A_s = I[5] / (2 * sf.beta(λ_q+1, 5+1))
+A_c = I[6] / (2 * sf.beta(λ_q+1, 5+1))
+A_b = I[7] / (2 * sf.beta(λ_q+1, 5+1));
+```
+
+```julia
+total = A_u * sf.beta(λ_u+1, K_u+1) + A_d * sf.beta(λ_d+1, K_d+1) 
+total += A_g1 * sf.beta(λ_g1+1, 5+1) + A_g2 * sf.beta(λ_g2+1, K_g+1)
+total += 2 * (A_ubar + A_dbar + A_s + A_c + A_b) * sf.beta(λ_q+1, 5+1)
+total ≈ 1
+```
+
+```julia
+total
+```
+
+```julia
+x = 10 .^ range(-2, stop=0, length=500)
+# How does it look?
+xg2 = A_g2 * x.^λ_g2 .* (1 .- x).^K_g
+xg1 = A_g1 * x.^λ_g1 .* (1 .-x).^5
+plot(x, x.*pdf(u_V, x)*2, alpha=0.7, label="x u(x)", lw=3)
+plot!(x, x.*pdf(d_V, x), alpha=0.7, label="x d(x)", lw=3)
+plot!(x, xg1 + xg2, alpha=0.7, label="x g(x)", lw=3)
+plot!(x, A_ubar * x.^λ_q .* (1.0 .- x).^5, alpha=0.7, label="x ubar(x)", lw=3)
+plot!(x, A_dbar * x.^λ_q .* (1.0 .- x).^5, alpha=0.7, label="x dbar(x)", lw=3)
+plot!(x, A_s * x.^λ_q .* (1.0 .- x).^5, alpha=0.7, label="x s(x)", lw=3)
+plot!(x, A_c * x.^λ_q .* (1.0 .- x).^5, alpha=0.7, label="x c(x)", lw=3)
+plot!(x, A_b * x.^λ_q .* (1.0 .-  x).^5, alpha=0.7, label="x b(x)", lw=3)
+plot!(xlabel="x", legend=:bottomleft, xscale=:log, ylims=(1e-8, 10), yscale=:log) 
+```
+
+### Prior predictive check
+
+We can start to visualise the type of PDFs that are allowed by the combination of the choice of parametrisation and prior distributions with some simple prior predictive checks, as done below...
+
+```julia
+N = 100
+alpha = 0.03
+total = Array{Float64, 1}(undef, N)
+first = true
+leg = 0
+
+plot()
+for i in 1:N
+
+    λ_u = rand(Uniform(0, 1))
+    K_u = rand(Uniform(2, 10))
+    λ_d = rand(Uniform(0, 1))
+    K_d = rand(Uniform(2, 10))
+    A_u = 2 / sf.beta(λ_u, K_u+1)
+    A_d = 1 / sf.beta(λ_d, K_d+1)
+    I_u = A_u * sf.beta(λ_u+1, K_u+1)
+    I_d = A_d * sf.beta(λ_d+1, K_d+1)
+    u_V = Beta(λ_u, K_u+1)
+    d_V = Beta(λ_d, K_d+1)
+
+    remaining = 1 - (I_u + I_d)
+    dirichlet = Dirichlet([3., 2., 1, 0.5, 0.3, 0.2, 0.1])
+    I = rand(dirichlet) * remaining
+    
+    λ_g1 = rand(Uniform(-1, 0))
+    λ_g2 = rand(Uniform(0, 1))
+    K_g = rand(Uniform(2, 10))
+    A_g2 = I[1] / sf.beta(λ_g2+1, K_g+1)
+    A_g1 = I[2] / sf.beta(λ_g1+1, 5+1)
+    
+    # Sea quark contributions
+    λ_q = rand(Uniform(-1, 0))
+    A_ubar = I[3] / (2 * sf.beta(λ_q+1, 5+1))
+    A_dbar = I[4] / (2 * sf.beta(λ_q+1, 5+1))
+    A_s = I[5] / (2 * sf.beta(λ_q+1, 5+1))
+    A_c = I[6] / (2 * sf.beta(λ_q+1, 5+1))
+    A_b = I[7] / (2 * sf.beta(λ_q+1, 5+1))
+    
+    total[i] = A_u * sf.beta(λ_u+1, K_u+1) + A_d * sf.beta(λ_d+1, K_d+1) 
+    total[i] += A_g1 * sf.beta(λ_g1+1, 5+1) + A_g2 * sf.beta(λ_g2+1, K_g+1)
+    total[i] += 2 * (A_ubar + A_dbar + A_s + A_c + A_b) * sf.beta(λ_q+1, 5+1)
+    
+    xg2 = A_g2 * x.^λ_g2 .* (1 .- x).^K_g
+    xg1 = A_g1 * x.^λ_g1 .* (1 .- x).^5
+    plot!(x, x.*pdf(u_V, x)*2, alpha=alpha, color="blue", lw=3)
+    plot!(x, x.*pdf(d_V, x), alpha=alpha, color="orange", lw=3)
+    plot!(x, xg1 + xg2, alpha=alpha, color="green", lw=3)
+    plot!(x, A_ubar * x.^λ_q .* (1 .- x).^5, alpha=alpha, color="red", lw=3)
+    plot!(x, A_dbar * x.^λ_q .* (1 .- x).^5, alpha=alpha, color="purple", lw=3)
+    plot!(x, A_s * x.^λ_q .* (1 .- x).^5, alpha=alpha, color="brown", lw=3)
+    plot!(x, A_c * x.^λ_q .* (1 .- x).^5, alpha=alpha, color="pink", lw=3)
+    plot!(x, A_b * x.^λ_q .* (1 .- x).^5, alpha=alpha, color="grey", lw=3)
+end
+h = plot!(xlabel="x", ylabel="x f(x)", xscale=:log, legend=false,
+    ylims=(1e-8, 10), yscale=:log)
+display(h)
+```
+
+```julia
+# Looks like naive priors need some work...
+```
+
+## PDF Parametrisation interface
+
+`PartonDensity` provides a handy interface to the "Valence shape + Dirichlet" style parametrisation, as demonstrated here.
+
+```julia
+using PartonDensity
+```
+
+```julia
+hyper_params = PDFParameters(λ_u=0.5, K_u=4.0, λ_d=0.6, K_d=6.0, λ_g1=-0.37, λ_g2=-0.7,
+    K_g=6.0, λ_q=0.5, seed=5, weights=[50., 0.5, 5., 5., 3., 2., 1.]);
+```
+
+```julia
+plot_input_pdfs(hyper_params)
+```
+
+```julia
+int_xtotx(hyper_params) ≈ 1
+```
+
+```julia
+
+```

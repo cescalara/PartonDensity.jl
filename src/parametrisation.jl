@@ -1,12 +1,30 @@
 using SpecialFunctions, Roots
-using Parameters
-using Plots
+using Parameters, Distributions
+using Plots, Random
 const sf = SpecialFunctions
 
 export PDFParameters
 export plot_input_pdfs, int_xtotx
 export get_input_pdf_func
 export input_pdf_map
+
+
+function get_dirichlet_samples(λ_u::Float64, K_u::Float64, λ_d::Float64,
+                               K_d::Float64, seed::Integer, weights::Vector{Float64})
+
+    A_u = 2 / sf.beta(λ_u, K_u + 1)
+    A_d = 1 / sf.beta(λ_d, K_d + 1)
+
+    I_u = A_u * sf.beta(λ_u+1, K_u+1)
+    I_d = A_d * sf.beta(λ_d+1, K_d+1)
+
+    remaining = 1 - (I_u + I_d)
+
+    Random.seed!(seed);
+    dirichlet = Dirichlet(weights)
+    
+    return rand(dirichlet) * remaining
+end
 
 """
     PDFParameters
@@ -15,29 +33,27 @@ Parameters of the input PDFs.
 """
 @with_kw struct PDFParameters
     λ_u::Float64
+    K_u::Float64
     λ_d::Float64
+    K_d::Float64
     λ_g1::Float64
     λ_g2::Float64
     K_g::Float64
     λ_q::Float64
-    θ::Vector{Float64}
+    seed::Integer = 0
+    weights::Vector{Float64}
+    θ::Vector{Float64} = get_dirichlet_samples(λ_u, K_u, λ_d, K_d, seed, weights)
 end
 
-
 """
-    x_uv_x(x, λ_u, w)
+    x_uv_x(x, λ_u, K_u)
 
 Momentum density of u valence component.
 Beta function 
     A_u x^λ_u (1-x)^K_u
-A_u and K_u are set by the passed weight, 
-`w`. 
+A_u is set by λ_u and K_u.
 """
-function x_uv_x(x::Float64, λ_u::Float64, w::Float64)
-    
-    f(K_u) = w - 2 * (sf.beta(λ_u + 1, K_u + 1) / sf.beta(λ_u, K_u + 1))
-    
-    K_u = find_zero(f, (-1.1, 100))
+function x_uv_x(x::Float64, λ_u::Float64, K_u::Float64)
     
     A_u = 2 / sf.beta(λ_u, K_u + 1)
     
@@ -46,19 +62,14 @@ function x_uv_x(x::Float64, λ_u::Float64, w::Float64)
 end
 
 """
-    x_dv_x(x, λ_d, w)
+    x_dv_x(x, λ_d, K_d)
 
 Momentum density of d valence component.
 Beta function
     A_d x^λ_d (1 - x)^K_d
-A_d and K_d are set by the passed weight,
-`w`
+A_d is set by λ_d and K_d.
 """
-function x_dv_x(x::Float64, λ_d::Float64, w::Float64)
-
-    f(K_d) = w - (sf.beta(λ_d + 1, K_d + 1) / sf.beta(λ_d, K_d + 1))
-    
-    K_d = find_zero(f, 1)
+function x_dv_x(x::Float64, λ_d::Float64, K_d::Float64)
 
     A_d = 1 / sf.beta(λ_d, K_d + 1)
 
@@ -106,63 +117,57 @@ end
 
 
 """
-    x_total_x(x, λ_u, λ_d, λ_g1, λ_g2, K_g, λ_q, θ)
+    x_total_x(x, λ_u, K_u, λ_d, K_d, λ_g1, λ_g2, K_g, λ_q, θ)
 
 Total momentum density.
 """
-function xtotx(x::Float64, λ_u::Float64, λ_d::Float64, λ_g1::Float64, λ_g2::Float64,
-               K_g::Float64, λ_q::Float64, θ::Array{Float64})
+function xtotx(x::Float64, λ_u::Float64, K_u::Float64, λ_d::Float64, K_d::Float64,
+               λ_g1::Float64, λ_g2::Float64, K_g::Float64, λ_q::Float64, θ::Array{Float64})
     
-    xuvx = x_uv_x(x, λ_u, θ[1])
+    xuvx = x_uv_x(x, λ_u, K_u)
 
-    xdvx = x_dv_x(x, λ_d, θ[2])
+    xdvx = x_dv_x(x, λ_d, K_d)
 
-    xgx = x_g_x(x, λ_g1, λ_g2, K_g, θ[3], θ[4])
+    xgx = x_g_x(x, λ_g1, λ_g2, K_g, θ[1], θ[2])
 
-    xubarx = x_q_x(x, λ_q, θ[5])
+    xubarx = x_q_x(x, λ_q, θ[3])
     
-    xdbarx = x_q_x(x, λ_q, θ[6])
+    xdbarx = x_q_x(x, λ_q, θ[4])
 
-    xsx = x_q_x(x, λ_q, θ[7])
+    xsx = x_q_x(x, λ_q, θ[5])
     
-    xcx = x_q_x(x, λ_q, θ[8])
+    xcx = x_q_x(x, λ_q, θ[6])
     
-    xbx = x_q_x(x, λ_q, θ[9])
+    xbx = x_q_x(x, λ_q, θ[7])
     
     return xuvx + xdvx + xgx + xubarx + xdbarx + xsx + xcx + xbx
     
 end
 
 """
-    int_xtotx(λ_u, λ_d, λ_g1, λ_g2, K_g, λ_q, θ)
+    int_xtotx(λ_u, K_u, λ_d, K_d, λ_g1, λ_g2, K_g, λ_q, θ)
 
 Total integrated momentum density. Should equal 1.
 """
-function int_xtotx(λ_u::Float64, λ_d::Float64, λ_g1::Float64, λ_g2::Float64,
-                            K_g::Float64, λ_q::Float64, θ::Array{Float64})
+function int_xtotx(λ_u::Float64, K_u::Float64, λ_d::Float64, K_d::Float64,
+                   λ_g1::Float64, λ_g2::Float64, K_g::Float64, λ_q::Float64, θ::Array{Float64})
 
-    # Amplitudes
-    fu(K_u) = θ[1] - 2 * (sf.beta(λ_u + 1, K_u + 1) / sf.beta(λ_u, K_u + 1))
-    K_u = find_zero(fu, 1)
     A_u = 2 / sf.beta(λ_u, K_u + 1)
-
-    fd(K_d) = θ[2] - (sf.beta(λ_d + 1, K_d + 1) / sf.beta(λ_d, K_d + 1))
-    K_d = find_zero(fd, 1)
     A_d = 1 / sf.beta(λ_d, K_d + 1)
 
-    A_g1 = θ[3] / sf.beta(λ_g1 + 1, K_g + 1)
-    A_g2 = θ[4] / sf.beta(λ_g2 + 1, 5 + 1)
+    A_g1 = θ[1] / sf.beta(λ_g1 + 1, K_g + 1)
+    A_g2 = θ[2] / sf.beta(λ_g2 + 1, 5 + 1)
     
     
-    A_ubar = (θ[5] / 2) / sf.beta(λ_q + 1, 5 + 1)
+    A_ubar = (θ[3] / 2) / sf.beta(λ_q + 1, 5 + 1)
 
-    A_dbar = (θ[6] / 2) / sf.beta(λ_q + 1, 5 + 1)
+    A_dbar = (θ[4] / 2) / sf.beta(λ_q + 1, 5 + 1)
 
-    A_s = (θ[7] / 2) / sf.beta(λ_q + 1, 5 + 1)
+    A_s = (θ[5] / 2) / sf.beta(λ_q + 1, 5 + 1)
 
-    A_c = (θ[8] / 2) / sf.beta(λ_q + 1, 5 + 1)
+    A_c = (θ[6] / 2) / sf.beta(λ_q + 1, 5 + 1)
 
-    A_b = (θ[9] / 2) / sf.beta(λ_q + 1, 5 + 1)
+    A_b = (θ[7] / 2) / sf.beta(λ_q + 1, 5 + 1)
     
     
     # Integrate
@@ -180,7 +185,7 @@ function int_xtotx(λ_u::Float64, λ_d::Float64, λ_g1::Float64, λ_g2::Float64,
 end
 
 """
-    int_xtotx(λ_u, λ_d, λ_g1, λ_g2, K_g, λ_q, θ)
+    int_xtotx(hyper_params)
 
 Total integrated momentum density. Should equal 1.
 """
@@ -188,8 +193,8 @@ function int_xtotx(hyper_params::PDFParameters)
 
     hp = hyper_params
 
-    result = int_xtotx(hp.λ_u, hp.λ_d, hp.λ_g1, hp.λ_g2,
-                       hp.K_g, hp.λ_q, hp.θ)
+    result = int_xtotx(hp.λ_u, hp.K_u, hp.λ_d, hp.K_d,
+                       hp.λ_g1, hp.λ_g2, hp.K_g, hp.λ_q, hp.θ)
     
     return result
 end
@@ -206,16 +211,16 @@ function plot_input_pdfs(hyper_params::PDFParameters, xmin::Float64=1.0e-2,
     x_grid = range(xmin, stop=xmax, length=nx)
     hp = hyper_params
 
-    p = plot(x_grid, [x_uv_x(x, hp.λ_u, hp.θ[1]) for x in x_grid], label="x uv(x)", lw=3)
-    p = plot!(x_grid, [x_dv_x(x, hp.λ_d, hp.θ[2]) for x in x_grid], label="x dv(x)", lw=3)
-    p = plot!(x_grid, [x_g_x(x, hp.λ_g1, hp.λ_g2, hp.K_g, hp.θ[3], hp.θ[4]) 
+    p = plot(x_grid, [x_uv_x(x, hp.λ_u, hp.K_u) for x in x_grid], label="x uv(x)", lw=3)
+    p = plot!(x_grid, [x_dv_x(x, hp.λ_d, hp.K_d) for x in x_grid], label="x dv(x)", lw=3)
+    p = plot!(x_grid, [x_g_x(x, hp.λ_g1, hp.λ_g2, hp.K_g, hp.θ[1], hp.θ[2]) 
                    for x in x_grid], label="x g(x)", lw=3)
     
-    p = plot!(x_grid, [x_q_x(x, hp.λ_q, hp.θ[5]) for x in x_grid], label="x ubar(x)", lw=3)
-    p = plot!(x_grid, [x_q_x(x, hp.λ_q, hp.θ[6]) for x in x_grid], label="x dbar(x)", lw=3)
-    p = plot!(x_grid, [x_q_x(x, hp.λ_q, hp.θ[7]) for x in x_grid], label="x s(x)", lw=3)
-    p = plot!(x_grid, [x_q_x(x, hp.λ_q, hp.θ[8]) for x in x_grid], label="x c(x)", lw=3)
-    p = plot!(x_grid, [x_q_x(x, hp.λ_q, hp.θ[9]) for x in x_grid], label="x b(x)", lw=3)
+    p = plot!(x_grid, [x_q_x(x, hp.λ_q, hp.θ[3]) for x in x_grid], label="x ubar(x)", lw=3)
+    p = plot!(x_grid, [x_q_x(x, hp.λ_q, hp.θ[4]) for x in x_grid], label="x dbar(x)", lw=3)
+    p = plot!(x_grid, [x_q_x(x, hp.λ_q, hp.θ[5]) for x in x_grid], label="x s(x)", lw=3)
+    p = plot!(x_grid, [x_q_x(x, hp.λ_q, hp.θ[6]) for x in x_grid], label="x c(x)", lw=3)
+    p = plot!(x_grid, [x_q_x(x, hp.λ_q, hp.θ[7]) for x in x_grid], label="x b(x)", lw=3)
     
     p = plot!(xlabel="x")
     p = plot!(xaxis=:log, yaxis=:log, legend=:outertopright)
@@ -236,42 +241,42 @@ function get_input_pdf_func(hyper_params::PDFParameters)
 
         # gluon
         if (i == 0)
-            f = x_g_x(x, hp.λ_g1, hp.λ_g2, hp.K_g, hp.θ[3], hp.θ[4]) 
+            f = x_g_x(x, hp.λ_g1, hp.λ_g2, hp.K_g, hp.θ[1], hp.θ[2]) 
         end
 
         # u valence
         if (i == 1)
-            f = x_uv_x(x, hp.λ_u, hp.θ[1])
+            f = x_uv_x(x, hp.λ_u, hp.K_u)
         end
 
         # d valence
         if (i == 2)
-            f = x_dv_x(x, hp.λ_d, hp.θ[2])
+            f = x_dv_x(x, hp.λ_d, hp.K_d)
         end
 
         # ubar
         if (i == 3)
-            f = x_q_x(x, hp.λ_q, hp.θ[5])
+            f = x_q_x(x, hp.λ_q, hp.θ[3])
         end
 
         # dbar
         if (i == 4)
-            f = x_q_x(x, hp.λ_q, hp.θ[6])
+            f = x_q_x(x, hp.λ_q, hp.θ[4])
         end
 
         # s and sbar
         if (i == 5) || (i == 6)
-            f = x_q_x(x, hp.λ_q, hp.θ[7])
+            f = x_q_x(x, hp.λ_q, hp.θ[5])
         end
 
         # c and cbar
         if (i == 7) || (i == 8)
-            f = x_q_x(x, hp.λ_q, hp.θ[8])
+            f = x_q_x(x, hp.λ_q, hp.θ[6])
         end
 
         # d and dbar
         if (i == 9) || (i == 10)
-            f = x_q_x(x, hp.λ_q, hp.θ[9])
+            f = x_q_x(x, hp.λ_q, hp.θ[7])
         end
 
         return f

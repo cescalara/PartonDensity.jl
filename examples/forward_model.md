@@ -19,25 +19,21 @@ Here, we go through an example of simulating the full forward model, from the pr
 
 ```julia
 using QCDNUM, PartonDensity 
-using Distributions, Plots, Random, Printf, NaNMath, Parameters
+using Plots, Printf, NaNMath, Parameters
 ```
 
 ##  Define input PDFs
 
 ```julia
-seed = 5
-Random.seed!(seed);
-dirichlet = Dirichlet([4., 4., 50., 0.5, 5., 5., 3., 2., 1.])
-input_random_dirichlet = rand(dirichlet)
-
-hyper_params = PDFParameters(λ_u=0.5, λ_d=0.6, λ_g1=-0.37, λ_g2=-0.7, 
-    K_g=6.0, λ_q=0.5, θ=input_random_dirichlet);
+weights = [50., 0.5, 5., 5., 3., 2., 1.]
+hyper_params = PDFParameters(λ_u=0.5, K_u=4.0, λ_d=0.6, K_d=6.0, λ_g1=-0.37, λ_g2=-0.7, 
+    K_g=6.0, λ_q=0.5, seed=5, weights=weights);
 ```
 
 Plot the input PDFs
 
 ```julia
-#plot_input_pdfs(hyper_params)
+plot_input_pdfs(hyper_params)
 ```
 
 ```julia
@@ -256,4 +252,8 @@ end
 
 ```julia
 xsec_pred_eM
+```
+
+```julia
+
 ```
