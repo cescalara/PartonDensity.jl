@@ -3,6 +3,16 @@ using Parameters
 using Plots
 const sf = SpecialFunctions
 
+export PDFParameters
+export plot_input_pdfs, int_xtotx
+export get_input_pdf_func
+export input_pdf_map
+
+"""
+    PDFParameters
+
+Parameters of the input PDFs.
+"""
 @with_kw struct PDFParameters
     λ_u::Float64
     λ_d::Float64

@@ -8,6 +8,21 @@ by R. Aggarwal.
 
 using QCDNUM
 
+export QuarkCoefficients
+
+"""
+    QuarkCoefficients
+
+Quark coefficients for structure function 
+calculations.
+"""
+@with_kw struct QuarkCoefficients
+    proup::Vector{Float64} = [0., 0., 1., 0., 1., 0., 0., 0., 1., 0., 1., 0., 0.]
+    prodn::Vector{Float64} = [0., 1., 0., 1., 0., 1., 0., 1., 0., 1., 0., 1., 0.]
+    valup::Vector{Float64} = [0., 0.,-1., 0.,-1., 0., 0., 0., 1., 0., 1., 0., 0.]
+    valdn::Vector{Float64} = [0.,-1., 0.,-1., 0.,-1., 0., 1., 0., 1., 0., 1., 0.]
+end
+
 # These globals will later be set by user
 ZMass = 91.1876
 WMass = 80.398 
@@ -33,7 +48,7 @@ ae = -0.5
 sqrt_s = 318.1  
 Lepcharge = 1 
 
-export _fun_xsec_i
+export _fun_xsec_i, get_input_xsec_func
 export set_lepcharge
 
 function set_lepcharge(value::Integer)
@@ -266,3 +281,17 @@ function _fun_xsec_i(ix, iq)::Float64
     
 end
 
+function get_input_xsec_func()
+
+    func = function _my_fun_xsec_i(ipx, ipq, first)::Float64
+    
+        ix = ipx[]
+        iq = ipq[]
+    
+        xsec = _fun_xsec_i(ix, iq)
+    
+        return xsec
+    end
+
+    return func
+end
