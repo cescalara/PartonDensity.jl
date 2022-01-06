@@ -10,6 +10,7 @@ docs/build/
 docs/src/pdf_parametrisation.md
 docs/src/forward_model.md
 docs/src/transfer_matrix.md
+docs/src/prior_bat_implementation.md
 
 # Mac OS
 .DS_Store
