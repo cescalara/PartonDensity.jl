@@ -16,15 +16,15 @@ const sf = SpecialFunctions;
 # ### Forward model
 #
 # The gluon distributions are parametrised by
-# $$
+# ```math
 # x g(x) = A_{g1} x^{\lambda_{g1}}(1-x)^5 + A_{g2} x^{\lambda_g2}(1-x)^{K_g}.
-# $$
+# ```
 #
 # We also want to impose 
 #
-# $$
+# ```math
 # \int_0^1 x g(x) dx = A_{g1} B(\lambda_{g1}+1, 1+5) + A_{g2} B(\lambda_{g2}+1, K_g+1)= 1,
-# $$
+# ```
 #
 # with B(.,.) the Beta function.
 #
@@ -110,7 +110,7 @@ data["bin_widths"] = bin_widths;
 
 # ### Fit
 #
-# To fit this example data, we choose a prior over our hyperparameters $\theta$, $\lambda_{g1}$, $\lambda_{g2}$ and $K_g$.
+# To fit this example data, we choose a prior over our hyperparameters `θ`, `λ_g1`, `λ_g2` and `K_g`.
 #
 # We decide to choose a sensible Dirichlet prior, and have a look at
 # some samples to help understand what this means.
@@ -125,9 +125,9 @@ plot!(append!(Histogram(0:0.1:1), test[2, :]))
 #
 # Now we can define the prior:
 #
-# $$
+# ```math
 # \mathrm{Prior} - P(\theta) P(\lambda_{g1}) P(\lambda_{g2}) P(K_g).
-# $$
+# ```
 
 prior = NamedTupleDist(
     θ = Dirichlet([1, 1]),
@@ -271,9 +271,9 @@ data["bin_widths"] = bin_widths;
 
 prior = NamedTupleDist(
     θ = Dirichlet([1, 1, 1, 1, 1, 1, 1]),
-    λ_u = Truncated(Normal(pdf_params.λ_u, 0.1), 0, 1), #  Uniform(0, 1),
+    λ_u = Uniform(0, 1),
     K_u = Uniform(2, 10),
-    λ_d = Truncated(Normal(pdf_params.λ_d, 0.1), 0, 1), # Uniform(0, 1),
+    λ_d = Uniform(0, 1),
     K_d = Uniform(2, 10),
     λ_g1 = Uniform(-1, 0), 
     λ_g2 = Uniform(0, 1), 
