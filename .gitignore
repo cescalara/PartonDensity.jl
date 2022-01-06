@@ -4,9 +4,12 @@ Manifest.toml
 *.ipynb
 
 .ipynb_checkpoints
-
+				
 # Docs
 docs/build/
+docs/src/pdf_parametrisation.md
+docs/src/forward_model.md
+docs/src/transfer_matrix.md
 
 # Mac OS
 .DS_Store
