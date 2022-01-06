@@ -15,6 +15,10 @@ julia> using Pkg
 julia> pkg"add https://github.com/cescalara/PartonDensity.jl.git"
 ```
 
+## Usage
+
+Check out the examples listed in these docs! The scripts can be found in the [examples](https://github.com/cescalara/PartonDensity.jl/tree/main/examples) directory of the GitHub repository. 
+
 ## Development
 
 Below are the installation instruction for those who wish to contribute to the code.

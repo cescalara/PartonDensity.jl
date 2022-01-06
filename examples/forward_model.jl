@@ -136,7 +136,9 @@ qcdnum_x_grid = QCDNUM.gxcopy(g.nx)
 qcdnum_qq_grid =  QCDNUM.gqcopy(g.nq)
 p1 = heatmap(qcdnum_x_grid, qcdnum_qq_grid, NaNMath.log10.(xsec_on_grid[:, :]'))
 plot(p1, xlabel="x", ylabel="q2", 
-    xaxis=:log, yaxis=:log)
+     xaxis=:log, yaxis=:log)
+
+#
 
 plot(qcdnum_x_grid, NaNMath.log10.(xsec_on_grid[:, 4]), 
     label="Q2=141 (input scale)", lw=3)
@@ -145,6 +147,8 @@ plot!(qcdnum_x_grid, NaNMath.log10.(xsec_on_grid[:, 35]), label="Q2=5233", lw=3)
 plot!(qcdnum_x_grid, NaNMath.log10.(xsec_on_grid[:, 41]), label="Q2=10523", lw=3)
 plot!(xaxis=:log, legend=:bottomleft, xlabel="x", 
     ylabel="log10(cross section spline input)", ylims=(-7, 5))
+
+#
 
 set_lepcharge(1)
 iaF_eP = QCDNUM.isp_s2make(1, 2);
@@ -171,7 +175,7 @@ p1 = heatmap(qcdnum_x_grid, qcdnum_qq_grid, NaNMath.log10.(spline[:, :]'))
 plot(p1, xlabel="x", ylabel="q2", 
     xaxis=:log, yaxis=:log)
 
-## Integrate over the cross section spline and find expected events numbers
+# ## Integrate over the cross section spline and find expected events numbers
 
 nbins = size(xbins_M_begin)[1]
 IntXsec_eP = zeros(nbins);
