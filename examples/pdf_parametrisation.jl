@@ -108,9 +108,11 @@ A_d = 1 / sf.beta(λ_d, K_d+1)
 I_u = A_u * sf.beta(λ_u+1, K_u+1)
 I_d = A_d * sf.beta(λ_d+1, K_d+1)
 
-plot(x, x.*pdf(u_V, x)*2, alpha=0.7, label="x u(x)", lw=3)
-plot!(x, x.*pdf(d_V, x), alpha=0.7, label="x d(x)", lw=3)
+plot(x, x .* A_u .* x.^λ_u .* (1 .- x).^K_u * 2, alpha=0.7, label="x u(x)", lw=3)
+plot!(x, x .* A_d .* x.^λ_d .* (1 .- x).^K_d, alpha=0.7, label="x d(x)", lw=3)
 plot!(xlabel="x", legend=:topright)
+
+#
 
 @printf("I_u = %.2f\n", I_u)
 @printf("I_d = %.2f\n", I_d)
@@ -152,8 +154,8 @@ x = 10 .^ range(-2, stop=0, length=500)
 
 xg2 = A_g2 * x.^λ_g2 .* (1 .- x).^K_g
 xg1 = A_g1 * x.^λ_g1 .* (1 .-x).^5
-plot(x, x.*pdf(u_V, x)*2, alpha=0.7, label="x u(x)", lw=3)
-plot!(x, x.*pdf(d_V, x), alpha=0.7, label="x d(x)", lw=3)
+plot(x, x .* A_u .* x.^λ_u .* (1 .- x).^K_u * 2, alpha=0.7, label="x u(x)", lw=3)
+plot!(x, x .* A_d .* x.^λ_d .* (1 .- x).^K_d, alpha=0.7, label="x d(x)", lw=3)
 plot!(x, xg1 + xg2, alpha=0.7, label="x g(x)", lw=3)
 plot!(x, A_ubar * x.^λ_q .* (1.0 .- x).^5, alpha=0.7, label="x ubar(x)", lw=3)
 plot!(x, A_dbar * x.^λ_q .* (1.0 .- x).^5, alpha=0.7, label="x dbar(x)", lw=3)
@@ -211,8 +213,8 @@ for i in 1:N
     
     xg2 = A_g2 * x.^λ_g2 .* (1 .- x).^K_g
     xg1 = A_g1 * x.^λ_g1 .* (1 .- x).^5
-    plot!(x, x.*pdf(u_V, x)*2, alpha=alpha, color="blue", lw=3)
-    plot!(x, x.*pdf(d_V, x), alpha=alpha, color="orange", lw=3)
+    plot!(x, [x .* A_u .* x.^λ_u .* (1 .- x).^K_u * 2], alpha=alpha, color="blue", lw=3)
+    plot!(x, x .* A_d .* x.^λ_d .* (1 .- x).^K_d, alpha=alpha, color="orange", lw=3)
     plot!(x, xg1 + xg2, alpha=alpha, color="green", lw=3)
     plot!(x, A_ubar * x.^λ_q .* (1 .- x).^5, alpha=alpha, color="red", lw=3)
     plot!(x, A_dbar * x.^λ_q .* (1 .- x).^5, alpha=alpha, color="purple", lw=3)
