@@ -4,7 +4,7 @@ using Plots, Random
 const sf = SpecialFunctions
 
 export PDFParameters
-export plot_input_pdfs, int_xtotx
+export plot_input_pdfs, int_xtotx, xtotx
 export get_input_pdf_func
 export input_pdf_map
 
@@ -142,6 +142,19 @@ function xtotx(x::Float64, λ_u::Float64, K_u::Float64, λ_d::Float64, K_d::Floa
     
     return xuvx + xdvx + xgx + xubarx + xdbarx + xsx + xcx + xbx
     
+end
+
+"""
+    x_total_x(x, hyper_params)
+
+Total momentum density.
+"""
+function xtotx(x::Float64, hyper_params::PDFParameters)
+
+    hp = hyper_params
+
+    return xtotx(x, hp.λ_u, hp.K_u, hp.λ_d, hp.K_d, hp.λ_g1,
+                 hp.λ_g2, hp.K_g, hp.λ_q, hp.θ)
 end
 
 """

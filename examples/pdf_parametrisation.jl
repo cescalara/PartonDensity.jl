@@ -107,8 +107,8 @@ A_d = 1 / sf.beta(λ_d, K_d+1)
 I_u = A_u * sf.beta(λ_u+1, K_u+1)
 I_d = A_d * sf.beta(λ_d+1, K_d+1)
 
-plot(x, x.*pdf(u_V, x)*2, alpha=0.7, label="x u(x)", lw=3)
-plot!(x, x.*pdf(d_V, x), alpha=0.7, label="x d(x)", lw=3)
+plot(x, x .* A_u .* x.^λ_u .* (1 .- x).^K_u * 2, alpha=0.7, label="x u(x)", lw=3)
+plot!(x, x .* A_d .* x.^λ_d .* (1 .- x).^K_d, alpha=0.7, label="x d(x)", lw=3)
 plot!(xlabel="x", legend=:topright)
 
 #
@@ -153,8 +153,8 @@ x = 10 .^ range(-2, stop=0, length=500)
 
 xg2 = A_g2 * x.^λ_g2 .* (1 .- x).^K_g
 xg1 = A_g1 * x.^λ_g1 .* (1 .-x).^5
-plot(x, x.*pdf(u_V, x)*2, alpha=0.7, label="x u(x)", lw=3)
-plot!(x, x.*pdf(d_V, x), alpha=0.7, label="x d(x)", lw=3)
+plot(x, x .* A_u .* x.^λ_u .* (1 .- x).^K_u * 2, alpha=0.7, label="x u(x)", lw=3)
+plot!(x, x .* A_d .* x.^λ_d .* (1 .- x).^K_d, alpha=0.7, label="x d(x)", lw=3)
 plot!(x, xg1 + xg2, alpha=0.7, label="x g(x)", lw=3)
 plot!(x, A_ubar * x.^λ_q .* (1.0 .- x).^5, alpha=0.7, label="x ubar(x)", lw=3)
 plot!(x, A_dbar * x.^λ_q .* (1.0 .- x).^5, alpha=0.7, label="x dbar(x)", lw=3)
@@ -210,16 +210,16 @@ for i in 1:N
     total[i] += A_g1_i * sf.beta(λ_g1_i+1, 5+1) + A_g2_i * sf.beta(λ_g2_i+1, K_g_i+1)
     total[i] += 2 * (A_ubar_i + A_dbar_i + A_s_i + A_c_i + A_b_i) * sf.beta(λ_q_i+1, 5+1)
     
-    xg2_i = A_g2_i * x.^λ_g2_i .* (1 .- x).^K_g
-    xg1_i = A_g1_i * x.^λ_g1_i .* (1 .- x).^5
-    plot!(x, x.*pdf(u_V_i, x)*2, alpha=alpha, color="blue", lw=3)
-    plot!(x, x.*pdf(d_V_i, x), alpha=alpha, color="orange", lw=3)
-    plot!(x, xg1_i + xg2_i, alpha=alpha, color="green", lw=3)
-    plot!(x, A_ubar_i * x.^λ_q_i .* (1 .- x).^5, alpha=alpha, color="red", lw=3)
-    plot!(x, A_dbar_i * x.^λ_q_i .* (1 .- x).^5, alpha=alpha, color="purple", lw=3)
-    plot!(x, A_s_i * x.^λ_q_i .* (1 .- x).^5, alpha=alpha, color="brown", lw=3)
-    plot!(x, A_c_i * x.^λ_q_i .* (1 .- x).^5, alpha=alpha, color="pink", lw=3)
-    plot!(x, A_b_i * x.^λ_q_i .* (1 .- x).^5, alpha=alpha, color="grey", lw=3)
+    xg2 = A_g2 * x.^λ_g2 .* (1 .- x).^K_g
+    xg1 = A_g1 * x.^λ_g1 .* (1 .- x).^5
+    plot!(x, [x .* A_u .* x.^λ_u .* (1 .- x).^K_u * 2], alpha=alpha, color="blue", lw=3)
+    plot!(x, x .* A_d .* x.^λ_d .* (1 .- x).^K_d, alpha=alpha, color="orange", lw=3)
+    plot!(x, xg1 + xg2, alpha=alpha, color="green", lw=3)
+    plot!(x, A_ubar * x.^λ_q .* (1 .- x).^5, alpha=alpha, color="red", lw=3)
+    plot!(x, A_dbar * x.^λ_q .* (1 .- x).^5, alpha=alpha, color="purple", lw=3)
+    plot!(x, A_s * x.^λ_q .* (1 .- x).^5, alpha=alpha, color="brown", lw=3)
+    plot!(x, A_c * x.^λ_q .* (1 .- x).^5, alpha=alpha, color="pink", lw=3)
+    plot!(x, A_b * x.^λ_q .* (1 .- x).^5, alpha=alpha, color="grey", lw=3)
 end
 
 plot!(xlabel="x", ylabel="x f(x)", xscale=:log, legend=false,
