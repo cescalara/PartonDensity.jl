@@ -23,7 +23,7 @@ int_xtotx(hyper_params) ≈ 1
 
 # ## Define QCDNUM grids, weights and settings
 
-grid = QCDNUMGrid(x_bounds=[1.0e-3, 0.75], x_weights=[1], nx=100,
+grid = QCDNUMGrid(x_min=[1.0e-3], x_weights=[1], nx=100,
                   qq_bounds=[1.0e2, 3.0e4], qq_weights=[1.0, 1.0], nq=50, spline_interp=3)
 
 qcdnum_params = QCDNUMParameters(order=2, α_S=0.118, q0=100.0, grid=grid,
@@ -38,7 +38,7 @@ QCDNUM.setalf(qcdnum_params.α_S, qcdnum_params.q0)
 # Build grids
 
 g = qcdnum_params.grid
-QCDNUM.gxmake(g.x_bounds, g.x_weights, g.x_num_bounds, g.nx,
+QCDNUM.gxmake(g.x_min, g.x_weights, g.x_num_bounds, g.nx,
               g.spline_interp);
 QCDNUM.gqmake(g.qq_bounds, g.qq_weights, g.qq_num_bounds, g.nq);
 

@@ -197,8 +197,6 @@ for i in 1:N
     K_g = rand(Uniform(2, 10))
     A_g2 = I[1] / sf.beta(λ_g2+1, K_g+1)
     A_g1 = I[2] / sf.beta(λ_g1+1, 5+1)
-    
-    # Sea quark contributions
 
     λ_q = rand(Uniform(-1, 0))
     A_ubar = I[3] / (2 * sf.beta(λ_q+1, 5+1))

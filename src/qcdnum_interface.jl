@@ -10,11 +10,11 @@ Struct for holding the QCDNUM grid parameters.
 """
 @with_kw struct QCDNUMGrid
     "x boundaries of grid"
-    x_bounds::Vector{Float64}
+    x_min::Vector{Float64}
     "x grid weights"
     x_weights::Vector{Int32}
     "number of x grid boundaries"
-    x_num_bounds::Integer = size(x_bounds)[1]
+    x_num_bounds::Integer = size(x_min)[1]
     "number of x grid points"
     nx::Integer
     "qq boundaries of grid"
