@@ -5,7 +5,7 @@
 
 A Bayesian approach to parton density extraction.
 
-For more information please see the [documentation](https://francescacapel.com/PartonDensity.jl/) and `examples/` notebooks.
+For more information please see the [documentation](https://francescacapel.com/PartonDensity.jl/) and `examples/` scripts.
 
 ## Quick start
 
