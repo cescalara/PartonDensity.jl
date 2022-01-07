@@ -71,10 +71,8 @@ end
 K_u ≈ find_zero(func_to_solve, (0, 10), Bisection())
 
 # While this approach might be nice, there are two issues in practice:
-# * It is difficult to set sensible priors on $\lambda_u$ that imply priors
-# on $K_u$, and similarly for $\lambda_d$ and $K_d$
-# * The problem is overconstrained and we hav to use a root finder.
-# This is rather fragile, and could fail for certain parameter combinations, such as we might find in a fit.
+# * It is difficult to set sensible priors on $\lambda_u$ that imply priors on $K_u$, and similarly for $\lambda_d$ and $K_d$
+# * The problem is overconstrained and we hav to use a root finder. This is rather fragile, and could fail for certain parameter combinations, such as we might find in a fit.
 
 
 # ## "Valence shape + Dirichlet" approach
@@ -210,16 +208,16 @@ for i in 1:N
     total[i] += A_g1_i * sf.beta(λ_g1_i+1, 5+1) + A_g2_i * sf.beta(λ_g2_i+1, K_g_i+1)
     total[i] += 2 * (A_ubar_i + A_dbar_i + A_s_i + A_c_i + A_b_i) * sf.beta(λ_q_i+1, 5+1)
     
-    xg2 = A_g2 * x.^λ_g2 .* (1 .- x).^K_g
-    xg1 = A_g1 * x.^λ_g1 .* (1 .- x).^5
-    plot!(x, [x .* A_u .* x.^λ_u .* (1 .- x).^K_u * 2], alpha=alpha, color="blue", lw=3)
-    plot!(x, x .* A_d .* x.^λ_d .* (1 .- x).^K_d, alpha=alpha, color="orange", lw=3)
-    plot!(x, xg1 + xg2, alpha=alpha, color="green", lw=3)
-    plot!(x, A_ubar * x.^λ_q .* (1 .- x).^5, alpha=alpha, color="red", lw=3)
-    plot!(x, A_dbar * x.^λ_q .* (1 .- x).^5, alpha=alpha, color="purple", lw=3)
-    plot!(x, A_s * x.^λ_q .* (1 .- x).^5, alpha=alpha, color="brown", lw=3)
-    plot!(x, A_c * x.^λ_q .* (1 .- x).^5, alpha=alpha, color="pink", lw=3)
-    plot!(x, A_b * x.^λ_q .* (1 .- x).^5, alpha=alpha, color="grey", lw=3)
+    xg2_i = A_g2_i * x.^λ_g2_i .* (1 .- x).^K_g_i
+    xg1_i = A_g1_i * x.^λ_g1_i .* (1 .- x).^5
+    plot!(x, [x .* A_u_i .* x.^λ_u_i .* (1 .- x).^K_u_i * 2], alpha=alpha, color="blue", lw=3)
+    plot!(x, x .* A_d_i .* x.^λ_d_i .* (1 .- x).^K_d_i, alpha=alpha, color="orange", lw=3)
+    plot!(x, xg1_i + xg2_i, alpha=alpha, color="green", lw=3)
+    plot!(x, A_ubar_i * x.^λ_q_i .* (1 .- x).^5, alpha=alpha, color="red", lw=3)
+    plot!(x, A_dbar_i * x.^λ_q_i .* (1 .- x).^5, alpha=alpha, color="purple", lw=3)
+    plot!(x, A_s_i * x.^λ_q_i .* (1 .- x).^5, alpha=alpha, color="brown", lw=3)
+    plot!(x, A_c_i * x.^λ_q_i .* (1 .- x).^5, alpha=alpha, color="pink", lw=3)
+    plot!(x, A_b_i * x.^λ_q_i .* (1 .- x).^5, alpha=alpha, color="grey", lw=3)
 end
 
 plot!(xlabel="x", ylabel="x f(x)", xscale=:log, legend=false,
