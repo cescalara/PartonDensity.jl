@@ -236,4 +236,6 @@ hyper_params = PDFParameters(λ_u=0.5, K_u=4.0, λ_d=0.6, K_d=6.0, λ_g1=-0.37, 
 
 plot_input_pdfs(hyper_params)
 
+#
+
 int_xtotx(hyper_params) ≈ 1

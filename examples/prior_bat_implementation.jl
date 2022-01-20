@@ -184,7 +184,7 @@ x_grid = range(0, stop=1, length=50)
 
 plot()
 for i in 1:200
-    random_ind = rand(1:7000)
+    random_ind = rand(1:5000)
     s = samples[random_ind].v
     xg = [xgx(x, s.λ_g1, s.λ_g2, s.K_g, s.θ) for x in bin_centers]
     plot!(bin_centers, xg .* bin_widths * N, alpha=0.1, lw=3, 
@@ -322,7 +322,7 @@ x_grid = range(0, stop=1, length=50)
 
 plot()
 for i in 1:200
-    random_ind = rand(1:7000)
+    random_ind = rand(1:5000)
     s = samples[random_ind].v
     xt = [xtotx(x, s.λ_u, s.K_u, s.λ_d, s.K_d, 
             s.λ_g1, s.λ_g2, s.K_g, s.λ_q, Vector(s.θ)) for x in bin_centers]
