@@ -19,6 +19,14 @@ julia> pkg"add https://github.com/cescalara/PartonDensity.jl.git"
 
 Check out the examples listed in these docs! The scripts can be found in the [examples](https://github.com/cescalara/PartonDensity.jl/tree/main/examples) directory of the GitHub repository. 
 
+To run these docs, you can follow the steps used in the GitHub workflow. In particular, we need to remember to use the latest version of ``BAT.jl`` from the GitHub master branch. From within `PartonDensity.jl/` we can run:
+
+```
+julia --project=docs/ -e 'using Pkg; Pkg.add(url="https://github.com/bat/BAT.jl.git")'
+julia --project=docs/ -e 'using Pkg; Pkg.develop(PackageSpec(path=pwd())); Pkg.instantiate()'
+julia <any_example_script_here>.jl
+```
+
 ## Development
 
 Below are the installation instruction for those who wish to contribute to the code.
