@@ -242,7 +242,7 @@ function plot_input_pdfs(hyper_params::PDFParameters, xmin::Float64=1.0e-2,
     return p
 end
 
-function get_input_pdf_func(hyper_params::PDFParameters)
+function get_input_pdf_func(hyper_params::PDFParameters)::Function
 
     hp = hyper_params
     
