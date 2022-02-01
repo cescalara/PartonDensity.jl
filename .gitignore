@@ -14,3 +14,6 @@ docs/src/prior_bat_implementation.md
 
 # Mac OS
 .DS_Store
+
+# HDF5 files
+*.h5
