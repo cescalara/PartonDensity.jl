@@ -30,49 +30,49 @@ const sf = SpecialFunctions;
 #
 # Start by defining some useful functions:
 
-function xg1x(x, λ_g1, θ_2)
-    A_g1 = θ_2 / sf.beta(λ_g1 + 1, 5 + 1)
-    return A_g1 * x^λ_g1 * (1 - x)^5
+function xg1x(x, λ_g1, K_g, θ_1)
+    A_g1 = θ_1 / sf.beta(λ_g1 + 1, K_g + 1)
+    return A_g1 * x^λ_g1 * (1 - x)^K_g
 end
 
-function xg2x(x, λ_g2, K_g, θ_1)
-    A_g2 = θ_1 / sf.beta(λ_g2 + 1, K_g + 1)
-    return A_g2 * x^λ_g2 * (1 - x)^K_g
+function xg2x(x, λ_g2, θ_2)
+    A_g2 = θ_2 / sf.beta(λ_g2 + 1, 5 + 1)
+    return A_g2 * x^λ_g2 * (1 - x)^5
 end
 
 function xgx(x, λ_g1, λ_g2, K_g, θ)
-    xg1 = xg1x(x, λ_g1, θ[2])
-    xg2 = xg2x(x, λ_g2, K_g, θ[1])
+    xg1 = xg1x(x, λ_g1, K_g, θ[1])
+    xg2 = xg2x(x, λ_g2, θ[2])
     return xg1 + xg2
 end
 
 # Choose true values for the high-level parameters and show what the resulting model looks like.
 
 θ = [0.5, 0.5]
-λ_g1 = -0.7 # rand(Uniform(-1, 0))
-λ_g2 = 0.5 # rand(Uniform(0, 1))
+λ_g1 = 0.5 # rand(Uniform(0, 1))
+λ_g2 = -0.7 # rand(Uniform(-1, 0))
 K_g = 3 # rand(Uniform(2, 10))
 truths = (θ = θ, λ_g1 = λ_g1, λ_g2 = λ_g2, K_g = K_g);
 
-A_g2 = θ[1] / sf.beta(λ_g2+1, K_g+1)
-A_g1 = θ[2] / sf.beta(λ_g1+1, 5+1);
+A_g1 = θ[1] / sf.beta(λ_g1+1, K_g+1)
+A_g2 = θ[2] / sf.beta(λ_g2+1, 5+1);
 
 # Check integral = 1
-total = A_g1 * sf.beta(λ_g1+1, 5+1) + A_g2 * sf.beta(λ_g2+1, K_g+1)
+total = A_g1 * sf.beta(λ_g1+1, K_g+1) + A_g2 * sf.beta(λ_g2+1, 5+1)
 print("Integral = ", total)
 
 # Plot true model
 x_grid = range(0, stop=1, length=50)
 
-xg2 = A_g2 * x_grid.^λ_g2 .* (1 .- x_grid).^K_g
-xg1 = A_g1 * x_grid.^λ_g1 .* (1 .- x_grid).^5
+xg1 = A_g1 * x_grid.^λ_g1 .* (1 .- x_grid).^K_g
+xg2 = A_g2 * x_grid.^λ_g2 .* (1 .- x_grid).^5
 
-plot(x_grid, [xg1x(x, λ_g1, θ[2]) for x in x_grid], 
-    alpha=0.7, label="x g1(x)", lw=3, color="blue")
-plot!(x_grid, [xg2x(x, λ_g2, K_g, θ[1]) for x in x_grid], 
-    alpha=0.7, label="x g2(x)", lw=3, color="green")
+plot!(x_grid, [xg1x(x, λ_g1, K_g, θ[1]) for x in x_grid], 
+      alpha=0.7, label="x g1(x)", lw=3, color="green")
+plot(x_grid, [xg2x(x, λ_g2, θ[2]) for x in x_grid], 
+     alpha=0.7, label="x g2(x)", lw=3, color="blue")
 plot!(x_grid, [xgx(x, λ_g1, λ_g2, K_g, θ) for x in x_grid],
-    alpha=0.7, label="x g1(x) + x g2(x)", lw=3, color="red")
+      alpha=0.7, label="x g1(x) + x g2(x)", lw=3, color="red")
 plot!(xlabel="x")
 
 # Now, for the purposes of testing the prior implementation,
@@ -131,9 +131,9 @@ plot!(append!(Histogram(0:0.1:1), test[2, :]))
 
 prior = NamedTupleDist(
     θ = Dirichlet([1, 1]),
-    λ_g1 = Uniform(-1, 0), #Truncated(Normal(-0.7, 0.1), -1, 0),
-    λ_g2 = Uniform(0, 1), #Truncated(Normal(0.7, 0.1), 0, 1)
-    K_g =  Uniform(2, 10), # Truncated(Normal(1, 2), 0, 10),
+    λ_g1 = Uniform(0, 1), #Truncated(Normal(0.7, 0.1), 0, 1)
+    λ_g2 = Uniform(-1, 0), #Truncated(Normal(-0.7, 0.1), -1, 0),
+    K_g =  Uniform(2, 10), # Truncated(Normal(1, 2), 2, 10),
 );
 
 # Define a simple poisson likelihood that describes the test data that we generated above.
@@ -204,7 +204,7 @@ plot!(xlabel="x")
 #
 # We can also look at marginal distributions for different parameters...
 plot(
-    samples, :(λ_g2),
+    samples, :(λ_g1),
     mean = true, std = true,
     nbins = 50, 
 )
@@ -224,7 +224,8 @@ using PartonDensity
 #
 
 pdf_params = PDFParameters(λ_u=0.7, K_u=4.0, λ_d=0.5, K_d=6.0, 
-    λ_g1=-0.4, λ_g2=0.7, K_g=6.0, λ_q=0.5, weights=[1, 0.5, 0.3, 0.2, 0.1, 0.1, 0.1])
+                           λ_g1=0.7, λ_g2=-0.4, K_g=6.0, λ_q=-0.5,
+                           weights=[1, 0.5, 0.3, 0.2, 0.1, 0.1, 0.1])
 
 # Sanity check
 
@@ -254,7 +255,7 @@ end
 # Plot data and expectation
 
 plot(bin_centers, [xtotx(x, pdf_params) for x in bin_centers] .* bin_widths * N,
-    alpha=0.7, label="Expected", lw=3, color="red")
+     alpha=0.7, label="Expected", lw=3, color="red")
 scatter!(bin_centers, observed_counts, lw=3, label="Observed", color="black")
 
 # Store the data 
@@ -275,8 +276,8 @@ prior = NamedTupleDist(
     K_u = Uniform(2, 6),
     λ_d = Truncated(Normal(pdf_params.λ_d, 0.1), 0, 1), # Uniform(0, 1),
     K_d = Uniform(2, 8),
-    λ_g1 = Uniform(-1, 0), 
-    λ_g2 = Uniform(0, 1), 
+    λ_g1 = Uniform(0, 1), 
+    λ_g2 = Uniform(-1, 0), 
     K_g =  Uniform(2, 8),
     λ_q = Truncated(Normal(pdf_params.λ_q, 0.1), -1, 0),
 );
