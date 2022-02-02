@@ -41,7 +41,7 @@ Parameters of the input PDFs.
     K_g::Float64
     λ_q::Float64
     seed::Integer = 0
-    weights::Vector{Float64}
+    weights::Vector{Float64} = [1, 1, 1, 1, 1, 1, 1]
     θ::Vector{Float64} = get_dirichlet_samples(λ_u, K_u, λ_d, K_d, seed, weights)
 end
 
@@ -242,7 +242,7 @@ function plot_input_pdfs(hyper_params::PDFParameters, xmin::Float64=1.0e-2,
     return p
 end
 
-function get_input_pdf_func(hyper_params::PDFParameters)
+function get_input_pdf_func(hyper_params::PDFParameters)::Function
 
     hp = hyper_params
     

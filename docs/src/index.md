@@ -12,20 +12,22 @@ To install PartonDensity.jl, start Julia and run
 
 ```julia
 julia> using Pkg
-julia> pkg"add https://github.com/cescalara/PartonDensity.jl.git"
+julia> Pkg.add(url="https://github.com/cescalara/PartonDensity.jl.git")
 ```
 
 ## Usage
 
 Check out the examples listed in these docs! The scripts can be found in the [examples](https://github.com/cescalara/PartonDensity.jl/tree/main/examples) directory of the GitHub repository. 
 
-To run these docs, you can follow the steps used in the GitHub workflow. In particular, we need to remember to use the latest version of ``BAT.jl`` from the GitHub master branch. From within `PartonDensity.jl/` we can run:
+To run these docs, you can follow the steps used in the GitHub workflow. In particular, we need to remember to use the latest versions of ``QCDNUM.jl`` and ``BAT.jl`` from GitHub. 
 
+```julia
+using Pkg
+Pkg.add(url="https://github.com/bat/BAT.jl.git")
+Pkg.add(url="https://github.com/cescalara/QCDNUM.jl.git")
 ```
-julia --project=docs/ -e 'using Pkg; Pkg.add(url="https://github.com/bat/BAT.jl.git")'
-julia --project=docs/ -e 'using Pkg; Pkg.develop(PackageSpec(path=pwd())); Pkg.instantiate()'
-julia <any_example_script_here>.jl
-```
+
+If you want to convert the example scripts to notebooks, use ``Literate.jl``.
 
 ## Development
 
@@ -33,12 +35,12 @@ Below are the installation instruction for those who wish to contribute to the c
 
 - Clone the github repository, e.g. via the command line:
 ```
-git clone  https://github.com/cescalara/QCDNUM.jl.git
+git clone  https://github.com/cescalara/PartonDensity.jl.git
 ```
 
 - Enter the directory and start Julia interpreter
 ```
-cd QCDNUM.jl
+cd PartonDensity.jl
 julia
 ```
 
@@ -50,7 +52,7 @@ julia> ]
 
  - Execute 
 ```
-pkg> generate QCDNUM
+pkg> generate PartonDensity
 ...... 
 pkg>  . dev
 ```

@@ -2,6 +2,7 @@ Manifest.toml
 
 # As using jupytext
 *.ipynb
+*.md
 
 .ipynb_checkpoints
 				
@@ -14,3 +15,6 @@ docs/src/prior_bat_implementation.md
 
 # Mac OS
 .DS_Store
+
+# HDF5 files
+*.h5
