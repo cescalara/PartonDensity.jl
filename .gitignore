@@ -2,6 +2,7 @@ Manifest.toml
 
 # As using jupytext
 *.ipynb
+*.md
 
 .ipynb_checkpoints
 				

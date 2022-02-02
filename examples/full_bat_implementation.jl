@@ -5,13 +5,6 @@
 # This fit is a work in progress and just a starting point for verification
 # of the method.
 
-using Pkg
-Pkg.activate("../docs")
-#Pkg.add(url="https://github.com/bat/BAT.jl.git")
-#Pkg.add(url="https://github.com/cescalara/QCDNUM.jl.git", rev="cfuncs")
-#Pkg.develop(PackageSpec(path="../")) 
-#Pkg.instantiate()
-
 using BAT, DensityInterface
 using PartonDensity
 using QCDNUM
