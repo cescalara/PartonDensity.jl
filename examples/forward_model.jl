@@ -9,9 +9,9 @@ using Plots, Printf, NaNMath, Parameters
 
 # ## Define input PDFs
 
-weights = [50., 0.5, 5., 5., 3., 2., 1.]
-hyper_params = PDFParameters(λ_u=0.5, K_u=4.0, λ_d=0.6, K_d=6.0, λ_g1=-0.37, λ_g2=-0.7,
-                             K_g=6.0, λ_q=0.5, seed=5, weights=weights);
+weights = [1, 0.5, 0.3, 0.2, 0.1, 0.1, 0.1]
+hyper_params = PDFParameters(λ_u=0.7, K_u=4.0, λ_d=0.5, K_d=6.0, λ_g1=0.7, λ_g2=-0.4,
+                             K_g=6.0, λ_q=-0.5, seed=5, weights=weights);
 
 # Plot the input PDFs
 
@@ -158,7 +158,7 @@ QCDNUM.ssp_s2fill(iaF_eP, input_xsec, splint_params.rscut);
 set_lepcharge(-1)
 iaF_eM = QCDNUM.isp_s2make(1, 2);
 QCDNUM.ssp_uwrite(splint_params.spline_addresses.F_eM, Float64(iaF_eM));
-QCDNUM.ssp_s2fill(iaF_eM, input_xsec, splint_params.rscut);
+`QCDNUM.ssp_s2fill(iaF_eM, input_xsec, splint_params.rscut);
 
 # plot spline
 
