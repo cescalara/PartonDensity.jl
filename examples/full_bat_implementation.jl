@@ -100,7 +100,13 @@ prior = NamedTupleDist(
     λ_q = Truncated(Normal(pdf_params.λ_q, 0.1), -1, 0),
 );
 
+# The likelihood is similar to that used in the *input PDF parametrisation* example.
+# We start by accessing the current parameter set of the sampler's iteration,
+# then running the forward model to get the predicted counts and comparing to
+# the observed counts using a simple Poisson likelihood.
 #
+# The `@critical` macro because `forward_model()` is currently not thread safe, so
+# this protects it from being run in parallel.
 
 likelihood = let d = sim_data
 
@@ -110,16 +116,13 @@ likelihood = let d = sim_data
 
     logfuncdensity(function (params)
 
-            # access current parameters
             pdf_params = PDFParameters(λ_u=params.λ_u, K_u=params.K_u, λ_d=params.λ_d,
                                        K_d=params.K_d, λ_g1=params.λ_g1, λ_g2=params.λ_g2,
                                        K_g=params.K_g, λ_q=params.λ_q, θ=Vector(params.θ))
 
-            # run forward model
             @critical counts_pred_ep, counts_pred_em = forward_model(pdf_params, 
                 qcdnum_params, splint_params, quark_coeffs);
 
-            # poisson likelihood
             ll_value = 0.0
             for i in 1:nbins
                 ll_value += logpdf(Poisson(counts_pred_ep[i]), counts_obs_ep[i])
