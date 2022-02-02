@@ -231,8 +231,8 @@ plot!(xlabel="x", ylabel="x f(x)", xscale=:log, legend=false,
 
 using PartonDensity
 
-hyper_params = PDFParameters(λ_u=0.5, K_u=4.0, λ_d=0.6, K_d=6.0, λ_g1=-0.37, λ_g2=-0.7,
-                             K_g=6.0, λ_q=0.5, seed=5, weights=[50., 0.5, 5., 5., 3., 2., 1.]);
+hyper_params = PDFParameters(λ_u=0.7, K_u=4.0, λ_d=0.5, K_d=6.0, λ_g1=0.7, λ_g2=-0.4,
+                             K_g=6.0, λ_q=-0.5, seed=5, weights=[1, 0.5, 0.3, 0.2, 0.1, 0.1, 0.1]);
 
 plot_input_pdfs(hyper_params)
 

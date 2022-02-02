@@ -26,7 +26,7 @@ function plot_model_space(pdf_params::PDFParameters, samples; xmin::Float64=1e-3
         
     end
 
-    p = plot!(xaxis=:log, yaxis=:log)
+    p = plot!(xaxis=:log, yaxis=:log, xlabel="x", ylabel="xtotx")
     p = ylims!(1e-5, 50.0)
 
     return p

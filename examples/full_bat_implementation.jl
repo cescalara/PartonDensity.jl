@@ -105,7 +105,7 @@ prior = NamedTupleDist(
 # then running the forward model to get the predicted counts and comparing to
 # the observed counts using a simple Poisson likelihood.
 #
-# The `@critical` macro because `forward_model()` is currently not thread safe, so
+# The `@critical` macro is used because `forward_model()` is currently not thread safe, so
 # this protects it from being run in parallel.
 
 likelihood = let d = sim_data
@@ -167,7 +167,7 @@ bat_eff_sample_size(unshaped.(samples))[1]
 # is only a small percentage of the input `nsteps`. We should try
 # to improve this if possible, or use a much larger `nsteps` value.
 #
-# for demonstration purposes, we will continue to show how we can
+# For demonstration purposes, we will continue to show how we can
 # visualise the results in this case. For robust inference, we need
 # to improve the sampling stage above.
 
@@ -186,7 +186,7 @@ vline!([pdf_params.λ_u], color="black", label="truth", lw=3)
 
 # Rather than making a large plot 15 different marginals,
 # it can be more useful to visualise the posterior distribution
-# in a more useful way, such as the shape of the distributions
+# in differently, such as the shape of the distributions
 # we are trying to fit, or the *model space*. Helper functions
 # exist for doing just this.
 
