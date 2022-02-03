@@ -3,28 +3,54 @@ using Parameters, Distributions
 using Plots, Random
 const sf = SpecialFunctions
 
+export get_scaled_θ
 export PDFParameters
 export plot_input_pdfs, int_xtotx, xtotx
 export get_input_pdf_func
 export input_pdf_map
 
 
-function get_dirichlet_samples(λ_u::Float64, K_u::Float64, λ_d::Float64,
-                               K_d::Float64, seed::Integer, weights::Vector{Float64})
+"""
+    get_scaled_θ(λ_u, K_u, λ_d, K_d, θ_tmp)
 
+Given a set of Dirichlet samples, θ_tmp, scale 
+according to the valence params.
+"""
+function get_scaled_θ(λ_u::Float64, K_u::Float64, λ_d::Float64, K_d::Float64,
+                      θ_tmp::Vector{Float64})
+
+    
     A_u = 2 / sf.beta(λ_u, K_u + 1)
     A_d = 1 / sf.beta(λ_d, K_d + 1)
 
-    I_u = A_u * sf.beta(λ_u+1, K_u+1)
-    I_d = A_d * sf.beta(λ_d+1, K_d+1)
+    I_u = A_u * sf.beta(λ_u + 1, K_u + 1)
+    I_d = A_d * sf.beta(λ_d + 1, K_d + 1)
 
     remaining = 1 - (I_u + I_d)
 
-    Random.seed!(seed);
-    dirichlet = Dirichlet(weights)
-    
-    return rand(dirichlet) * remaining
+    return θ_tmp * remaining
+  
 end
+
+
+"""
+    get_dirichlet_samples(λ_u, K_u, λ_d, K_d, seed, weights)
+
+Given valance shape parameters and weights, get samples θ
+that are correctly scaled. 
+"""
+function get_dirichlet_samples(λ_u::Float64, K_u::Float64, λ_d::Float64,
+                               K_d::Float64, seed::Integer, weights::Vector{Float64})
+
+    Random.seed!(seed);
+    θ_tmp = rand(Dirichlet(weights))
+
+    θ = get_scaled_θ(λ_u, K_u, λ_d, K_d, θ_tmp)
+    
+    return θ
+    
+end
+
 
 """
     PDFParameters

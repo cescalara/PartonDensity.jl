@@ -16,11 +16,14 @@ function plot_model_space(pdf_params::PDFParameters, samples; xmin::Float64=1e-3
 
     for i in 1:nsamples
 
+        θ_i = get_scaled_θ(samples.v.λ_u[i], samples.v.K_u[i], samples.v.λ_d[i],
+                           samples.v.K_d[i], Vector(samples.v.θ_tmp[i]))
+        
         pdf_params_i = PDFParameters(λ_u=samples.v.λ_u[i], K_u=samples.v.K_u[i], 
                                      λ_d=samples.v.λ_d[i], K_d=samples.v.K_d[i],
                                      λ_g1=samples.v.λ_g1[i], λ_g2=samples.v.λ_g2[i],
                                      K_g=samples.v.K_g[i], λ_q=samples.v.λ_q[i], 
-                                     θ=Vector(samples.v.θ[i]))
+                                     θ=θ_i)
         p = plot!(x_grid, [xtotx(x, pdf_params_i) for x in x_grid], color=sample_color, lw=3,
                   alpha=0.01, label="")
         
@@ -57,11 +60,15 @@ function plot_data_space(pdf_params::PDFParameters, sim_data::Dict{String, Any},
         counts_obs_ep_i = zeros(UInt64, nbins)
         counts_obs_em_i = zeros(UInt64, nbins)
 
+        θ_i = get_scaled_θ(samples.v.λ_u[i], samples.v.K_u[i], samples.v.λ_d[i],
+                           samples.v.K_d[i], Vector(samples.v.θ_tmp[i]))
+
+
         pdf_params_i = PDFParameters(λ_u=samples.v.λ_u[i], K_u=samples.v.K_u[i], 
                                      λ_d=samples.v.λ_d[i], K_d=samples.v.K_d[i],
                                      λ_g1=samples.v.λ_g1[i], λ_g2=samples.v.λ_g2[i],
                                      K_g=samples.v.K_g[i], λ_q=samples.v.λ_q[i], 
-                                     θ=Vector(samples.v.θ[i]))
+                                     θ=θ_i)
         
         counts_pred_ep_i, counts_pred_em_i = forward_model(pdf_params_i, qcdnum_params, 
                                                            splint_params, quark_coeffs)
