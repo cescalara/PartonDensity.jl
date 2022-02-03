@@ -29,7 +29,7 @@ Random.seed!(seed) # for reproducibility
 pdf_params = PDFParameters(λ_u=0.7, K_u=4.0, λ_d=0.5, K_d=6.0,
     λ_g1=0.7, λ_g2=-0.4, K_g=6.0, λ_q=-0.5, weights=[1, 0.5, 0.3, 0.2, 0.1, 0.1, 0.1]);
 
-#plot_input_pdfs(pdf_params)
+plot_input_pdfs(pdf_params)
 
 # ### Go from PDFs to counts in ZEUS detector bins
 #
@@ -89,7 +89,7 @@ pd_write_sim("output/simulation.h5", pdf_params, sim_data)
 # For now, let's try relatively narrow priors centred on the true values.
 
 prior = NamedTupleDist(
-    θ = Dirichlet([1, 0.5, 0.3, 0.2, 0.1, 0.1, 0.1]),
+    θ_tmp = Dirichlet([1, 0.5, 0.3, 0.2, 0.1, 0.1, 0.1]),
     λ_u = Truncated(Normal(pdf_params.λ_u, 0.2), 0, 1), 
     K_u = Truncated(Normal(pdf_params.K_u, 1), 2, 10),
     λ_d = Truncated(Normal(pdf_params.λ_d, 0.2), 0, 1), 
@@ -116,9 +116,12 @@ likelihood = let d = sim_data
 
     logfuncdensity(function (params)
 
+            θ = get_scaled_θ(params.λ_u, params.K_u, params.λ_d, 
+                             params.K_d, Vector(params.θ_tmp))
+                   
             pdf_params = PDFParameters(λ_u=params.λ_u, K_u=params.K_u, λ_d=params.λ_d,
                                        K_d=params.K_d, λ_g1=params.λ_g1, λ_g2=params.λ_g2,
-                                       K_g=params.K_g, λ_q=params.λ_q, θ=Vector(params.θ))
+                                       K_g=params.K_g, λ_q=params.λ_q, θ=θ)
 
             @critical counts_pred_ep, counts_pred_em = forward_model(pdf_params, 
                 qcdnum_params, splint_params, quark_coeffs);
@@ -191,10 +194,11 @@ vline!([pdf_params.λ_u], color="black", label="truth", lw=3)
 # exist for doing just this.
 
 # Using BAT recipe
-function wrap_xtotx(p::NamedTuple{(:K_d, :K_g, :K_u, :θ, :λ_d, :λ_g1, 
+function wrap_xtotx(p::NamedTuple{(:K_d, :K_g, :K_u, :θ_tmp, :λ_d, :λ_g1, 
                                    :λ_g2, :λ_q, :λ_u)}, x::Real)
+    θ = get_scaled_θ(p.λ_u, p.K_u, p.λ_d, p.K_d, Vector(p.θ_tmp))
     pdf_params = PDFParameters(λ_u=p.λ_u, K_u=p.K_u, λ_d=p.λ_d, K_d=p.K_d, λ_g1=p.λ_g1, 
-        λ_g2=p.λ_g2, K_g=p.K_g, λ_q=p.λ_q, θ=p.θ)
+        λ_g2=p.λ_g2, K_g=p.K_g, λ_q=p.λ_q, θ=θ)
     return xtotx(x, pdf_params)
 end
 
