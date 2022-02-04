@@ -17,13 +17,13 @@ const sf = SpecialFunctions;
 #
 # The gluon distributions are parametrised by
 # ```math
-# x g(x) = A_{g1} x^{\lambda_{g1}}(1-x)^5 + A_{g2} x^{\lambda_g2}(1-x)^{K_g}.
+# x g(x) = A_{g1} x^{\lambda_g1}(1-x)^{K_g} + A_{g2} x^{\lambda_{g2}}(1-x)^5.
 # ```
 #
 # We also want to impose 
 #
 # ```math
-# \int_0^1 x g(x) dx = A_{g1} B(\lambda_{g1}+1, 1+5) + A_{g2} B(\lambda_{g2}+1, K_g+1)= 1,
+# \int_0^1 x g(x) dx = A_{g1} B(\lambda_{g1}+1, K_g+1) + A_{g2} B(\lambda_{g2}+1, 1+5) = 1,
 # ```
 #
 # with B(.,.) the Beta function.
