@@ -9,6 +9,7 @@ using BAT, DensityInterface
 using PartonDensity
 using QCDNUM
 using Plots, Random, Distributions, ValueShapes, ParallelProcessingTools
+using StatsBase, LinearAlgebra
 
 # ## Simulate some data
 
@@ -186,6 +187,24 @@ plot(
     legend=:topleft
 )
 vline!([pdf_params.λ_u], color="black", label="truth", lw=3)
+
+# If we want to compare the momentum weights, we must transform
+# from θ_tmp to θ, as shown below. Here, we transform using
+# `get_scaled_θ()`, convert the result to a matrix, and
+# access the ith weight with the integer `i`
+
+θ = [get_scaled_θ(λ_u, K_u, λ_d, K_d, Vector(θ_tmp)) for (λ_u, K_u, λ_d, K_d, θ_tmp)
+     in zip(samples.v.λ_u, samples.v.K_u, samples.v.λ_d, samples.v.K_d, samples.v.θ_tmp)];
+
+θ = transpose(reduce(vcat,transpose.(θ)))
+
+i = 1
+hist = append!(Histogram(0:0.02:1), θ[i,:])
+plot(
+    normalize(hist, mode=:density),
+    st = :steps, label="Marginal posterior"
+)
+vline!([pdf_params.θ[i]], color="black", label="truth", lw=3)
 
 # Rather than making a large plot 15 different marginals,
 # it can be more useful to visualise the posterior distribution
