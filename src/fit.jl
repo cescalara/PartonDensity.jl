@@ -16,7 +16,9 @@ function plot_model_space(pdf_params::PDFParameters, samples; xmin::Float64=1e-3
     p = plot(x_grid, [xtotx(x, pdf_params) for x in x_grid], color=truth_color,
              lw=3, label="Truth")
 
-    sub_samples = bat_sample(samples, OrderedResampling(nsamples=nsamples)).result
+    #sub_samples = bat_sample(samples, OrderedResampling(nsamples=nsamples)).result
+    sub_samples = samples
+    n = size(samples.v)
     
     for i in 1:nsamples
 
@@ -56,10 +58,11 @@ function plot_data_space(pdf_params::PDFParameters, sim_data::Dict{String, Any},
 
     p1 = scatter(1:nbins, sim_data["counts_obs_ep"], label="Observed counts (eP)", 
                  color=ep_color, lw=3)
-    p2 = scatter(1:nbins, sim_data["counts_obs_ep"], label="Observed counts (eM)", 
+    p2 = scatter(1:nbins, sim_data["counts_obs_em"], label="Observed counts (eM)", 
                  color=em_color, lw=3)
 
-    sub_samples = bat_sample(samples, OrderedResampling(nsamples=nsamples)).result
+    #sub_samples = bat_sample(samples, OrderedResampling(nsamples=nsamples)).result
+    sub_samples = samples
     
     for i in 1:nsamples
         
