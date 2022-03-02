@@ -318,19 +318,20 @@ likelihood = let d = data, f = xtotx
 end
 
 # Run fit
+#
+# The next steps are commented for now as this hangs for some
+# reason in the doc builds...
 
-posterior = PosteriorDensity(likelihood, prior);
-samples = bat_sample(
-    posterior, 
-    MCMCSampling(mcalg=MetropolisHastings(), nsteps=10^4, nchains=2)
-).result;
+#posterior = PosteriorDensity(likelihood, prior);
+#samples = bat_sample(posterior, MCMCSampling(mcalg=MetropolisHastings(), nsteps=10^4, nchains=2)).result;
 
 # ### Visualise results
 
-x_grid = range(0, stop=1, length=50)
-sub_samples = bat_sample(samples, OrderedResampling(nsamples=200)).result
+#x_grid = range(0, stop=1, length=50)
+#sub_samples = bat_sample(samples, OrderedResampling(nsamples=200)).result
 
-plot()
+#plot()
+"""
 for i in eachindex(sub_samples)
     s = sub_samples[i].v
     xt = [xtotx(x, s.λ_u, s.K_u, s.λ_d, s.K_d, 
@@ -338,14 +339,13 @@ for i in eachindex(sub_samples)
     plot!(bin_centers, xt .* bin_widths * N, alpha=0.1, lw=3, 
         color="darkorange", label="")
 end
+"""
+#xt = [xtotx(x, pdf_params) for x in bin_centers]
+#plot!(bin_centers, xt .* bin_widths * N, alpha=0.7, label="Expected", lw=3, color="red")
 
-xt = [xtotx(x, pdf_params) for x in bin_centers]
-plot!(bin_centers, xt .* bin_widths * N, alpha=0.7, 
-    label="Expected", lw=3, color="red")
-
-scatter!(bin_centers, observed_counts, lw=3, label="Observed", color="black")
-
-plot!(xlabel="x")
+#scatter!(bin_centers, observed_counts, lw=3, label="Observed", color="black")
+#plot!(xlabel="x")
+nothing
 
 # These first results are promising. We can also try changing the input
 # parameters and priors to explore the performance of the fit.
