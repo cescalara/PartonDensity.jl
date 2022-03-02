@@ -16,11 +16,9 @@ function plot_model_space(pdf_params::PDFParameters, samples; xmin::Float64=1e-3
     p = plot(x_grid, [xtotx(x, pdf_params) for x in x_grid], color=truth_color,
              lw=3, label="Truth")
 
-    #sub_samples = bat_sample(samples, OrderedResampling(nsamples=nsamples)).result
-    sub_samples = samples
-    n = size(samples.v)
+    sub_samples = bat_sample(samples, OrderedResampling(nsamples=nsamples)).result
     
-    for i in 1:nsamples
+    for i in eachindex(sub_samples)
 
         θ_i = get_scaled_θ(sub_samples.v.λ_u[i], sub_samples.v.K_u[i], sub_samples.v.λ_d[i],
                            sub_samples.v.K_d[i], Vector(sub_samples.v.θ_tmp[i]))
@@ -61,10 +59,9 @@ function plot_data_space(pdf_params::PDFParameters, sim_data::Dict{String, Any},
     p2 = scatter(1:nbins, sim_data["counts_obs_em"], label="Observed counts (eM)", 
                  color=em_color, lw=3)
 
-    #sub_samples = bat_sample(samples, OrderedResampling(nsamples=nsamples)).result
-    sub_samples = samples
+    sub_samples = bat_sample(samples, OrderedResampling(nsamples=nsamples)).result
     
-    for i in 1:nsamples
+    for i in eachindex(sub_samples)
         
         counts_obs_ep_i = zeros(UInt64, nbins)
         counts_obs_em_i = zeros(UInt64, nbins)
