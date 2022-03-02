@@ -4,10 +4,51 @@ using Plots, Random
 const sf = SpecialFunctions
 
 export get_scaled_θ
-export PDFParameters
+export DirichletPDFParams, ValencePDFParams
 export plot_input_pdfs, int_xtotx, xtotx
 export get_input_pdf_func
 export input_pdf_map
+
+abstract type AbstractPDFParams
+
+"""
+    struct DirichletPDFParams <: AbstractPDFParams
+
+Full Dirichlet specification of input PDF parameters.
+"""
+@with_kw struct DirichletPDFParams <: AbstractPDFParams
+    seed::Integer = 0
+    weights::Vector{Float64} = [1, 1, 1, 1, 1, 1, 1, 1, 1]
+    θ::Vector{Float64} = rand(MersenneTwister(seed), Dirichlet(weights)) K_u::Float64
+    K_u::Float64
+    λ_u::Float64 = θ[1] * (K_u + 1) * (2 - θ[1])
+    K_d::Float64
+    λ_d::Float64 = θ[2] * (K_d + 1) * (1 - θ[2])
+    λ_g1::Float64
+    λ_g2::Float64
+    K_g::Float64
+    λ_q::Float64   
+end
+
+
+"""
+    struct ValencePDFParams <: AbstractPDFParams
+
+Valence specification of input PDF parameters.
+"""
+@with_kw struct ValencePDFParams
+    λ_u::Float64
+    K_u::Float64
+    λ_d::Float64
+    K_d::Float64
+    λ_g1::Float64
+    λ_g2::Float64
+    K_g::Float64
+    λ_q::Float64
+    seed::Integer = 0
+    weights::Vector{Float64} = [1, 1, 1, 1, 1, 1, 1]
+    θ::Vector{Float64} = get_dirichlet_samples(λ_u, K_u, λ_d, K_d, seed, weights)
+end
 
 
 """
@@ -51,25 +92,6 @@ function get_dirichlet_samples(λ_u::Float64, K_u::Float64, λ_d::Float64,
     
 end
 
-
-"""
-    PDFParameters
-
-Parameters of the input PDFs.
-"""
-@with_kw struct PDFParameters
-    λ_u::Float64
-    K_u::Float64
-    λ_d::Float64
-    K_d::Float64
-    λ_g1::Float64
-    λ_g2::Float64
-    K_g::Float64
-    λ_q::Float64
-    seed::Integer = 0
-    weights::Vector{Float64} = [1, 1, 1, 1, 1, 1, 1]
-    θ::Vector{Float64} = get_dirichlet_samples(λ_u, K_u, λ_d, K_d, seed, weights)
-end
 
 """
     x_uv_x(x, λ_u, K_u)
@@ -171,16 +193,16 @@ function xtotx(x::Float64, λ_u::Float64, K_u::Float64, λ_d::Float64, K_d::Floa
 end
 
 """
-    x_total_x(x, hyper_params)
+    x_total_x(x, pdf_params)
 
 Total momentum density.
 """
-function xtotx(x::Float64, hyper_params::PDFParameters)
+function xtotx(x::Float64, pdf_params::AbstractPDFParams)
 
-    hp = hyper_params
+    pdf = pdf_params 
 
-    return xtotx(x, hp.λ_u, hp.K_u, hp.λ_d, hp.K_d, hp.λ_g1,
-                 hp.λ_g2, hp.K_g, hp.λ_q, hp.θ)
+    return xtotx(x, pdf.λ_u, pdf.K_u, pdf.λ_d, pdf.K_d, pdf.λ_g1,
+                 pdf.λ_g2, pdf.K_g, pdf.λ_q, pdf.θ)
 end
 
 """
@@ -224,16 +246,16 @@ function int_xtotx(λ_u::Float64, K_u::Float64, λ_d::Float64, K_d::Float64,
 end
 
 """
-    int_xtotx(hyper_params)
+    int_xtotx(pdf_params)
 
 Total integrated momentum density. Should equal 1.
 """
-function int_xtotx(hyper_params::PDFParameters)
+function int_xtotx(pdf_params::AbstractPDFParams)
 
-    hp = hyper_params
+    pdf = pdf_params
 
-    result = int_xtotx(hp.λ_u, hp.K_u, hp.λ_d, hp.K_d,
-                       hp.λ_g1, hp.λ_g2, hp.K_g, hp.λ_q, hp.θ)
+    result = int_xtotx(pdf.λ_u, pdf.K_u, pdf.λ_d, pdf.K_d,
+                       pdf.λ_g1, pdf.λ_g2, pdf.K_g, pdf.λ_q, pdf.θ)
     
     return result
 end
