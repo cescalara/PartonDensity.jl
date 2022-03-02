@@ -273,14 +273,14 @@ data["bin_widths"] = bin_widths;
 # Prior
 
 prior = NamedTupleDist(
-    θ = Dirichlet([1, 1, 1, 1, 1, 1, 1]),
-    λ_u = Truncated(Normal(pdf_params.λ_u, 0.1), 0, 1), #  Uniform(0, 1),
-    K_u = Uniform(2, 6),
-    λ_d = Truncated(Normal(pdf_params.λ_d, 0.1), 0, 1), # Uniform(0, 1),
-    K_d = Uniform(2, 8),
-    λ_g1 = Uniform(0, 1), 
-    λ_g2 = Uniform(-1, 0), 
-    K_g =  Uniform(2, 8),
+    θ = Dirichlet(pdf_params.weights),
+    λ_u = Truncated(Normal(pdf_params.λ_u, 0.5), 0, 1), #  Uniform(0, 1),
+    K_u = Truncated(Normal(pdf_params.K_u, 1), 2, 10),
+    λ_d = Truncated(Normal(pdf_params.λ_d, 0.5), 0, 1), # Uniform(0, 1),
+    K_d = Truncated(Normal(pdf_params.K_d, 1), 2, 10),
+    λ_g1 = Truncated(Normal(pdf_params.λ_g1, 1), 0, 1), 
+    λ_g2 = Truncated(Normal(pdf_params.λ_g2, 1), -1, 0), 
+    K_g = Truncated(Normal(pdf_params.K_g, 1), 2, 10),
     λ_q = Truncated(Normal(pdf_params.λ_q, 0.1), -1, 0),
 );
 
