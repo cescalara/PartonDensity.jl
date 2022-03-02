@@ -8,6 +8,8 @@ using Plots, SpecialFunctions, Printf, Random, ValueShapes
 using BAT, DensityInterface
 const sf = SpecialFunctions;
 
+gr(fmt=:png); 
+
 # ## Simple two-component model: gluons 
 #
 # First we start with a simpler two-component model, and show all the
@@ -67,9 +69,9 @@ x_grid = range(0, stop=1, length=50)
 xg1 = A_g1 * x_grid.^λ_g1 .* (1 .- x_grid).^K_g
 xg2 = A_g2 * x_grid.^λ_g2 .* (1 .- x_grid).^5
 
-plot!(x_grid, [xg1x(x, λ_g1, K_g, θ[1]) for x in x_grid], 
+plot(x_grid, [xg1x(x, λ_g1, K_g, θ[1]) for x in x_grid], 
       alpha=0.7, label="x g1(x)", lw=3, color="green")
-plot(x_grid, [xg2x(x, λ_g2, θ[2]) for x in x_grid], 
+plot!(x_grid, [xg2x(x, λ_g2, θ[2]) for x in x_grid], 
      alpha=0.7, label="x g2(x)", lw=3, color="blue")
 plot!(x_grid, [xgx(x, λ_g1, λ_g2, K_g, θ) for x in x_grid],
       alpha=0.7, label="x g1(x) + x g2(x)", lw=3, color="red")
@@ -181,11 +183,11 @@ SampledDensity(posterior, samples)
 # We can (roughly) check how well the fit reconstructs the truth with a simple comparison.
 
 x_grid = range(0, stop=1, length=50)
+sub_samples = bat_sample(samples, OrderedResampling(nsamples=200)).result
 
 plot()
-for i in 1:200
-    random_ind = rand(1:5000)
-    s = samples[random_ind].v
+for i in eachindex(sub_samples)
+    s = sub_samples[i].v
     xg = [xgx(x, s.λ_g1, s.λ_g2, s.K_g, s.θ) for x in bin_centers]
     plot!(bin_centers, xg .* bin_widths * N, alpha=0.1, lw=3, 
         color="darkorange", label="",)
@@ -296,6 +298,9 @@ likelihood = let d = data, f = xtotx
             xt = f(bin_centers[i], params.λ_u, params.K_u, params.λ_d, params.K_d, 
                     params.λ_g1, params.λ_g2, params.K_g, params.λ_q, Vector(params.θ))
             expected_counts = bin_widths[i] * xt * N
+            if expected_counts < 0
+                expected_counts = 0
+            end
             logpdf(Poisson(expected_counts), observed_counts[i])
         end
 
@@ -314,17 +319,17 @@ end
 posterior = PosteriorDensity(likelihood, prior);
 samples = bat_sample(
     posterior, 
-    MCMCSampling(mcalg=MetropolisHastings(), nsteps=10^4, nchains=4)
+    MCMCSampling(mcalg=MetropolisHastings(), nsteps=10^4, nchains=2)
 ).result;
 
 # ### Visualise results
 
 x_grid = range(0, stop=1, length=50)
+sub_samples = bat_sample(samples, OrderedResampling(nsamples=200)).result
 
 plot()
-for i in 1:200
-    random_ind = rand(1:5000)
-    s = samples[random_ind].v
+for i in eachindex(sub_samples)
+    s = sub_samples[i].v
     xt = [xtotx(x, s.λ_u, s.K_u, s.λ_d, s.K_d, 
             s.λ_g1, s.λ_g2, s.K_g, s.λ_q, Vector(s.θ)) for x in bin_centers]
     plot!(bin_centers, xt .* bin_widths * N, alpha=0.1, lw=3, 
