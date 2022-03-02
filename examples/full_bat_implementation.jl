@@ -11,6 +11,8 @@ using QCDNUM
 using Plots, Random, Distributions, ValueShapes, ParallelProcessingTools
 using StatsBase, LinearAlgebra
 
+gr(fmt=:png); 
+
 # ## Simulate some data
 
 seed = 42
