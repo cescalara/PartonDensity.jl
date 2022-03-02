@@ -83,6 +83,9 @@ plot!(xlabel="x")
 # and multiplying by some factor.
 # Then, plot the model and data to compare.
 
+seed = 42
+Random.seed!(seed) # for reproducibility
+
 bins = 0.0:0.05:1.0
 bin_widths = bins[2:end] - bins[1:end-1]
 bin_centers = (bins[1:end-1] + bins[2:end]) / 2
@@ -299,7 +302,7 @@ likelihood = let d = data, f = xtotx
                     params.λ_g1, params.λ_g2, params.K_g, params.λ_q, Vector(params.θ))
             expected_counts = bin_widths[i] * xt * N
             if expected_counts < 0
-                expected_counts = 0
+                expected_counts = 1e-3
             end
             logpdf(Poisson(expected_counts), observed_counts[i])
         end
