@@ -29,8 +29,8 @@ Random.seed!(seed) # for reproducibility
 # See the *Input PDF parametrisation and priors* example for more information on the
 # definition of the input PDFs.
 
-pdf_params = PDFParameters(λ_u=0.7, K_u=4.0, λ_d=0.5, K_d=6.0,
-    λ_g1=0.7, λ_g2=-0.4, K_g=6.0, λ_q=-0.5, weights=[1, 0.5, 0.3, 0.2, 0.1, 0.1, 0.1]);
+pdf_params = PDFParameters(λ_u=0.64, K_u=3.38, λ_d=0.67, K_d=4.73,
+    λ_g1=-0.59, λ_g2=-0.63, K_g=4.23, λ_q=-0.23, weights=[5., 5., 1., 1., 1., 0.5, 0.5]);
 
 plot_input_pdfs(pdf_params)
 
@@ -92,13 +92,13 @@ pd_write_sim("output/simulation.h5", pdf_params, sim_data)
 # For now, let's try relatively narrow priors centred on the true values.
 
 prior = NamedTupleDist(
-    θ_tmp = Dirichlet([1, 0.5, 0.3, 0.2, 0.1, 0.1, 0.1]),
-    λ_u = Truncated(Normal(pdf_params.λ_u, 0.2), 0, 1), 
+    θ_tmp = Dirichlet(pdf_params.weights),
+    λ_u = Truncated(Normal(pdf_params.λ_u, 1), 0, 1), 
     K_u = Truncated(Normal(pdf_params.K_u, 1), 2, 10),
-    λ_d = Truncated(Normal(pdf_params.λ_d, 0.2), 0, 1), 
+    λ_d = Truncated(Normal(pdf_params.λ_d, 1), 0, 1), 
     K_d = Truncated(Normal(pdf_params.K_d, 1), 2, 10),
-    λ_g1 = Truncated(Normal(pdf_params.λ_g1, 0.2), 0, 1),
-    λ_g2 = Truncated(Normal(pdf_params.λ_g2, 0.2), -1, 0),
+    λ_g1 = Truncated(Normal(pdf_params.λ_g1, 1), -1, 0),
+    λ_g2 = Truncated(Normal(pdf_params.λ_g2, 1), -1, 0),
     K_g =  Truncated(Normal(pdf_params.K_g, 1), 2, 10),
     λ_q = Truncated(Normal(pdf_params.λ_q, 0.1), -1, 0),
 );
@@ -126,11 +126,22 @@ likelihood = let d = sim_data
                                        K_d=params.K_d, λ_g1=params.λ_g1, λ_g2=params.λ_g2,
                                        K_g=params.K_g, λ_q=params.λ_q, θ=θ)
 
-            @critical counts_pred_ep, counts_pred_em = forward_model(pdf_params, 
+            counts_pred_ep, counts_pred_em = @critical forward_model(pdf_params, 
                 qcdnum_params, splint_params, quark_coeffs);
 
             ll_value = 0.0
             for i in 1:nbins
+                
+                if counts_pred_ep[i] < 0
+                   #@warn "counts_pred_ep[i] < 0, setting to 0" i counts_pred_ep[i]
+                   counts_pred_ep[i] = 0
+                end
+
+                if counts_pred_em[i] < 0
+                   #@warn "counts_pred_em[i] < 0, setting to 0" i counts_pred_em[i]
+                   counts_pred_em[i] = 0
+                end
+                   
                 ll_value += logpdf(Poisson(counts_pred_ep[i]), counts_obs_ep[i])
                 ll_value += logpdf(Poisson(counts_pred_em[i]), counts_obs_em[i])
             end
@@ -141,19 +152,30 @@ end
 
 # We can now run the MCMC sampler. We will start by using the
 # Metropolis-Hastings algorithm as implemented in `BAT.jl`.
-# To demonstrate, we run a short chain of 10^3 iterations, which
-# should take around 10 minutes.
+# To get reasonable results, we need to run the sampler for a
+# long time (several hours). To save time in this demo, we will
+# work with a ready-made results file. To actually run the sampler,
+# simply uncomment the code below.
 
-posterior = PosteriorDensity(likelihood, prior);
-samples = bat_sample(
-    posterior,
-    MCMCSampling(mcalg=MetropolisHastings(), nsteps=10^3, nchains=2)
-).result;
+#posterior = PosteriorDensity(likelihood, prior);
+#convergence = BrooksGelmanConvergence(threshold=1.3);
+#burnin = MCMCMultiCycleBurnin(max_ncycles=100);
 
-# Let's save the result for further analysis
+#samples = bat_sample(posterior, MCMCSampling(mcalg=MetropolisHastings(), nsteps=10^4, nchains=2)).result;
 
-import HDF5
-bat_write("output/results.h5", samples)
+# Alternatively, we could also try a nested sampling approach
+# here for comparison. This is easily done thanks to the
+# interface of `BAT.jl`, you will just need to add the
+# `NestedSamplers.jl` package.
+
+#import NestedSamplers
+#samples = bat_sample(posterior, EllipsoidalNestedSampling()).result
+
+# If you run the sampler, be sure to save
+# the results for further analysis
+
+#import HDF5
+#bat_write("output/results.h5", samples)
 
 # ## Analysing the results
 #
@@ -192,7 +214,7 @@ vline!([pdf_params.λ_u], color="black", label="truth", lw=3)
 
 # If we want to compare the momentum weights, we must transform
 # from θ_tmp to θ, as shown below. Here, we transform using
-# `get_scaled_θ()`, convert the result to a matrix, and
+# ```get_scaled_θ()```, convert the result to a matrix, and
 # access the ith weight with the integer `i`
 
 θ = [get_scaled_θ(λ_u, K_u, λ_d, K_d, Vector(θ_tmp)) for (λ_u, K_u, λ_d, K_d, θ_tmp)
@@ -220,15 +242,15 @@ function wrap_xtotx(p::NamedTuple{(:K_d, :K_g, :K_u, :θ_tmp, :λ_d, :λ_g1,
     θ = get_scaled_θ(p.λ_u, p.K_u, p.λ_d, p.K_d, Vector(p.θ_tmp))
     pdf_params = PDFParameters(λ_u=p.λ_u, K_u=p.K_u, λ_d=p.λ_d, K_d=p.K_d, λ_g1=p.λ_g1, 
         λ_g2=p.λ_g2, K_g=p.K_g, λ_q=p.λ_q, θ=θ)
-    return xtotx(x, pdf_params)
+    return log(xtotx(x, pdf_params))
 end
 
 x_grid = range(1e-3, stop=1, length=50)
 plot(x_grid, wrap_xtotx, samples, colors=[:skyblue4, :skyblue3, :skyblue1], 
      legend=:topright)
-plot!(x_grid, [xtotx(x, pdf_params) for x in x_grid], color="black", lw=3, 
+plot!(x_grid, [log(xtotx(x, pdf_params)) for x in x_grid], color="black", lw=3, 
       label="Truth", linestyle=:dash)
-plot!(xaxis=:log)
+plot!(ylabel="log(xtotx)")
 
 # Using `PartonDensity.jl`
 plot_model_space(pdf_params, samples)
