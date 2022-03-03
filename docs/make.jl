@@ -27,7 +27,7 @@ Examples = "Examples" => ["pdf_parametrisation.md",
 
 API = "API" => "api.md"
 
-PAGES = [Introduction, Examples, API]
+PAGES = [Introduction, Examples, API] 
 
 makedocs(modules=[PartonDensity], sitename="PartonDensity.jl", pages=PAGES)
 
