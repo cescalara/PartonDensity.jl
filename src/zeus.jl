@@ -11,12 +11,14 @@ Based on C++ code by R. Aggarwal.
 """
 
 include("../data/zeus_transfer_matrix.jl")
+include("../data/zeus_bin_edges.jl")
 
 export get_pred_N
 export get_data_events
 export get_TM_elements
 export get_K_elements
 export get_L_data
+export get_bin_info
 
 export q2bins_M_begin
 export q2bins_M_end
@@ -86,6 +88,24 @@ function get_pred_N(Integ_xsec, eMPp)
 
     return xsec_pred;
 
+end
+
+"""
+    get_bin_info(n)
+
+Get the bin egdes of the ZEUS 
+detector space for a given 
+bin number, `n`.
+"""
+function get_bin_info(n::Integer)
+
+    if n < 1 || n > 153
+        error("Bin number n should be [1, 153]")
+    end
+
+    @info "ZEUS detector bin" n BinQ2low[n] BinQ2high[n] Binxlow[n] Binxhigh[n]
+
+    return ([BinQ2low[n], BinQ2high[n]], [Binxlow[n], Binxhigh[n]])
 end
 
 
