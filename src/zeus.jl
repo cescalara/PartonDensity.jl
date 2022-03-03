@@ -100,7 +100,7 @@ bin number, `n`.
 function get_bin_info(n::Integer)
 
     if n < 1 || n > 153
-        error("Bin number n should be [1, 153]")
+        @error "Bin number n should be [1, 153]"
     end
 
     @info "ZEUS detector bin" n BinQ2low[n] BinQ2high[n] Binxlow[n] Binxhigh[n]
