@@ -24,6 +24,10 @@ jobs:
             ${{ runner.os }}-test-${{ env.cache-name }}-
             ${{ runner.os }}-test-
             ${{ runner.os }}-
+      - name: Install dependencies
+        run: |
+          julia -e 'using Pkg; Pkg.add(url="https://github.com/bat/BAT.jl.git")'
+          julia -e 'using Pkg; Pkg.add(url="https://github.com/cescalara/QCDNUM.jl.git")'
       - uses: julia-actions/julia-buildpkg@latest
       - uses: julia-actions/julia-runtest@latest
       - uses: julia-actions/julia-processcoverage@v1
