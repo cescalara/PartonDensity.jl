@@ -228,7 +228,7 @@ using PartonDensity
 
 #
 
-pdf_params = PDFParameters(λ_u=0.7, K_u=4.0, λ_d=0.5, K_d=6.0, 
+pdf_params = ValencePDFParams(λ_u=0.7, K_u=4.0, λ_d=0.5, K_d=6.0, 
                            λ_g1=0.7, λ_g2=-0.4, K_g=6.0, λ_q=-0.5,
                            weights=[1, 0.5, 0.3, 0.2, 0.1, 0.1, 0.1])
 
