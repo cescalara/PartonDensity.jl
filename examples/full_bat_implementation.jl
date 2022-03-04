@@ -29,8 +29,8 @@ Random.seed!(seed) # for reproducibility
 # See the *Input PDF parametrisation and priors* example for more information on the
 # definition of the input PDFs.
 
-pdf_params = PDFParameters(λ_u=0.64, K_u=3.38, λ_d=0.67, K_d=4.73,
-    λ_g1=-0.59, λ_g2=-0.63, K_g=4.23, λ_q=-0.23, weights=[5., 5., 1., 1., 1., 0.5, 0.5]);
+pdf_params = ValencePDFParams(λ_u=0.64, K_u=3.38, λ_d=0.67, K_d=4.73,
+                              λ_g1=-0.59, λ_g2=-0.63, K_g=4.23, λ_q=-0.23, weights=[5., 5., 1., 1., 1., 0.5, 0.5]);
 
 plot_input_pdfs(pdf_params)
 
@@ -122,9 +122,9 @@ likelihood = let d = sim_data
             θ = get_scaled_θ(params.λ_u, params.K_u, params.λ_d, 
                              params.K_d, Vector(params.θ_tmp))
                    
-            pdf_params = PDFParameters(λ_u=params.λ_u, K_u=params.K_u, λ_d=params.λ_d,
-                                       K_d=params.K_d, λ_g1=params.λ_g1, λ_g2=params.λ_g2,
-                                       K_g=params.K_g, λ_q=params.λ_q, θ=θ)
+            pdf_params = ValencePDFParams(λ_u=params.λ_u, K_u=params.K_u, λ_d=params.λ_d,
+                                          K_d=params.K_d, λ_g1=params.λ_g1, λ_g2=params.λ_g2,
+                                          K_g=params.K_g, λ_q=params.λ_q, θ=θ)
 
             counts_pred_ep, counts_pred_em = @critical forward_model(pdf_params, 
                 qcdnum_params, splint_params, quark_coeffs);
@@ -240,7 +240,7 @@ vline!([pdf_params.θ[i]], color="black", label="truth", lw=3)
 function wrap_xtotx(p::NamedTuple{(:K_d, :K_g, :K_u, :θ_tmp, :λ_d, :λ_g1, 
                                    :λ_g2, :λ_q, :λ_u)}, x::Real)
     θ = get_scaled_θ(p.λ_u, p.K_u, p.λ_d, p.K_d, Vector(p.θ_tmp))
-    pdf_params = PDFParameters(λ_u=p.λ_u, K_u=p.K_u, λ_d=p.λ_d, K_d=p.K_d, λ_g1=p.λ_g1, 
+    pdf_params = ValencePDFParams(λ_u=p.λ_u, K_u=p.K_u, λ_d=p.λ_d, K_d=p.K_d, λ_g1=p.λ_g1, 
         λ_g2=p.λ_g2, K_g=p.K_g, λ_q=p.λ_q, θ=θ)
     return log(xtotx(x, pdf_params))
 end
