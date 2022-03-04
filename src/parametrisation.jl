@@ -3,8 +3,9 @@ using Parameters, Distributions
 using Plots, Random
 const sf = SpecialFunctions
 
-export get_scaled_θ
 export DirichletPDFParams, ValencePDFParams
+export DIRICHLET_TYPE, VALENCE_TYPE
+export get_scaled_θ
 export plot_input_pdfs, int_xtotx, xtotx
 export get_input_pdf_func
 export input_pdf_map
