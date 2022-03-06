@@ -161,7 +161,7 @@ end
 #convergence = BrooksGelmanConvergence(threshold=1.3);
 #burnin = MCMCMultiCycleBurnin(max_ncycles=100);
 
-#samples = bat_sample(posterior, MCMCSampling(mcalg=MetropolisHastings(), nsteps=10^4, nchains=2)).result;
+#samples = bat_sample(posterior, MCMCSampling(mcalg=MetropolisHastings(), nsteps=10^5, nchains=2)).result;
 
 # Alternatively, we could also try a nested sampling approach
 # here for comparison. This is easily done thanks to the
@@ -253,13 +253,13 @@ plot!(x_grid, [log(xtotx(x, pdf_params)) for x in x_grid], color="black", lw=3,
 plot!(ylabel="log(xtotx)")
 
 # Using `PartonDensity.jl`
-plot_model_space(pdf_params, samples)
+plot_model_space(pdf_params, samples, nsamples=500)
 
 # Alternatively, we can also visualise the implications of the fit
 # in the *data space*, as shown below. 
 
 plot_data_space(pdf_params, sim_data, samples, qcdnum_grid, qcdnum_params, 
-                splint_params, quark_coeffs)
+                splint_params, quark_coeffs, nsamples=500)
 
 # The first results seem promising, but these are really just first checks
 # and more work will have to be done to verify the method.
