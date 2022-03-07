@@ -98,7 +98,7 @@ end
     # Run forward model
     for pdf_params in pdf_params_list
 
-        counts_pred_ep, counts_pred_em = forward_model(dir_pdf_params, qcdnum_params, 
+        counts_pred_ep, counts_pred_em = forward_model(pdf_params, qcdnum_params, 
                                                        splint_params, quark_coeffs)
 
         @test all(counts_pred_ep .>= 0.0)
