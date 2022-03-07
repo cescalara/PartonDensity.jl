@@ -68,7 +68,7 @@ end
 
 Go from input PDF parameters to the expected number of events in bins.
 """
-function forward_model(pdf_params::PDFParameters, qcdnum_params::QCDNUMParameters,
+function forward_model(pdf_params::AbstractPDFParams, qcdnum_params::QCDNUMParameters,
                        splint_params::SPLINTParameters, quark_coeffs::QuarkCoefficients)
 
 
@@ -157,7 +157,7 @@ end
 
 Store the simulation truth and simulated data in an HDF5 file.
 """
-function pd_write_sim(file_name::String, pdf_params::PDFParameters, sim_data::Dict{String, Any})
+function pd_write_sim(file_name::String, pdf_params::AbstractPDFParams, sim_data::Dict{String, Any})
 
     h5open(file_name, "w") do fid
 
@@ -180,6 +180,7 @@ function pd_write_sim(file_name::String, pdf_params::PDFParameters, sim_data::Di
         truth_group["seed"] = pdf_params.seed
         truth_group["weights"] = pdf_params.weights
         truth_group["θ"] = pdf_params.θ
+        truth_group["param_type"] = pdf_params.param_type
         
     end
 
@@ -204,12 +205,30 @@ function pd_read_sim(file_name::String)
         end
         
         g = fid["truth"]
-        pdf_params = PDFParameters(λ_u=read(g["λ_u"]), K_u=read(g["K_u"]), 
-                                   λ_d=read(g["λ_d"]), K_d=read(g["K_d"]),
-                                   λ_g1=read(g["λ_g1"]), λ_g2=read(g["λ_g2"]),
-                                   K_g=read(g["K_g"]), λ_q=read(g["λ_q"]),
-                                   seed=read(g["seed"]), weights=read(g["weights"]),
-                                   θ=read(g["θ"]))
+        if read(g["param_type"]) == VALENCE_TYPE
+            
+            pdf_params = ValencePDFParams(λ_u=read(g["λ_u"]), K_u=read(g["K_u"]), 
+                                          λ_d=read(g["λ_d"]), K_d=read(g["K_d"]),
+                                          λ_g1=read(g["λ_g1"]), λ_g2=read(g["λ_g2"]),
+                                          K_g=read(g["K_g"]), λ_q=read(g["λ_q"]),
+                                          seed=read(g["seed"]), weights=read(g["weights"]),
+                                          θ=read(g["θ"]))
+            
+        elseif read(g["param_type"]) == DIRICHLET_TYPE
+
+            pdf_params = DirichletPDFParams(λ_u=read(g["λ_u"]), K_u=read(g["K_u"]), 
+                                            λ_d=read(g["λ_d"]), K_d=read(g["K_d"]),
+                                            λ_g1=read(g["λ_g1"]), λ_g2=read(g["λ_g2"]),
+                                            K_g=read(g["K_g"]), λ_q=read(g["λ_q"]),
+                                            seed=read(g["seed"]), weights=read(g["weights"]),
+                                            θ=read(g["θ"]))
+            
+        else
+
+            @error "PDF parametrisation not recognised."
+
+        end
+        
     end
 
     return pdf_params, sim_data

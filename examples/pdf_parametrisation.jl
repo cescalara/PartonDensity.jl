@@ -4,13 +4,13 @@
 # PDF shapes, as well as meaningful prior distributions that encode our knowledge
 # of the problem.
 #
-# In this notebook, we explore two different approaches:
+# In this notebook, and in the `PartonDensity` package, we explore two different approaches:
 # * *Full Dirichlet*
 # * *Valence shape + Dirichlet*
 #
-# In the end, it seems like the latter option makes more sense for us and is
-# therefore implemented elsewhere in the `PartonDensity` package.
-# We demonstrate why below.
+# We are still investigating which approach will be most
+# effective, and so both options are currently implemented,
+# as detailed below.
 
 using Distributions, Plots, SpecialFunctions, Printf
 const sf = SpecialFunctions;
@@ -20,8 +20,6 @@ const sf = SpecialFunctions;
 # A clean way to ensure the momentum sum rule would be to sample different
 # contributions of the momentrum density integral from a Dirichlet distribution,
 # then use these weights to set the parameters on the individual Beta distributions.
-# However, in practice this is non-trvial as we also want to fix the normalisation
-# of the *number densities* of the valance contributions.  
 
 # 9 components of decreasing importance
 
@@ -40,49 +38,40 @@ plot!(xlabel="I_i = A_i B_i")
 
 sum(data, dims=1)
 
-# But, it is non-trival to define valence params from this
+# But, it could be non-trivial to choose the Dirichlet weights for a
+# sensible prior, and connect to the physics of the problem.
 
 I = rand(dirichlet)
 
-# Valance u component
+# As we are more interested in `K_u` and `K_d` than `λ_u` and `λ_d`
+# for our high-x data, we can set the `λ`s according to the `K`s.
 
-λ_u = rand(Uniform(0, 1))
-K_u = rand(Uniform(0, 10))
+K_u = rand(Uniform(2, 10))
 
-# Integral of number density must = 2
+# Integral of number density must = 2, and integral of
+# momentum density must = `I[1]`. This implies the following:
 
-A_u = 2 / sf.beta(λ_u, K_u+1) 
+λ_u = (I[1] * (K_u + 1)) / (2 - I[1])
 
-# integral of momentum density can be fixed by I[1] 
+# Let's check this
 
-I_1 = A_u * sf.beta(λ_u+1, K_u+1);
+A_u = 2 / sf.beta(λ_u, K_u + 1)
 
-# Could use a root-finder to find K_u given I_1 and λ_u...
-# Could be nasty to sample from though... 
+I[1] ≈ A_u * sf.beta(λ_u + 1, K_u + 1)
 
-I_1 = 2 * (sf.beta(λ_u+1, K_u+1)/sf.beta(λ_u, K_u+1));
-
-using Roots
-
-function func_to_solve(K_u)
-    return I_1 - 2 * (sf.beta(λ_u+1, K_u+1) / sf.beta(λ_u, K_u+1))
-end
-
-K_u ≈ find_zero(func_to_solve, (0, 10), Bisection())
-
-# While this approach might be nice, there are two issues in practice:
-# * It is difficult to set sensible priors on $\lambda_u$ that imply priors on $K_u$, and similarly for $\lambda_d$ and $K_d$
-# * The problem is overconstrained and we hav to use a root finder. This is rather fragile, and could fail for certain parameter combinations, such as we might find in a fit.
-
+# While this approach might be nice, it could be hard to set priors on the shape
+# of the valence distributions, as the `λ_u` and `λ_d` are now derived parameters, dependent
+# on the specified Dirichlet weights and `K_u`/`K_d` values. However, sensible prior choices
+# could be made using e.g. prior predictive checks.
 
 # ## "Valence shape + Dirichlet" approach
 #
-# We can handle this more elegantly (maybe?) by specifying constraints on the
+# An alternative approach is to specify constraints on the
 # valence params through the shape of their Beta distributions, then using a
 # Dirichlet to specify the weights of the gluon and sea components. The problem
 # here is it isn't clear how to specify that the d contribution must be less than
 # the u contribution, but it is possible to do this indirectly through priors on
-# the shape parameters. This will however require some further investigation.
+# the shape parameters. This would however also require some further investigation.
 
 x = range(0, stop=1, length=50)
 
@@ -165,7 +154,8 @@ plot!(xlabel="x", legend=:bottomleft, xscale=:log, ylims=(1e-8, 10), yscale=:log
 #
 # We can start to visualise the type of PDFs that are allowed by the
 # combination of the choice of parametrisation and prior distributions
-# with some simple prior predictive checks, as done below...
+# with some simple prior predictive checks, as done below for the valence
+# style parametrisation...
 
 N = 100
 alpha = 0.03
@@ -227,15 +217,30 @@ plot!(xlabel="x", ylabel="x f(x)", xscale=:log, legend=false,
 
 # ## PDF Parametrisation interface
 #
-# `PartonDensity` provides a handy interface to the "Valence shape + Dirichlet" style parametrisation, as demonstrated here.
+# `PartonDensity` provides a handy interface to both the parametrisations through the
+# `DirichletPDFParams` and `ValencePDFParams` options.
 
 using PartonDensity
 
-hyper_params = PDFParameters(λ_u=0.7, K_u=4.0, λ_d=0.5, K_d=6.0, λ_g1=0.7, λ_g2=-0.4,
-                             K_g=6.0, λ_q=-0.5, seed=5, weights=[1, 0.5, 0.3, 0.2, 0.1, 0.1, 0.1]);
+# Let's try the Dirichlet specification...
 
-plot_input_pdfs(hyper_params)
+pdf_params = DirichletPDFParams(K_u=4.0, K_d=6.0, λ_g1=0.7, λ_g2=-0.4,
+                         K_g=6.0, λ_q=-0.5, seed=5,
+                         weights=[3., 1., 5., 5., 1., 1., 1., 0.5, 0.5]);
+
+plot_input_pdfs(pdf_params)
 
 #
 
-int_xtotx(hyper_params) ≈ 1
+int_xtotx(pdf_params) ≈ 1
+
+# And now the valence specification...
+
+pdf = ValencePDFParams(λ_u=0.7, K_u=4.0, λ_d=0.5, K_d=6.0, λ_g1=0.7, λ_g2=-0.4,
+                       K_g=6.0, λ_q=-0.5, seed=5, weights=[5., 5., 1., 1., 1., 0.5, 0.5]);
+
+plot_input_pdfs(pdf_params)
+
+#
+
+int_xtotx(pdf_params) ≈ 1

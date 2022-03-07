@@ -8,18 +8,20 @@ using QCDNUM, PartonDensity
 using Plots, Printf, NaNMath, Parameters
 
 # ## Define input PDFs
+# We can use `DirichletPDFParams` or `ValencePDFParams`, as long
+# as we do so according to the *PDF parametrisation and priors* docs.
 
-weights = [1, 0.5, 0.3, 0.2, 0.1, 0.1, 0.1]
-hyper_params = PDFParameters(λ_u=0.7, K_u=4.0, λ_d=0.5, K_d=6.0, λ_g1=0.7, λ_g2=-0.4,
-                             K_g=6.0, λ_q=-0.5, seed=5, weights=weights);
+weights = [3., 1., 5., 5., 1., 1., 1., 0.5, 0.5]
+pdf_params = DirichletPDFParams(K_u=4.0, K_d=6.0, λ_g1=0.7, λ_g2=-0.4,
+                                K_g=6.0, λ_q=-0.5, seed=5, weights=weights);
 
 # Plot the input PDFs
 
-plot_input_pdfs(hyper_params)
+plot_input_pdfs(pdf_params)
 
 # Sanity check that sum = 1
 
-int_xtotx(hyper_params) ≈ 1
+int_xtotx(pdf_params) ≈ 1
 
 # ## Define QCDNUM grids, weights and settings
 
@@ -63,7 +65,7 @@ nw = QCDNUM.zmfillw()
 
 # Get function and wrap with c-style pointer
 
-my_func = get_input_pdf_func(hyper_params)
+my_func = get_input_pdf_func(pdf_params)
 input_pdf = @cfunction(my_func, Float64, (Ref{Int32}, Ref{Float64}))
 
 # Find index of starting scale and evolve

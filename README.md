@@ -1,6 +1,8 @@
 # PartonDensity
 
 [![](https://img.shields.io/badge/docs-dev-blue.svg)](https://francescacapel.com/PartonDensity.jl/dev/) 
+![CI](https://github.com/cescalara/PartonDensity.jl/actions/workflows/Tests.yml/badge.svg)
+[![codecov](https://codecov.io/gh/cescalara/PartonDensity.jl/branch/main/graph/badge.svg?token=Q5PLHWXV3I)](https://codecov.io/gh/cescalara/PartonDensity.jl)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 A Bayesian approach to parton density extraction.
