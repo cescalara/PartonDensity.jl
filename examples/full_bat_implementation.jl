@@ -30,7 +30,7 @@ Random.seed!(seed) # for reproducibility
 # definition of the input PDFs.
 
 pdf_params = ValencePDFParams(λ_u=0.64, K_u=3.38, λ_d=0.67, K_d=4.73,
-                              λ_g1=-0.59, λ_g2=-0.63, K_g=4.23, λ_q=-0.23, weights=[5., 5., 1., 1., 1., 0.5, 0.5]);
+                              λ_g1=0.50, λ_g2=-0.63, K_g=4.23, λ_q=-0.23, weights=[5., 5., 1., 1., 1., 0.5, 0.5]);
 
 plot_input_pdfs(pdf_params)
 
@@ -213,9 +213,9 @@ plot(
 vline!([pdf_params.λ_u], color="black", label="truth", lw=3)
 
 # If we want to compare the momentum weights, we must transform
-# from θ_tmp to θ, as shown below. Here, we transform using
-# ```get_scaled_θ()```, convert the result to a matrix, and
-# access the ith weight with the integer `i`
+# from `θ_tmp` to `θ`, as shown below. Here, we transform using
+# a helper function, convert the result to a matrix, and
+# access the ith weight with the integer `i`.
 
 θ = [get_scaled_θ(λ_u, K_u, λ_d, K_d, Vector(θ_tmp)) for (λ_u, K_u, λ_d, K_d, θ_tmp)
      in zip(samples.v.λ_u, samples.v.K_u, samples.v.λ_d, samples.v.K_d, samples.v.θ_tmp)];

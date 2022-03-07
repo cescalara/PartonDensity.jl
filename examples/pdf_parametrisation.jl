@@ -236,8 +236,8 @@ int_xtotx(pdf_params) ≈ 1
 
 # And now the valence specification...
 
-pdf = ValencePDFParams(λ_u=0.7, K_u=4.0, λ_d=0.5, K_d=6.0, λ_g1=0.7, λ_g2=-0.4,
-                       K_g=6.0, λ_q=-0.5, seed=5, weights=[5., 5., 1., 1., 1., 0.5, 0.5]);
+pdf_params = ValencePDFParams(λ_u=0.7, K_u=4.0, λ_d=0.5, K_d=6.0, λ_g1=0.7, λ_g2=-0.4,
+                              K_g=6.0, λ_q=-0.5, seed=5, weights=[5., 5., 1., 1., 1., 0.5, 0.5]);
 
 plot_input_pdfs(pdf_params)
 
