@@ -181,8 +181,8 @@ end
 #
 # First, let's load our simulation inputs and results
 
-pdf_params, sim_data = pd_read_sim("output/simulation.h5");
-samples = bat_read("output/results.h5").result;
+pdf_params, sim_data = pd_read_sim("output/demo_simulation.h5");
+samples = bat_read("output/demo_results.h5").result;
 
 # We can check some diagnostics using built in `BAT.jl`, such as the
 # effective sample size shown below
