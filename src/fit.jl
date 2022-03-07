@@ -169,7 +169,7 @@ function plot_model_space(pdf_params::AbstractPDFParams, samples; xmin::Float64=
 
     sub_samples = bat_sample(samples, OrderedResampling(nsamples=nsamples)).result
 
-    p = plot_model_space_impl(pdf_params, sub_samples, p, color=sample_color)
+    p = plot_model_space_impl(x_grid, pdf_params, sub_samples, p, color=sample_color)
 
     p = plot!(xaxis=:log, yaxis=:log, xlabel="x", ylabel="xtotx")
     p = ylims!(1e-5, 50.0)
@@ -178,7 +178,7 @@ function plot_model_space(pdf_params::AbstractPDFParams, samples; xmin::Float64=
 end
 
     
-function plot_model_space_impl(pdf_params::ValencePDFParams, samples, p; color=:skyblue3)
+function plot_model_space_impl(x_grid::StepRangeLen{Float64}, pdf_params::ValencePDFParams, samples, p; color=:skyblue3)
 
     for i in eachindex(samples)
 
@@ -190,7 +190,7 @@ function plot_model_space_impl(pdf_params::ValencePDFParams, samples, p; color=:
                                         λ_g1=samples.v.λ_g1[i], λ_g2=samples.v.λ_g2[i],
                                         K_g=samples.v.K_g[i], λ_q=samples.v.λ_q[i], 
                                         θ=θ_i)
-        p = plot!(x_grid, [xtotx(x, pdf_params_i) for x in x_grid], color=sample_color, lw=3,
+        p = plot!(x_grid, [xtotx(x, pdf_params_i) for x in x_grid], color=color, lw=3,
                   alpha=0.01, label="")
         
     end
@@ -199,7 +199,7 @@ function plot_model_space_impl(pdf_params::ValencePDFParams, samples, p; color=:
 end
 
 
-function plot_model_space_impl(pdf_params::DirichletPDFParams, samples, p; color=:skyblue3)
+function plot_model_space_impl(x_grid::StepRangeLen{Float64}, pdf_params::DirichletPDFParams, samples, p; color=:skyblue3)
 
     for i in eachindex(sub_samples)
 
@@ -208,7 +208,7 @@ function plot_model_space_impl(pdf_params::DirichletPDFParams, samples, p; color
                                           λ_g1=sub_samples.v.λ_g1[i], λ_g2=sub_samples.v.λ_g2[i],
                                           K_g=sub_samples.v.K_g[i], λ_q=sub_samples.v.λ_q[i], 
                                           θ=Vector(sub_samples.v.θ[i]))
-        p = plot!(x_grid, [xtotx(x, pdf_params_i) for x in x_grid], color=sample_color, lw=3,
+        p = plot!(x_grid, [xtotx(x, pdf_params_i) for x in x_grid], color=color, lw=3,
                   alpha=0.01, label="")
         
     end
@@ -242,13 +242,16 @@ function plot_data_space(pdf_params::AbstractPDFParams, sim_data::Dict{String, A
 
     sub_samples = bat_sample(samples, OrderedResampling(nsamples=nsamples)).result
 
-    p1, p2 = plot_data_space_impl(pdf_params, sub_samples)
+    p1, p2 = plot_data_space_impl(pdf_params, sub_samples, qcdnum_params,
+                                  splint_params, quark_coeffs, p1, p2, nbins)
       
     plot(p1, p2, size=plot_size, xlabel="Bin number")
 end
 
 
-function plot_data_space_impl(pdf_params::ValencePDFParams, samples, p1, p2; ep_color=:firebrick, em_color=:teal)
+function plot_data_space_impl(pdf_params::ValencePDFParams, samples, qcdnum_params::QCDNUMParameters,
+                              splint_params::SPLINTParameters, quark_coeffs::QuarkCoefficients,
+                              p1, p2, nbins::Integer; ep_color=:firebrick, em_color=:teal)
 
     for i in eachindex(samples)
         
@@ -259,11 +262,11 @@ function plot_data_space_impl(pdf_params::ValencePDFParams, samples, p1, p2; ep_
                            samples.v.K_d[i], Vector(samples.v.θ_tmp[i]))
 
 
-        pdf_params_i = PDFParameters(λ_u=samples.v.λ_u[i], K_u=samples.v.K_u[i], 
-                                     λ_d=samples.v.λ_d[i], K_d=samples.v.K_d[i],
-                                     λ_g1=samples.v.λ_g1[i], λ_g2=samples.v.λ_g2[i],
-                                     K_g=samples.v.K_g[i], λ_q=samples.v.λ_q[i], 
-                                     θ=θ_i)
+        pdf_params_i = ValencePDFParams(λ_u=samples.v.λ_u[i], K_u=samples.v.K_u[i], 
+                                        λ_d=samples.v.λ_d[i], K_d=samples.v.K_d[i],
+                                        λ_g1=samples.v.λ_g1[i], λ_g2=samples.v.λ_g2[i],
+                                        K_g=samples.v.K_g[i], λ_q=samples.v.λ_q[i], 
+                                        θ=θ_i)
         
         counts_pred_ep_i, counts_pred_em_i = forward_model(pdf_params_i, qcdnum_params, 
                                                            splint_params, quark_coeffs)
@@ -300,7 +303,9 @@ function plot_data_space_impl(pdf_params::ValencePDFParams, samples, p1, p2; ep_
 end
 
 
-function plot_data_space_impl(pdf_params::DirichletPDFParams, samples, p1, p2; ep_color=:firebrick, em_color=:teal)
+function plot_data_space_impl(pdf_params::DirichletPDFParams, samples, qcdnum_params::QCDNUMParameters,
+                              splint_params::SPLINTParameters, quark_coeffs::QuarkCoefficients,
+                              p1, p2; ep_color=:firebrick, em_color=:teal)
 
     for i in eachindex(samples)
         
