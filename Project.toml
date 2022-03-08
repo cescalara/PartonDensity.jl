@@ -26,6 +26,7 @@ Parameters = "0.12"
 Plots = "1"
 Roots = "1"
 SpecialFunctions = "1, 2"
+ValueShapes = "0.10"
 julia = "1"
 
 [extras]
