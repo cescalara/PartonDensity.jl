@@ -19,7 +19,7 @@ function forward_model_init(qcdnum_grid::QCDNUMGrid, qcdnum_params::QCDNUMParame
     QCDNUM.setalf(qcdnum_params.α_S, qcdnum_params.q0)
 
     # Debugging
-    QCDNUM.setval("elim", -1)
+    QCDNUM.setval("elim", -1.0)
     
     # QCDNUM Grids
     g = qcdnum_params.grid
