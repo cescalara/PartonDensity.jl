@@ -27,7 +27,7 @@ jobs:
       - name: Install dependencies
         run: |
           julia --project=. -e 'using Pkg; Pkg.add(url="https://github.com/bat/BAT.jl.git")'
-          julia --project=. -e 'using Pkg; Pkg.add(url="https://github.com/cescalara/QCDNUM.jl.git")'
+          julia --project=. -e 'using Pkg; Pkg.add(url="https://github.com/cescalara/QCDNUM.jl.git", rev="spline_check")'
           julia --project=. -e 'using Pkg; Pkg.instantiate()'
       #- uses: julia-actions/julia-buildpkg@latest
       - uses: julia-actions/julia-runtest@latest
