@@ -18,3 +18,5 @@ docs/src/prior_bat_implementation.md
 
 # HDF5 files
 *.h5
+
+examples/testing
