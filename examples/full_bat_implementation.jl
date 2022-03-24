@@ -237,8 +237,7 @@ vline!([pdf_params.θ[i]], color="black", label="truth", lw=3)
 # exist for doing just this.
 
 # Using BAT recipe
-function wrap_xtotx(p::NamedTuple{(:K_d, :K_g, :K_u, :θ_tmp, :λ_d, :λ_g1, 
-                                   :λ_g2, :λ_q, :λ_u)}, x::Real)
+function wrap_xtotx(p::NamedTuple, x::Real)
     θ = get_scaled_θ(p.λ_u, p.K_u, p.λ_d, p.K_d, Vector(p.θ_tmp))
     pdf_params = ValencePDFParams(λ_u=p.λ_u, K_u=p.K_u, λ_d=p.λ_d, K_d=p.K_d, λ_g1=p.λ_g1, 
         λ_g2=p.λ_g2, K_g=p.K_g, λ_q=p.λ_q, θ=θ)
