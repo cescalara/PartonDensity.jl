@@ -3,6 +3,8 @@ using HDF5
 export forward_model, forward_model_init
 export pd_write_sim, pd_read_sim
 
+qcdnum_evolfg_ϵ_values = Vector{Float64}()
+
 """
     forward_model_init(qcdnum_grid, qcdnum_params)
 
@@ -90,6 +92,7 @@ function forward_model(pdf_params::AbstractPDFParams, qcdnum_params::QCDNUMParam
         @warn "QCDNUM.evolfg(): Spline issues detected" eps pdf_params
         
     end
+    push!(qcdnum_evolfg_ϵ_values, ϵ)
     
     # Read spline addresses
     iaF2up = Int64(QCDNUM.dsp_uread(splint_params.spline_addresses.F2up))
