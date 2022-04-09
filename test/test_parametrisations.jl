@@ -1,7 +1,7 @@
 using PartonDensity
 using Test
 using Random, Distributions
-using Plots
+using Plots, ValueShapes
 
 @testset "Valence PDF parametrisation" begin
 
@@ -36,6 +36,10 @@ using Plots
     p = plot_input_pdfs(val_pdf_params)
     
     @test typeof(p) <: Plots.Plot
+
+    prior = get_prior(val_pdf_params)
+
+    @test typeof(prior) <: NamedTupleDist 
     
 end
 
@@ -68,5 +72,9 @@ end
     p = plot_input_pdfs(dir_pdf_params)
 
     @test typeof(p) <: Plots.Plot
+
+    prior = get_prior(dir_pdf_params)
+
+    @test typeof(prior) <: NamedTupleDist 
     
 end

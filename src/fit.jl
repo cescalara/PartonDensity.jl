@@ -120,7 +120,14 @@ function get_likelihood(pdf_params::DirichletPDFParams, sim_data::Dict{String, A
                                             λ_g1=params.λ_g1, λ_g2=params.λ_g2,
                                             K_g=params.K_g, λ_q=params.λ_q,
                                             θ=Vector(params.θ))
-                       
+
+            # Ensure u-valence weight > d-valence weight
+            if params.θ[2] > params.θ[1]
+                   
+                return -Inf
+            
+            end
+                     
             counts_pred_ep, counts_pred_em = @critical forward_model(pdf_params, qcdnum_params,
                                                                      splint_params, quark_coeffs)
 
