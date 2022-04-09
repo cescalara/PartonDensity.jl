@@ -2,8 +2,19 @@ using HDF5
 
 export forward_model, forward_model_init
 export pd_write_sim, pd_read_sim
+export reset_qcdnum_evolfg_ϵ_values
 
 qcdnum_evolfg_ϵ_values = Vector{Float64}()
+
+"""
+    reset_qcdnum_evolfg_ϵ_values()
+"""
+function reset_qcdnum_evolfg_ϵ_values()
+
+    global qcdnum_evolfg_ϵ_values = Vector{Float64}()
+    
+end
+
 
 """
     forward_model_init(qcdnum_grid, qcdnum_params)
