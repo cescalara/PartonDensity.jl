@@ -5,6 +5,7 @@ export pd_write_sim, pd_read_sim
 export reset_qcdnum_evolfg_ϵ_values
 
 qcdnum_evolfg_ϵ_values = Vector{Float64}()
+splint_init_complete = false
 
 """
     reset_qcdnum_evolfg_ϵ_values()
@@ -50,7 +51,10 @@ function forward_model_init(qcdnum_grid::QCDNUMGrid, qcdnum_params::QCDNUMParame
     nw = QCDNUM.zmfillw()
 
     # Define splines, nodes and addresses
-    QCDNUM.ssp_spinit(splint_params.nuser)
+    if !splint_init_complete
+        QCDNUM.ssp_spinit(splint_params.nuser)
+        global splint_init_complete = true
+    end
     ia = QCDNUM.isp_s2make(splint_params.nsteps_x, splint_params.nsteps_q)
     xnd = QCDNUM.ssp_unodes(ia, splint_params.nnodes_x, 0)
     qnd = QCDNUM.ssp_vnodes(ia, splint_params.nnodes_q, 0)
