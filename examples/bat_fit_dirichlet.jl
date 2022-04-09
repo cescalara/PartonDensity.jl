@@ -240,7 +240,7 @@ hline!([pdf_params.θ[2]], color="black", label="true θ[2]", lw=3)
 # Using BAT recipe
 function wrap_xtotx(p::NamedTuple, x::Real)
     pdf_params = DirichletPDFParams(K_u=p.K_u, K_d=p.K_d, λ_g1=p.λ_g1, 
-                                    λ_g2=p.λ_g2, K_g=p.K_g, λ_q=p.λ_q, θ=θ)
+                                    λ_g2=p.λ_g2, K_g=p.K_g, λ_q=p.λ_q, θ=p.θ)
     return log(xtotx(x, pdf_params))
 end
 
