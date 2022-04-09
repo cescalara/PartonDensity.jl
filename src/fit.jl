@@ -120,7 +120,14 @@ function get_likelihood(pdf_params::DirichletPDFParams, sim_data::Dict{String, A
                                             λ_g1=params.λ_g1, λ_g2=params.λ_g2,
                                             K_g=params.K_g, λ_q=params.λ_q,
                                             θ=Vector(params.θ))
-                       
+
+            # Ensure u-valence weight > d-valence weight
+            if params.θ[2] > params.θ[1]
+                   
+                return -Inf
+            
+            end
+                     
             counts_pred_ep, counts_pred_em = @critical forward_model(pdf_params, qcdnum_params,
                                                                      splint_params, quark_coeffs)
 
@@ -201,13 +208,12 @@ end
 
 function plot_model_space_impl(x_grid::StepRangeLen{Float64}, pdf_params::DirichletPDFParams, samples, p; color=:skyblue3)
 
-    for i in eachindex(sub_samples)
+    for i in eachindex(samples)
 
-        pdf_params_i = DirichletPDFParams(λ_u=sub_samples.v.λ_u[i], K_u=sub_samples.v.K_u[i], 
-                                          λ_d=sub_samples.v.λ_d[i], K_d=sub_samples.v.K_d[i],
-                                          λ_g1=sub_samples.v.λ_g1[i], λ_g2=sub_samples.v.λ_g2[i],
-                                          K_g=sub_samples.v.K_g[i], λ_q=sub_samples.v.λ_q[i], 
-                                          θ=Vector(sub_samples.v.θ[i]))
+        pdf_params_i = DirichletPDFParams(K_u=samples.v.K_u[i], K_d=samples.v.K_d[i],
+                                          λ_g1=samples.v.λ_g1[i], λ_g2=samples.v.λ_g2[i],
+                                          K_g=samples.v.K_g[i], λ_q=samples.v.λ_q[i], 
+                                          θ=Vector(samples.v.θ[i]))
         p = plot!(x_grid, [xtotx(x, pdf_params_i) for x in x_grid], color=color, lw=3,
                   alpha=0.01, label="")
         
@@ -305,18 +311,17 @@ end
 
 function plot_data_space_impl(pdf_params::DirichletPDFParams, samples, qcdnum_params::QCDNUMParameters,
                               splint_params::SPLINTParameters, quark_coeffs::QuarkCoefficients,
-                              p1, p2; ep_color=:firebrick, em_color=:teal)
+                              p1, p2, nbins::Integer; ep_color=:firebrick, em_color=:teal)
 
     for i in eachindex(samples)
         
         counts_obs_ep_i = zeros(UInt64, nbins)
         counts_obs_em_i = zeros(UInt64, nbins)
 
-        pdf_params_i = DirichletPDFParams(λ_u=samples.v.λ_u[i], K_u=samples.v.K_u[i], 
-                                          λ_d=samples.v.λ_d[i], K_d=samples.v.K_d[i],
+        pdf_params_i = DirichletPDFParams(K_u=samples.v.K_u[i], K_d=samples.v.K_d[i],
                                           λ_g1=samples.v.λ_g1[i], λ_g2=samples.v.λ_g2[i],
                                           K_g=samples.v.K_g[i], λ_q=samples.v.λ_q[i], 
-                                          θ=Vector(samples.v.θ))
+                                          θ=Vector(samples.v.θ[i]))
         
         counts_pred_ep_i, counts_pred_em_i = forward_model(pdf_params_i, qcdnum_params, 
                                                            splint_params, quark_coeffs)

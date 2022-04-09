@@ -1,4 +1,4 @@
-# # A fit with BAT.jl
+# # Fit with valence parametrisation
 #
 # In this example we show how to bring the PDF parametrisation and
 # forward model together with `BAT.jl` to perform a fit of simulated data.
@@ -27,7 +27,7 @@ Random.seed!(seed) # for reproducibility
 # ### Specify the input PDFs
 #
 # See the *Input PDF parametrisation and priors* example for more information on the
-# definition of the input PDFs.
+# definition of the input PDFs. Here, we use the valence parametrisation.
 
 pdf_params = ValencePDFParams(λ_u=0.64, K_u=3.38, λ_d=0.67, K_d=4.73,
                               λ_g1=0.50, λ_g2=-0.63, K_g=4.23, λ_q=-0.23, weights=[5., 5., 1., 1., 1., 0.5, 0.5]);
@@ -181,8 +181,8 @@ end
 #
 # First, let's load our simulation inputs and results
 
-pdf_params, sim_data = pd_read_sim("output/demo_simulation.h5");
-samples = bat_read("output/demo_results.h5").result;
+pdf_params, sim_data = pd_read_sim("output/demo_simulation_valence.h5");
+samples = bat_read("output/demo_results_valence.h5").result;
 
 # We can check some diagnostics using built in `BAT.jl`, such as the
 # effective sample size shown below

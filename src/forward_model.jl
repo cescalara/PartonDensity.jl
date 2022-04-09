@@ -3,6 +3,8 @@ using HDF5
 export forward_model, forward_model_init
 export pd_write_sim, pd_read_sim
 
+qcdnum_evolfg_ϵ_values = Vector{Float64}()
+
 """
     forward_model_init(qcdnum_grid, qcdnum_params)
 
@@ -18,6 +20,9 @@ function forward_model_init(qcdnum_grid::QCDNUMGrid, qcdnum_params::QCDNUMParame
     QCDNUM.setord(qcdnum_params.order)
     QCDNUM.setalf(qcdnum_params.α_S, qcdnum_params.q0)
 
+    # Debugging
+    QCDNUM.setval("elim", -1.0)
+    
     # QCDNUM Grids
     g = qcdnum_params.grid
     QCDNUM.gxmake(g.x_min, g.x_weights, g.x_num_bounds, g.nx,
@@ -79,8 +84,16 @@ function forward_model(pdf_params::AbstractPDFParams, qcdnum_params::QCDNUMParam
     # Evolve PDFs
     iq0 = QCDNUM.iqfrmq(qcdnum_params.q0)
     pdf_loc = 1
-    eps = QCDNUM.evolfg(pdf_loc, input_pdf, input_pdf_map, iq0)
+    ϵ = QCDNUM.evolfg(pdf_loc, input_pdf, input_pdf_map, iq0)
 
+    # Debugging
+    if ϵ > 0.05
+
+        @warn "QCDNUM.evolfg(): Spline issues detected" eps pdf_params
+        
+    end
+    push!(qcdnum_evolfg_ϵ_values, ϵ)
+    
     # Read spline addresses
     iaF2up = Int64(QCDNUM.dsp_uread(splint_params.spline_addresses.F2up))
     iaF2dn = Int64(QCDNUM.dsp_uread(splint_params.spline_addresses.F2dn))
