@@ -1,4 +1,4 @@
-using SpecialFunctions, Roots
+using SpecialFunctions
 using Parameters, Distributions
 using Plots, Random
 const sf = SpecialFunctions
