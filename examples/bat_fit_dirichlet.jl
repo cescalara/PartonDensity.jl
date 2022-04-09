@@ -122,7 +122,7 @@ likelihood = let d = sim_data
             pdf_params = DirichletPDFParams(K_u=params.K_u, K_d=params.K_d, λ_g1=params.λ_g1, λ_g2=params.λ_g2,
                                             K_g=params.K_g, λ_q=params.λ_q, θ=θ)
 
-            # Esure u-valence weight > d-valence
+            #Ensure u-valence weight > d-valence weight
             if params.θ[2] > params.θ[1]
                    
                 return -Inf
