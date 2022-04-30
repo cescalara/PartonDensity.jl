@@ -27,7 +27,7 @@ ParallelProcessingTools = "0.4"
 Parameters = "0.12"
 Plots = "1"
 SpecialFunctions = "1, 2"
-StatsFuns = "< 0.9.16"
+StatsFuns = "< 0.9.16, 1"
 ValueShapes = "0.10"
 julia = "1"
 
