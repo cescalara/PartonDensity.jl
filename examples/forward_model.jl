@@ -83,7 +83,9 @@ quark_coeffs = QuarkCoefficients();
 
 # Define initial spline
 
-QCDNUM.ssp_spinit(splint_params.nuser);
+if !PartonDensity.splint_init_complete
+    QCDNUM.ssp_spinit(splint_params.nuser)
+end
 ia = QCDNUM.isp_s2make(splint_params.nsteps_x, splint_params.nsteps_q);
 xnd = QCDNUM.ssp_unodes(ia, splint_params.nnodes_x, 0);
 qnd = QCDNUM.ssp_vnodes(ia, splint_params.nnodes_q, 0);

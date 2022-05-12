@@ -1,4 +1,4 @@
-# # A fit with BAT.jl
+# # Fit with Dirichlet parametrisation
 #
 # In this example we show how to bring the PDF parametrisation and
 # forward model together with `BAT.jl` to perform a fit of simulated data.
@@ -27,10 +27,12 @@ Random.seed!(seed) # for reproducibility
 # ### Specify the input PDFs
 #
 # See the *Input PDF parametrisation and priors* example for more information on the
-# definition of the input PDFs.
+# definition of the input PDFs. Here, we use the Dirichlet parametrisation.
 
-pdf_params = ValencePDFParams(λ_u=0.64, K_u=3.38, λ_d=0.67, K_d=4.73,
-                              λ_g1=0.50, λ_g2=-0.63, K_g=4.23, λ_q=-0.23, weights=[5., 5., 1., 1., 1., 0.5, 0.5]);
+pdf_params = DirichletPDFParams(K_u=4.0, K_d=4.0, λ_g1=1.5, λ_g2=-0.4, K_g=6.0, 
+                                λ_q=-0.25, weights=[30., 15., 12., 6., 3.6, 0.85, 0.85, 0.85, 0.85]);
+
+@info "Valence λ:" pdf_params.λ_u pdf_params.λ_d
 
 plot_input_pdfs(pdf_params)
 
@@ -41,10 +43,10 @@ plot_input_pdfs(pdf_params)
 # functions to do so. For more details, see the *Forward model* example.
 
 # first specify QCDNUM inputs
-qcdnum_grid = QCDNUMGrid(x_min=[1.0e-3], x_weights=[1], nx=100,
-    qq_bounds=[1.0e2, 3.0e4], qq_weights=[1.0, 1.0], nq=50, spline_interp=3)
+qcdnum_grid = QCDNUMGrid(x_min=[1.0e-3, 1.0e-1, 5.0e-1], x_weights=[1, 2, 2], nx=100,
+                         qq_bounds=[1.0e2, 3.0e4], qq_weights=[1.0, 1.0], nq=50, spline_interp=3)
 qcdnum_params = QCDNUMParameters(order=2, α_S=0.118, q0=100.0, grid=qcdnum_grid,
-    n_fixed_flav=5, iqc=1, iqb=1, iqt=1, weight_type=1);
+                                 n_fixed_flav=5, iqc=1, iqb=1, iqt=1, weight_type=1);
 
 # now SPLINT and quark coefficients
 splint_params = SPLINTParameters();
@@ -92,15 +94,13 @@ pd_write_sim("output/simulation.h5", pdf_params, sim_data)
 # For now, let's try relatively narrow priors centred on the true values.
 
 prior = NamedTupleDist(
-    θ_tmp = Dirichlet(pdf_params.weights),
-    λ_u = Truncated(Normal(pdf_params.λ_u, 1), 0, 1), 
-    K_u = Truncated(Normal(pdf_params.K_u, 1), 2, 10),
-    λ_d = Truncated(Normal(pdf_params.λ_d, 1), 0, 1), 
-    K_d = Truncated(Normal(pdf_params.K_d, 1), 2, 10),
-    λ_g1 = Truncated(Normal(pdf_params.λ_g1, 1), -1, 0),
-    λ_g2 = Truncated(Normal(pdf_params.λ_g2, 1), -1, 0),
-    K_g =  Truncated(Normal(pdf_params.K_g, 1), 2, 10),
-    λ_q = Truncated(Normal(pdf_params.λ_q, 0.1), -1, 0),
+    θ = Dirichlet(pdf_params.weights),
+    K_u = Uniform(3., 7.),
+    K_d = Uniform(3., 7.),
+    λ_g1 = Uniform(1., 2.),
+    λ_g2 = Uniform(-0.5, -0.1),
+    K_g =  Uniform(3., 7.),
+    λ_q = Uniform(-0.5, -0.1),
 );
 
 # The likelihood is similar to that used in the *input PDF parametrisation* example.
@@ -118,14 +118,17 @@ likelihood = let d = sim_data
     nbins = d["nbins"]
 
     logfuncdensity(function (params)
+         
+            pdf_params = DirichletPDFParams(K_u=params.K_u, K_d=params.K_d, λ_g1=params.λ_g1, λ_g2=params.λ_g2,
+                                            K_g=params.K_g, λ_q=params.λ_q, θ=params.θ)
 
-            θ = get_scaled_θ(params.λ_u, params.K_u, params.λ_d, 
-                             params.K_d, Vector(params.θ_tmp))
+            #Ensure u-valence weight > d-valence weight
+            if params.θ[2] > params.θ[1]
                    
-            pdf_params = ValencePDFParams(λ_u=params.λ_u, K_u=params.K_u, λ_d=params.λ_d,
-                                          K_d=params.K_d, λ_g1=params.λ_g1, λ_g2=params.λ_g2,
-                                          K_g=params.K_g, λ_q=params.λ_q, θ=θ)
-
+                return -Inf
+            
+            end
+                   
             counts_pred_ep, counts_pred_em = @critical forward_model(pdf_params, 
                 qcdnum_params, splint_params, quark_coeffs);
 
@@ -133,12 +136,12 @@ likelihood = let d = sim_data
             for i in 1:nbins
                 
                 if counts_pred_ep[i] < 0
-                   #@warn "counts_pred_ep[i] < 0, setting to 0" i counts_pred_ep[i]
+                   @debug "counts_pred_ep[i] < 0, setting to 0" i counts_pred_ep[i]
                    counts_pred_ep[i] = 0
                 end
 
                 if counts_pred_em[i] < 0
-                   #@warn "counts_pred_em[i] < 0, setting to 0" i counts_pred_em[i]
+                   @debug "counts_pred_em[i] < 0, setting to 0" i counts_pred_em[i]
                    counts_pred_em[i] = 0
                 end
                    
@@ -158,11 +161,11 @@ end
 # simply uncomment the code below.
 
 #posterior = PosteriorDensity(likelihood, prior);
+#mcalg = MetropolisHastings(proposal=BAT.MvTDistProposal(10.0))
 #convergence = BrooksGelmanConvergence(threshold=1.3);
-#burnin = MCMCMultiCycleBurnin(max_ncycles=100);
+#burnin = MCMCMultiCycleBurnin(max_ncycles=50);
 
-#samples = bat_sample(posterior, MCMCSampling(mcalg=MetropolisHastings(), nsteps=10^5, nchains=2)).result;
-
+#samples = bat_sample(posterior, MCMCSampling(mcalg=mcalg, nsteps=10^4, nchains=2)).result;
 # Alternatively, we could also try a nested sampling approach
 # here for comparison. This is easily done thanks to the
 # interface of `BAT.jl`, you will just need to add the
@@ -181,8 +184,8 @@ end
 #
 # First, let's load our simulation inputs and results
 
-pdf_params, sim_data = pd_read_sim("output/demo_simulation.h5");
-samples = bat_read("output/demo_results.h5").result;
+pdf_params, sim_data = pd_read_sim("output/demo_simulation_dirichlet.h5");
+samples = bat_read("output/demo_results_dirichlet.h5").result;
 
 # We can check some diagnostics using built in `BAT.jl`, such as the
 # effective sample size shown below
@@ -203,32 +206,30 @@ bat_eff_sample_size(unshaped.(samples))[1]
 # for example, consider `λ_u`, and compare to the known truth.
 
 plot(
-    samples, :(λ_u),
+    samples, :(K_u),
     nbins=50,
     colors=[:skyblue4, :skyblue3, :skyblue1],
     alpha=0.7,
     marginalmode=false,
     legend=:topleft
 )
-vline!([pdf_params.λ_u], color="black", label="truth", lw=3)
+vline!([pdf_params.K_u], color="black", label="truth", lw=3)
 
-# If we want to compare the momentum weights, we must transform
-# from `θ_tmp` to `θ`, as shown below. Here, we transform using
-# a helper function, convert the result to a matrix, and
-# access the ith weight with the integer `i`.
+# If we want to compare the momentum weights, we no longer need to
+# transform (compared to the valence parametrisation case) and can
+# simply use the `BAT.jl` recipes as before.
 
-θ = [get_scaled_θ(λ_u, K_u, λ_d, K_d, Vector(θ_tmp)) for (λ_u, K_u, λ_d, K_d, θ_tmp)
-     in zip(samples.v.λ_u, samples.v.K_u, samples.v.λ_d, samples.v.K_d, samples.v.θ_tmp)];
-
-θ = transpose(reduce(vcat,transpose.(θ)))
-
-i = 1
-hist = append!(Histogram(0:0.02:1), θ[i,:])
 plot(
-    normalize(hist, mode=:density),
-    st = :steps, label="Marginal posterior"
+    samples, (:(θ[1]), :(θ[2])),
+    nbins=50,
+    colors=[:skyblue4, :skyblue3, :skyblue1],
+    alpha=0.7,
+    marginalmode=false,
+    legend=:topright
 )
-vline!([pdf_params.θ[i]], color="black", label="truth", lw=3)
+
+vline!([pdf_params.θ[1]], color="black", label="true θ[1]", lw=3)
+hline!([pdf_params.θ[2]], color="black", label="true θ[2]", lw=3)
 
 # Rather than making a large plot 15 different marginals,
 # it can be more useful to visualise the posterior distribution
@@ -238,9 +239,8 @@ vline!([pdf_params.θ[i]], color="black", label="truth", lw=3)
 
 # Using BAT recipe
 function wrap_xtotx(p::NamedTuple, x::Real)
-    θ = get_scaled_θ(p.λ_u, p.K_u, p.λ_d, p.K_d, Vector(p.θ_tmp))
-    pdf_params = ValencePDFParams(λ_u=p.λ_u, K_u=p.K_u, λ_d=p.λ_d, K_d=p.K_d, λ_g1=p.λ_g1, 
-        λ_g2=p.λ_g2, K_g=p.K_g, λ_q=p.λ_q, θ=θ)
+    pdf_params = DirichletPDFParams(K_u=p.K_u, K_d=p.K_d, λ_g1=p.λ_g1, 
+                                    λ_g2=p.λ_g2, K_g=p.K_g, λ_q=p.λ_q, θ=p.θ)
     return log(xtotx(x, pdf_params))
 end
 
