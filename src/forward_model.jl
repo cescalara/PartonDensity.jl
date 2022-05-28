@@ -197,7 +197,20 @@ function pd_write_sim(file_name::String, pdf_params::AbstractPDFParams, sim_data
 
         # store pdf_params
         truth_group = create_group(fid, "truth")
-        truth_group["λ_u"] = pdf_params.λ_u
+
+        if pdf_params.param_type == UVALENCE_TYPE
+
+            truth_group["λ_u1"] = pdf_params.λ_u1
+            truth_group["λ_u2"] = pdf_params.λ_u2
+            truth_group["n_weights"] = pdf_params.n_weights
+            truth_group["n"] = pdf_params.n
+
+        else
+            
+            truth_group["λ_u"] = pdf_params.λ_u
+
+        end
+
         truth_group["K_u"] = pdf_params.K_u
         truth_group["λ_d"] = pdf_params.λ_d
         truth_group["K_d"] = pdf_params.K_d
@@ -250,6 +263,15 @@ function pd_read_sim(file_name::String)
                                             K_g=read(g["K_g"]), λ_q=read(g["λ_q"]),
                                             seed=read(g["seed"]), weights=read(g["weights"]),
                                             θ=read(g["θ"]))
+            
+        elseif read(g["param_type"]) == UVALENCE_TYPE
+
+            pdf_params = UValencePDFParams(λ_u1=read(g["λ_u1"]), λ_u2=read(g["λ_u2"]),
+                                           K_u=read(g["K_u"]), λ_d=read(g["λ_d"]),
+                                           K_d=read(g["K_d"]),λ_g1=read(g["λ_g1"]),
+                                           λ_g2=read(g["λ_g2"]),K_g=read(g["K_g"]),
+                                           λ_q=read(g["λ_q"]), seed=read(g["seed"]),
+                                           weights=read(g["weights"]), θ=read(g["θ"]))
             
         else
 
