@@ -16,7 +16,14 @@ using Distributions, Random
                                         K_g=4.2, λ_q=-0.2,
                                         weights=[3., 1., 5., 5., 1., 1., 1., 0.5, 0.5])
 
-    pdf_params_list = [val_pdf_params, dir_pdf_params]
+    uval_pdf_params = UValencePDFParams(K_u=3.4, K_d=4.7,
+                                        λ_g1=0.4, λ_g2=-0.6,
+                                        K_g=4.2, λ_q=-0.2,
+                                        weights=[3., 3., 1., 5., 5., 1., 1., 1., 0.5, 0.5],
+                                        n_weights=[1, 1])
+
+    
+    pdf_params_list = [val_pdf_params, dir_pdf_params, uval_pdf_params]
 
 
     # Initialise
@@ -40,10 +47,10 @@ using Distributions, Random
                                                        splint_params, quark_coeffs)
 
         @test all(counts_pred_ep .>= 0.0)
-        @test all(counts_pred_ep .<= 1.0e3)
+        @test all(counts_pred_ep .<= 1.0e4)
 
         @test all(counts_pred_em .> 0.0)
-        @test all(counts_pred_em .<= 1.0e3)
+        @test all(counts_pred_em .<= 1.0e4)
 
         nbins = size(counts_pred_ep)[1]
         counts_obs_ep = zeros(UInt64, nbins)
