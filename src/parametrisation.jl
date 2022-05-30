@@ -49,12 +49,10 @@ Includes 2 U-valence components.
     param_type::Integer = UVALENCE_TYPE
     seed::Integer = 0
     weights::Vector{Float64} = [1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
-    n_weights::Vector{Float64} = [1, 1]
     θ::Vector{Float64} = rand(MersenneTwister(seed), Dirichlet(weights))
-    n::Vector{Float64} = 2 * rand(MersenneTwister(seed), Dirichlet(n_weights))
     K_u::Float64
-    λ_u1::Float64 = (θ[1] * (K_u + 1)) / (n[1] - θ[1])
-    λ_u2::Float64 = (θ[2] * (K_u + 1)) / (n[2] - θ[2])
+    λ_u1::Float64 = (θ[1] * (K_u + 1)) / (1 - θ[1])
+    λ_u2::Float64 = (θ[2] * (K_u + 1)) / (1 - θ[2])
     K_d::Float64
     λ_d::Float64 = (θ[3] * (K_d + 1)) / (1 - θ[3])
     λ_g1::Float64
@@ -144,21 +142,21 @@ function x_uv_x(x::Float64, λ_u::Float64, K_u::Float64)
 end
 
 """
-    x_uv_x(x, λ_u1, λ_u2, K_u, n)
+    x_uv_x(x, λ_u1, λ_u2, K_u)
 
 Momentum density of u valence component.
 Beta function 
     A_u1 x^λ_u1 (1-x)^K_u
     A_u2 x^λ_u2 (1-x)^K_u
     
-A_u is set by λ_u, K_u and n.
+A_u is set by λ_u, and K_u.
 
 Alternative form for 2 components in u valence.
 """
-function x_uv_x(x::Float64, λ_u1::Float64, λ_u2::Float64, K_u::Float64, n::Vector{Float64})
+function x_uv_x(x::Float64, λ_u1::Float64, λ_u2::Float64, K_u::Float64)
 
-    A_u1 = n[1] / sf.beta(λ_u1, K_u + 1)
-    A_u2 = n[2] / sf.beta(λ_u2, K_u + 1)
+    A_u1 = 1 / sf.beta(λ_u1, K_u + 1)
+    A_u2 = 1 / sf.beta(λ_u2, K_u + 1)
 
     comp1 = A_u1 * x^λ_u1 * (1 - x)^K_u
     comp2 = A_u2 * x^λ_u2 * (1 - x)^K_u
@@ -280,9 +278,9 @@ end
 Total momentum density.
 """
 function xtotx(x::Float64, λ_u1::Float64, λ_u2::Float64, K_u::Float64, λ_d::Float64, K_d::Float64,
-               λ_g1::Float64, λ_g2::Float64, K_g::Float64, λ_q::Float64, θ::Vector{Float64}, n::Vector{Float64})
+               λ_g1::Float64, λ_g2::Float64, K_g::Float64, λ_q::Float64, θ::Vector{Float64})
 
-    xuvx = x_uv_x(x, λ_u1, λ_u2, K_u, n)
+    xuvx = x_uv_x(x, λ_u1, λ_u2, K_u)
 
     xdvx = x_dv_x(x, λ_d, K_d)
 
@@ -315,7 +313,7 @@ function xtotx(x::Float64, pdf_params::AbstractPDFParams)
     if pdf.param_type == UVALENCE_TYPE
 
         return xtotx(x, pdf.λ_u1, pdf.λ_u2, pdf.K_u, pdf.λ_d, pdf.K_d, pdf.λ_g1,
-                     pdf.λ_g2, pdf.K_g, pdf.λ_q, pdf.θ, pdf.n)
+                     pdf.λ_g2, pdf.K_g, pdf.λ_q, pdf.θ)
 
         
     else
@@ -387,11 +385,10 @@ end
 Total integrated momentum density. Should equal 1.
 """
 function int_xtotx(λ_u1::Float64, λ_u2::Float64, K_u::Float64, λ_d::Float64, K_d::Float64,
-                   λ_g1::Float64, λ_g2::Float64, K_g::Float64, λ_q::Float64, θ::Array{Float64},
-                   n::Vector{Float64})
+                   λ_g1::Float64, λ_g2::Float64, K_g::Float64, λ_q::Float64, θ::Array{Float64})
 
-    A_u1 = n[1] / sf.beta(λ_u1, K_u + 1)
-    A_u2 = n[2] / sf.beta(λ_u2, K_u + 1)
+    A_u1 = 1 / sf.beta(λ_u1, K_u + 1)
+    A_u2 = 1 / sf.beta(λ_u2, K_u + 1)
     A_d = 1 / sf.beta(λ_d, K_d + 1)
 
     A_g1 = θ[4] / sf.beta(λ_g1 + 1, K_g + 1)
@@ -428,7 +425,7 @@ function int_xtotx(pdf_params::AbstractPDFParams)
     if pdf.param_type == UVALENCE_TYPE
 
         result = int_xtotx(pdf.λ_u1, pdf.λ_u2, pdf.K_u, pdf.λ_d, pdf.K_d,
-                           pdf.λ_g1, pdf.λ_g2, pdf.K_g, pdf.λ_q, pdf.θ, pdf.n)
+                           pdf.λ_g1, pdf.λ_g2, pdf.K_g, pdf.λ_q, pdf.θ)
 
     else
 
@@ -505,7 +502,7 @@ function plot_input_pdfs(pdf_params::UValencePDFParams, xmin::Float64=1.0e-2,
     x_grid = range(xmin, stop=xmax, length=nx)
     pdf = pdf_params
 
-    p = plot(x_grid, [x_uv_x(x, pdf.λ_u1, pdf.λ_u2, pdf.K_u, pdf.n) for x in x_grid], label="x uv(x)", lw=3)
+    p = plot(x_grid, [x_uv_x(x, pdf.λ_u1, pdf.λ_u2, pdf.K_u) for x in x_grid], label="x uv(x)", lw=3)
     p = plot!(x_grid, [x_dv_x(x, pdf.λ_d, pdf.K_d) for x in x_grid], label="x dv(x)", lw=3)
 
     p = plot!(x_grid, [x_g_x(x, pdf.λ_g1, pdf.λ_g2, pdf.K_g, pdf.θ[4], pdf.θ[5]) 
@@ -663,7 +660,7 @@ function get_input_pdf_func(pdf_params::UValencePDFParams)::Function
 
         # u valence
         if (i == 1)
-            f = x_uv_x(x, pdf.λ_u1, pdf.λ_u2, pdf.K_u, pdf.n)
+            f = x_uv_x(x, pdf.λ_u1, pdf.λ_u2, pdf.K_u)
         end
 
         # d valence

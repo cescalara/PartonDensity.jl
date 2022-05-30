@@ -202,8 +202,6 @@ function pd_write_sim(file_name::String, pdf_params::AbstractPDFParams, sim_data
 
             truth_group["λ_u1"] = pdf_params.λ_u1
             truth_group["λ_u2"] = pdf_params.λ_u2
-            truth_group["n_weights"] = pdf_params.n_weights
-            truth_group["n"] = pdf_params.n
 
         else
             

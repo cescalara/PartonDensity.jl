@@ -92,11 +92,10 @@ end
         K_g = rand(Uniform(2, 10))
         λ_q = rand(Uniform(-1, 0))
         weights = ones(10)
-        n = 2 * rand(Dirichlet(ones(2)))
 
         uval_pdf_params = UValencePDFParams(K_u=K_u, K_d=K_d, λ_g1=λ_g2,
                                             λ_g2=λ_g2, K_g=K_g, λ_q=λ_q,
-                                            weights=weights, n=n)
+                                            weights=weights)
 
         @test int_xtotx(uval_pdf_params) ≈ 1.0   
           

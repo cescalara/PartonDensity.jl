@@ -32,23 +32,7 @@ function get_prior(pdf_params::ValencePDFParams)
 end
 
 
-function get_prior(pdf_params::UValencePDFParams)
-
-    prior = NamedTupleDist(
-        θ = Dirichlet(pdf_params.weights),
-        n_tmp = Dirichlet(pdf_params.n_weights),
-        K_u = Uniform(2, 10),
-        K_d = Uniform(2, 10),
-        λ_g1 = Uniform(0, 1),
-        λ_g2 = Uniform(-1, 0),
-        K_g =  Uniform(2, 10),
-        λ_q = Uniform(-1, 0),
-    )
-
-    return prior
-end
-
-function get_prior(pdf_params::DirichletPDFParams)
+function get_prior(pdf_params::Union{DirichletPDFParams, UValencePDFParams})
 
     prior = NamedTupleDist(
         θ = Dirichlet(pdf_params.weights),
