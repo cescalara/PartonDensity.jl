@@ -62,82 +62,106 @@ Reads various systematic errors and feeds them for further use
 """
 function Init_sys()
 
-
+TM_Elements_ePp  = zeros(429,153)
+TM_Elements_eMp  = zeros(429,153)
+    
  TM_Elements_ePp = get_TM_elements(0);
  TM_Elements_eMp = get_TM_elements(1);
 
 
  Tnm_Ee_sys_ePp = zeros(429,153)
  Tnm_Eehigh_ePp[426,153]
+    
+ Tnm_sys_ePp = zeros(429,153,8)
+ Tnm_sys_eMp = zeros(429,153,8)
+
+
+    
+    TM_Elements_ePp = TM_Elements_ePp / get_L_data(0)
+    TM_Elements_eMp = TM_Elements_eMp / get_L_data(1)
+    
 
  for i in 1:429
     for j in 1:153
 
+            
 
-     Tnm_Ee_sys_ePp[i,j] =abs(Tnm_Eehigh_ePp[i,j] - TM_Elements_ePp[i,j])/2.
-      +abs(Tnm_Eelow_ePp[i,j] - TM_Elements_ePp[i,j])/2.
+     Tnm_Ee_sys_ePp[i,j] =( abs(Tnm_Eehigh_ePp[i,j] - TM_Elements_ePp[i,j])
+      +abs(Tnm_Eelow_ePp[i,j] - TM_Elements_ePp[i,j]) )/2.0
 
-     Tnm_sys_ePp[i,j,1] =abs(Tnm_Eehigh_ePp[i,j] - TM_Elements_ePp[i,j])/2.
-      +abs(Tnm_Eelow_ePp[i,j] - TM_Elements_ePp[i,j])/2.
+     Tnm_sys_ePp[i,j,1] =( abs(Tnm_Eehigh_ePp[i,j] - TM_Elements_ePp[i,j])
+      +abs(Tnm_Eelow_ePp[i,j] - TM_Elements_ePp[i,j]) )/2.0
 
-     Tnm_sys_ePp[i,j,2] =abs(Tnm_Eeconehigh_ePp[i,j] - TM_Elements_ePp[i,j])/2.
-      +abs(Tnm_Eeconelow_ePp[i,j] - TM_Elements_ePp[i,j])/2.
+     Tnm_sys_ePp[i,j,2] =( abs(Tnm_Eeconehigh_ePp[i,j] - TM_Elements_ePp[i,j])
+      +abs(Tnm_Eeconelow_ePp[i,j] - TM_Elements_ePp[i,j]) )/2.
 
-     Tnm_sys_ePp[i,j,3] =abs(Tnm_Eereshigh_ePp[i,j] - TM_Elements_ePp[i,j])/2.
-      +abs(Tnm_Eereslow_ePp[i,j] - TM_Elements_ePp[i,j])/2.
-
-
-     Tnm_sys_ePp[i,j,4] =abs(Tnm_Ejhigh_ePp[i,j] - TM_Elements_ePp[i,j])/2.
-      +abs(Tnm_Ejlow_ePp[i,j] - TM_Elements_ePp[i,j])/2.
+     Tnm_sys_ePp[i,j,3] =(abs(Tnm_Eereshigh_ePp[i,j] - TM_Elements_ePp[i,j])
+      +abs(Tnm_Eereslow_ePp[i,j] - TM_Elements_ePp[i,j]) )/2.
 
 
-     Tnm_sys_ePp[i,j,5] =abs(Tnm_FBcalhigh_ePp[i,j] - TM_Elements_ePp[i,j])/2.
-      +abs(Tnm_FBcallow_ePp[i,j] - TM_Elements_ePp[i,j])/2.
-
-     Tnm_sys_ePp[i,j,6] =abs(Tnm_FCALxhigh_ePp[i,j] - TM_Elements_ePp[i,j])/2.
-      +abs(Tnm_FCALxlow_ePp[i,j] - TM_Elements_ePp[i,j])/2.
-
-     Tnm_sys_ePp[i,j,7] =abs(Tnm_FCALyhigh_ePp[i,j] - TM_Elements_ePp[i,j])/2.
-      +abs(Tnm_FCALylow_ePp[i,j] - TM_Elements_ePp[i,j])/2.
+     Tnm_sys_ePp[i,j,4] =( abs(Tnm_Ejhigh_ePp[i,j] - TM_Elements_ePp[i,j])
+      +abs(Tnm_Ejlow_ePp[i,j] - TM_Elements_ePp[i,j]))/2.
 
 
-     Tnm_sys_ePp[i,j,8] =abs(Tnm_AriMepsUp_ePp[i,j] - TM_Elements_ePp[i,j])/2.
-      +abs(Tnm_AriMepsDown_ePp[i,j] - TM_Elements_ePp[i,j])/2.
+     Tnm_sys_ePp[i,j,5] =(abs(Tnm_FBcalhigh_ePp[i,j] - TM_Elements_ePp[i,j])
+      +abs(Tnm_FBcallow_ePp[i,j] - TM_Elements_ePp[i,j]))/2.
+
+     Tnm_sys_ePp[i,j,6] =(abs(Tnm_FCALxhigh_ePp[i,j] - TM_Elements_ePp[i,j])
+      +abs(Tnm_FCALxlow_ePp[i,j] - TM_Elements_ePp[i,j]) )/2.
+
+     Tnm_sys_ePp[i,j,7] =(abs(Tnm_FCALyhigh_ePp[i,j] - TM_Elements_ePp[i,j])
+      +abs(Tnm_FCALylow_ePp[i,j] - TM_Elements_ePp[i,j]) )/2.
+
+
+     Tnm_sys_ePp[i,j,8] =(abs(Tnm_AriMepsUp_ePp[i,j] - TM_Elements_ePp[i,j])
+      +abs(Tnm_AriMepsDown_ePp[i,j] - TM_Elements_ePp[i,j]) )/2.
 
 
 
 
-     Tnm_sys_eMp[i,j,1] =abs(Tnm_Eehigh_eMp[i,j] - TM_Elements_eMp[i,j])/2.
-      +abs(Tnm_Eelow_eMp[i,j] - TM_Elements_eMp[i,j])/2.
+     Tnm_sys_eMp[i,j,1] =(abs(Tnm_Eehigh_eMp[i,j] - TM_Elements_eMp[i,j])
+      +abs(Tnm_Eelow_eMp[i,j] - TM_Elements_eMp[i,j]))/2.
 
-     Tnm_sys_eMp[i,j,2] =abs(Tnm_Eeconehigh_eMp[i,j] - TM_Elements_eMp[i,j])/2.
-      +abs(Tnm_Eeconelow_eMp[i,j] - TM_Elements_eMp[i,j])/2.
+     Tnm_sys_eMp[i,j,2] =(abs(Tnm_Eeconehigh_eMp[i,j] - TM_Elements_eMp[i,j])
+      +abs(Tnm_Eeconelow_eMp[i,j] - TM_Elements_eMp[i,j]))/2.
 
-     Tnm_sys_eMp[i,j,3] =abs(Tnm_Eereshigh_eMp[i,j] - TM_Elements_eMp[i,j])/2.
-      +abs(Tnm_Eereslow_eMp[i,j] - TM_Elements_eMp[i,j])/2.
-
-
-     Tnm_sys_eMp[i,j,4] =abs(Tnm_Ejhigh_eMp[i,j] - TM_Elements_eMp[i,j])/2.
-      +abs(Tnm_Ejlow_eMp[i,j] - TM_Elements_eMp[i,j])/2.
+     Tnm_sys_eMp[i,j,3] =(abs(Tnm_Eereshigh_eMp[i,j] - TM_Elements_eMp[i,j])
+      +abs(Tnm_Eereslow_eMp[i,j] - TM_Elements_eMp[i,j]))/2.
 
 
-     Tnm_sys_eMp[i,j,5] =abs(Tnm_FBcalhigh_eMp[i,j] - TM_Elements_eMp[i,j])/2.
-      +abs(Tnm_FBcallow_eMp[i,j] - TM_Elements_eMp[i,j])/2.
-
-     Tnm_sys_eMp[i,j,6] =abs(Tnm_FCALxhigh_eMp[i,j] - TM_Elements_eMp[i,j])/2.
-      +abs(Tnm_FCALxlow_eMp[i,j] - TM_Elements_eMp[i,j])/2.
-
-     Tnm_sys_eMp[i,j,7] =abs(Tnm_FCALyhigh_eMp[i,j] - TM_Elements_eMp[i,j])/2.
-      +abs(Tnm_FCALylow_eMp[i,j] - TM_Elements_eMp[i,j])/2.
+     Tnm_sys_eMp[i,j,4] =(abs(Tnm_Ejhigh_eMp[i,j] - TM_Elements_eMp[i,j])
+      +abs(Tnm_Ejlow_eMp[i,j] - TM_Elements_eMp[i,j]) )/2.
 
 
-     Tnm_sys_eMp[i,j,8] =abs(Tnm_AriMepsDown_eMp[i,j] - TM_Elements_eMp[i,j])/2.
-      +abs(Tnm_AriMepsUp_eMp[i,j] - TM_Elements_eMp[i,j])/2.
+     Tnm_sys_eMp[i,j,5] =(abs(Tnm_FBcalhigh_eMp[i,j] - TM_Elements_eMp[i,j])
+      +abs(Tnm_FBcallow_eMp[i,j] - TM_Elements_eMp[i,j]) )/2.
+
+     Tnm_sys_eMp[i,j,6] =(abs(Tnm_FCALxhigh_eMp[i,j] - TM_Elements_eMp[i,j])
+      +abs(Tnm_FCALxlow_eMp[i,j] - TM_Elements_eMp[i,j]) )/2.
+
+     Tnm_sys_eMp[i,j,7] =(abs(Tnm_FCALyhigh_eMp[i,j] - TM_Elements_eMp[i,j])
+      +abs(Tnm_FCALylow_eMp[i,j] - TM_Elements_eMp[i,j]) )/2.
+
+
+     Tnm_sys_eMp[i,j,8] =(abs(Tnm_AriMepsDown_eMp[i,j] - TM_Elements_eMp[i,j])
+      +abs(Tnm_AriMepsUp_eMp[i,j] - TM_Elements_eMp[i,j]) )/2.
 
 
     end
  end
-
+    
+     println(TM_Elements_ePp[429,153])
+     println(Tnm_Eehigh_ePp[429,153])
+     println(Tnm_Eelow_ePp[429,153])
+     println(Tnm_Ee_sys_ePp[429,153])
+     println(Tnm_sys_ePp[429,153,1])
+    
+     Tnm_sys_ePp = Tnm_sys_ePp * get_L_data(0)
+     Tnm_sys_eMp = Tnm_sys_eMp * get_L_data(1)
+    
+     println(Tnm_Ee_sys_ePp[429,153])
+     println(Tnm_sys_ePp[429,153,1])
+    
 end
 
 """
