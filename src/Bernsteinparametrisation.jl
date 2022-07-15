@@ -82,7 +82,7 @@ function bs_poly(x::Float64, v::Integer, n::Integer)
 end
 
 
-function x_uv_x_bern(x::Float64, U_list::Vector{Float64})
+function x_uv_x(x::Float64, U_list::Vector{Float64})
     
     return x * (U_list[1] * bs_poly(x, 0, 3) + U_list[2] * bs_poly(x, 0, 4) + 
                 U_list[3] * bs_poly(x, 1, 4) + U_list[4] * bs_poly(x, 0, 5))
@@ -90,7 +90,7 @@ function x_uv_x_bern(x::Float64, U_list::Vector{Float64})
 end
 
 
-function x_dv_x_bern(x::Float64, D_list::Vector{Float64})
+function x_dv_x(x::Float64, D_list::Vector{Float64})
 
     return x * (D_list[1] * bs_poly(x, 0, 3) + D_list[2] * bs_poly(x, 0, 4) + 
                 D_list[3] * bs_poly(x, 1, 4) + D_list[4] * bs_poly(x, 0, 5))
@@ -127,9 +127,9 @@ function xtotx(x::Float64, pdf_params::BernsteinPDFParams)
 
     pdf = pdf_params 
     
-    xux = x_uv_x_bern(x, pdf.U_list)
+    xux = x_uv_x(x, pdf.U_list)
     
-    xdx = x_dv_x_bern(x, pdf.D_list)
+    xdx = x_dv_x(x, pdf.D_list)
     
     xgx = x_g_x(x, pdf.λ_g1, pdf.λ_g2, pdf.K_g, pdf.θ[1], pdf.θ[2])
     
@@ -178,8 +178,8 @@ function plot_input_pdfs(pdf_params::BernsteinPDFParams, xmin::Float64=1.0e-2,
     x_grid = range(xmin, stop=xmax, length=nx)
     pdf = pdf_params
 
-    p = plot(x_grid, [x_uv_x_bern(x, pdf.U_list) for x in x_grid], label="x uv(x)", lw=3)
-    p = plot!(x_grid, [x_dv_x_bern(x, pdf.D_list) for x in x_grid], label="x dv(x)", lw=3)
+    p = plot(x_grid, [x_uv_x(x, pdf.U_list) for x in x_grid], label="x uv(x)", lw=3)
+    p = plot!(x_grid, [x_dv_x(x, pdf.D_list) for x in x_grid], label="x dv(x)", lw=3)
 
     p = plot!(x_grid, [x_g_x(x, pdf.λ_g1, pdf.λ_g2, pdf.K_g, pdf.θ[1], pdf.θ[2]) 
                        for x in x_grid], label="x g(x)", lw=3)    
