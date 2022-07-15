@@ -3,7 +3,7 @@ using Parameters, Distributions
 using Plots, Random
 const sf = SpecialFunctions
 
-export BersteinPDFParams
+export BernsteinPDFParams
 export BERNSTEIN_TYPE
 export get_scaled_θ_bern
 export plot_input_pdfs, int_xtotx, xtotx
