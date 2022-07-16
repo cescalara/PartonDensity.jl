@@ -29,7 +29,7 @@ abstract type AbstractPDFParams end
     weights::Vector{Float64} = [1., 1., 1., 1., 1., 1., 1.]
     U_list::Vector{Float64} = get_dirichlet_UD(U_weights, 2, seed)
     D_list::Vector{Float64} = get_dirichlet_UD(D_weights, 1, seed)
-    θ::Vector{Float64} = get_dirichlet_samples_bern(U_list, D_list, seed, weights)
+    θ::Vector{Float64} = get_dirichlet_samples(U_list, D_list, seed, weights)
 end
 
 
@@ -62,7 +62,7 @@ function get_scaled_θ(U_list::Vector{Float64}, D_list::Vector{Float64}, θ_tmp:
 end
 
 
-function get_dirichlet_samples_bern(U_list::Vector{Float64}, D_list::Vector{Float64}, seed::Integer,
+function get_dirichlet_samples(U_list::Vector{Float64}, D_list::Vector{Float64}, seed::Integer,
                                     weights::Vector{Float64})
 
     Random.seed!(seed);
