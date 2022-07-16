@@ -5,7 +5,7 @@ const sf = SpecialFunctions
 
 export BernsteinPDFParams
 export BERNSTEIN_TYPE
-export get_scaled_θ_bern
+export get_scaled_θ
 export plot_input_pdfs, int_xtotx, xtotx
 export get_input_pdf_func
 export input_pdf_map
@@ -50,7 +50,7 @@ function get_dirichlet_UD(UD_weights::Vector{Float64}, intres::Integer, seed::In
 end
 
 
-function get_scaled_θ_bern(U_list::Vector{Float64}, D_list::Vector{Float64}, θ_tmp::Vector{Float64})
+function get_scaled_θ(U_list::Vector{Float64}, D_list::Vector{Float64}, θ_tmp::Vector{Float64})
     
     I_u = U_list[1] / 20 + U_list[2] / 30 + U_list[3] / 15 + U_list[4] / 42
     I_d = D_list[1] / 20 + D_list[2] / 30 + D_list[3] / 15 + D_list[4] / 42
@@ -68,7 +68,7 @@ function get_dirichlet_samples_bern(U_list::Vector{Float64}, D_list::Vector{Floa
     Random.seed!(seed);
     θ_tmp = rand(Dirichlet(weights))
 
-    θ = get_scaled_θ_bern(U_list, D_list, θ_tmp)
+    θ = get_scaled_θ(U_list, D_list, θ_tmp)
     
     return θ
     
