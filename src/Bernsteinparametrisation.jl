@@ -26,7 +26,7 @@ abstract type AbstractPDFParams end
     K_g::Float64
     λ_q::Float64
     seed::Integer = 0
-    weights::Vector{Float64} = [1., 1., 1., 1., 1., 1., 1.]
+    weights::Vector{Float64} = ones(7)
     U_list::Vector{Float64} = get_dirichlet_UD(U_weights, 2, seed)
     D_list::Vector{Float64} = get_dirichlet_UD(D_weights, 1, seed)
     θ::Vector{Float64} = get_dirichlet_samples(U_list, D_list, seed, weights)
