@@ -70,6 +70,12 @@ function get_dirichlet_samples(U_list::Vector{Float64}, D_list::Vector{Float64},
 
     θ = get_scaled_θ(U_list, D_list, θ_tmp)
     
+    if length(θ) != 7
+        
+        @error("length(θ) must be 7!")
+        
+    end
+    
     return θ
     
 end
