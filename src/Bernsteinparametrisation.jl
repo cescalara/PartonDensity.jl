@@ -19,8 +19,8 @@ abstract type AbstractPDFParams end
 
 @with_kw struct BernsteinPDFParams <: AbstractPDFParams
     param_type::Integer = BERNSTEIN_TYPE
-    U_weights::Vector{Float64}
-    D_weights::Vector{Float64}
+    U_weights::Vector{Float64} = zeros(4)
+    D_weights::Vector{Float64} = zeros(4)
     λ_g1::Float64
     λ_g2::Float64
     K_g::Float64
@@ -35,7 +35,7 @@ end
 
 function get_scaled_UD(UD_tmp::Vector{Float64}, intres::Integer)
     
-    return UD_tmp * intres / (UD_tmp[1] / 4 + UD_tmp[2] / 5 + UD_tmp[3] / 5 + UD_tmp[4] /6)
+    return UD_tmp * (intres / (UD_tmp[1] / 4 + UD_tmp[2] / 5 + UD_tmp[3] / 5 + UD_tmp[4] / 6))
 
 end
 
