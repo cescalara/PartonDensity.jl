@@ -224,12 +224,12 @@ function get_input_pdf_func(pdf_params::BernsteinPDFParams)::Function
 
         # u valence
         if (i == 1)
-            f = x_uv_x(x, U_list)
+            f = x_uv_x(x, pdf.U_list)
         end
 
         # d valence
         if (i == 2)
-            f = x_dv_x(x, D_list)
+            f = x_dv_x(x, pdf.D_list)
         end
 
         # ubar
