@@ -5,7 +5,7 @@ const sf = SpecialFunctions
 
 export BernsteinPDFParams
 export BERNSTEIN_TYPE
-export get_scaled_θ
+export get_scaled_θ, get_scaled_UD
 export plot_input_pdfs, int_xtotx, xtotx
 export get_input_pdf_func
 export input_pdf_map
