@@ -36,9 +36,9 @@ import BAT
     
     @test typeof(p) <: Plots.Plot
 
-    #prior = get_prior(bern_pdf_params)     #define get_prior later
-
-    #@test typeof(prior) <: NamedTupleDist 
+    prior = get_prior(bern_pdf_params)
+    
+    @test typeof(prior) <: NamedTupleDist 
     
 end
 
