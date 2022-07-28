@@ -13,8 +13,8 @@ function get_prior(pdf_params::BernsteinPDFParams)
 
     prior = NamedTupleDist(
         θ_tmp = Dirichlet(pdf_params.weights),
-        U_weights = [Uniform(0, 500), Uniform(0, 500), Uniform(0, 500), Uniform(0, 500)]
-        D_weights = [Uniform(0, 500), Uniform(0, 500), Uniform(0, 500), Uniform(0, 500)]
+        U_weights = [Uniform(0, 500), Uniform(0, 500), Uniform(0, 500), Uniform(0, 500)],
+        D_weights = [Uniform(0, 500), Uniform(0, 500), Uniform(0, 500), Uniform(0, 500)],
         λ_g1 = Uniform(0, 1),
         λ_g2 = Uniform(-1, 0),
         K_g =  Uniform(2, 10),
