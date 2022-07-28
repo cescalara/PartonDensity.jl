@@ -44,12 +44,24 @@ using Distributions, Random
         counts_pred_ep, counts_pred_em = forward_model(pdf_params, qcdnum_params, 
                                                        splint_params, quark_coeffs)
 
-        @test all(counts_pred_ep .>= 0.0)
-        @test all(counts_pred_ep .<= 1.0e3)
+        if typeof(pdf_params) == BernsteinPDFParams
 
-        @test all(counts_pred_em .> 0.0)
-        @test all(counts_pred_em .<= 1.0e3)
+            @test all(counts_pred_ep .>= 0.0)
+            @test all(counts_pred_ep .<= 2.0e3)
 
+            @test all(counts_pred_em .> 0.0)
+            @test all(counts_pred_em .<= 2.0e3)
+            
+        else
+            
+            @test all(counts_pred_ep .>= 0.0)
+            @test all(counts_pred_ep .<= 1.0e3)
+
+            @test all(counts_pred_em .> 0.0)
+            @test all(counts_pred_em .<= 1.0e3)
+            
+        end
+        
         nbins = size(counts_pred_ep)[1]
         counts_obs_ep = zeros(UInt64, nbins)
         counts_obs_em = zeros(UInt64, nbins)
