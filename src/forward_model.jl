@@ -185,7 +185,7 @@ end
 
 Store the simulation truth and simulated data in an HDF5 file.
 """
-function pd_write_sim(file_name::String, pdf_params::AbstractPDFParams, sim_data::Dict{String, Any})
+function pd_write_sim(file_name::String, pdf_params::Union{ValencePDFParams, DirichletPDFParams}, sim_data::Dict{String, Any})
 
     h5open(file_name, "w") do fid
 
