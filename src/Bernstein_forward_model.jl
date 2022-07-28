@@ -198,6 +198,8 @@ function pd_write_sim(file_name::String, pdf_params::BernsteinPDFParams, sim_dat
 end
 
 
+"""
+###conflicting with pd_read_sim from forward_model.jl
 function pd_read_sim(file_name::String)
 
     local pdf_params
@@ -232,3 +234,4 @@ function pd_read_sim(file_name::String)
     return pdf_params, sim_data
     
 end
+"""
