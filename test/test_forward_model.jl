@@ -5,7 +5,7 @@ using Distributions, Random
 @testset "Forward model" begin
 
     # Define different parametriations for testing
-    bern_pdf_params = BernsteinDFParams(U_weights = ones(4), D_weights = ones(4),
+    bern_pdf_params = BernsteinPDFarams(U_weights = ones(4), D_weights = ones(4),
                                       λ_g1=0.4, λ_g2=-0.6,
                                       K_g=4.2, λ_q=-0.2, 
                                       weights=[5., 5., 1., 1., 1., 0.5, 0.5])
