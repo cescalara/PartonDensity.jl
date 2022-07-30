@@ -34,7 +34,7 @@ abstract type AbstractPDFParams end
 end
 
 
-function get_scaled_UD(UD_tmp::Vector{Float64}, intres::Integer, bspoly_params::Vector{Vector{Int64}})
+function get_scaled_UD(UD_tmp::Vector{Float64}, intres::Integer, bspoly_params::Vector{Vector{Int64}} = [[0,3],[0,4],[1,4],[0,5]])
     
     intres_tmp = 0
     
@@ -72,7 +72,7 @@ end
 
 
 function get_scaled_θ(U_list::Vector{Float64}, D_list::Vector{Float64}, θ_tmp::Vector{Float64},
-                      bspoly_params::Vector{Vector{Int64}})
+                      bspoly_params::Vector{Vector{Int64}} = [[0,3],[0,4],[1,4],[0,5]])
     
     I_u = xfx_int(U_list, bspoly_params)
     I_d = xfx_int(D_list, bspoly_params)
