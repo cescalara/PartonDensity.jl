@@ -251,7 +251,7 @@ function plot_data_space(pdf_params::AbstractPDFParams, sim_data::Dict{String, A
     p1, p2 = plot_data_space_impl(pdf_params, sub_samples, qcdnum_params,
                                   splint_params, quark_coeffs, p1, p2, nbins)
       
-    plot(p1, p2, size=plot_size, xlabel="Bin number")
+    plot(p1, p2, size=plot_size, xlabel="Bin number", bottom_margin=10Plots.mm)
 end
 
 
@@ -386,7 +386,7 @@ function plot_data_space_sysErr(pdf_params::AbstractPDFParams, sim_data::Dict{St
     p1, p2 = plot_data_space_impl_sysErr(pdf_params, sub_samples, qcdnum_params,
                                          splint_params, quark_coeffs, p1, p2, nbins)
       
-    plot(p1, p2, size=plot_size, xlabel="Bin number")
+    plot(p1, p2, size=plot_size, xlabel="Bin number", bottom_margin=10Plots.mm)
 end
 
 
