@@ -235,7 +235,8 @@ function plot_data_space end
 function plot_data_space(pdf_params::AbstractPDFParams, sim_data::Dict{String, Any}, samples,
                          qcdnum_grid::QCDNUMGrid, qcdnum_params::QCDNUMParameters,
                          splint_params::SPLINTParameters, quark_coeffs::QuarkCoefficients;
-                         ep_color=:firebrick, em_color=:teal, nsamples::Integer=100, plot_size=(1000, 500))
+                         ep_color=:firebrick, em_color=:teal, nsamples::Integer=100, plot_size=(1000, 500),
+                         args...)
 
     forward_model_init(qcdnum_grid, qcdnum_params, splint_params)
 
@@ -251,7 +252,7 @@ function plot_data_space(pdf_params::AbstractPDFParams, sim_data::Dict{String, A
     p1, p2 = plot_data_space_impl(pdf_params, sub_samples, qcdnum_params,
                                   splint_params, quark_coeffs, p1, p2, nbins)
       
-    plot(p1, p2, size=plot_size, xlabel="Bin number", bottom_margin=10Plots.mm)
+    plot(p1, p2, size=plot_size, xlabel="Bin number", bottom_margin=10Plots.mm, markerstrokewidth=0; args...)
 end
 
 
