@@ -102,8 +102,8 @@ function plot_model_space_impl(x_grid::StepRangeLen{Float64}, pdf_params::Bernst
 
     for i in eachindex(samples)
         
-        U_list = get_scaled_UD(Vector(params.U_weights[i]), 2)
-		D_list = get_scaled_UD(Vector(params.U_weights[i]), 1)
+        U_list = get_scaled_UD(Vector(samples.v.U_weights[i]), 2)
+	D_list = get_scaled_UD(Vector(samples.v.U_weights[i]), 1)
 
         θ_i = get_scaled_θ(U_list, D_list, Vector(samples.v.θ_tmp[i]))
         
