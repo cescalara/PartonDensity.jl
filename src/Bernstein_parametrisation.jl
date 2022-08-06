@@ -6,7 +6,7 @@ const sf = SpecialFunctions
 export BernsteinPDFParams
 export BERNSTEIN_TYPE
 export get_scaled_θ, get_scaled_UD
-export plot_input_pdfs, int_xtotx, xtotx
+export plot_input_pdfs, int_xtotx, xtotx, xfx_int
 export get_input_pdf_func
 export input_pdf_map
 
@@ -58,7 +58,7 @@ function get_dirichlet_UD(UD_weights::Vector{Float64}, intres::Integer, seed::In
 end
 
 
-function xfx_int(UD_list::Vector{Float64}, bspoly_params::Vector{Vector{Int64}})
+function xfx_int(UD_list::Vector{Float64}, bspoly_params::Vector{Vector{Int64}} = [[0,3],[0,4],[1,4],[0,5]])
         
     I = 0
         
