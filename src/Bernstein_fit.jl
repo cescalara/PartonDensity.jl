@@ -154,11 +154,14 @@ function plot_data_space_impl(pdf_params::BernsteinPDFParams, samples, qcdnum_pa
         
         counts_obs_ep_i = zeros(UInt64, nbins)
         counts_obs_em_i = zeros(UInt64, nbins)
+		
+	U_list = get_scaled_UD(Vector(samples.v.U_weights[i]), 2)
+	D_list = get_scaled_UD(Vector(samples.v.U_weights[i]), 1)
 
-        θ_i = get_scaled_θ(samples.v.U_list[i], samples.v.D_list[i], Vector(samples.v.θ_tmp[i]))
+        θ_i = get_scaled_θ(U_list, D_list, Vector(samples.v.θ_tmp[i]))
 
 
-        pdf_params_i = BernsteinPDFParams(samples.v.U_list[i], samples.v.D_list[i],
+        pdf_params_i = BernsteinPDFParams(U_list, D_list,
                                         λ_g1=samples.v.λ_g1[i], λ_g2=samples.v.λ_g2[i],
                                         K_g=samples.v.K_g[i], λ_q=samples.v.λ_q[i], 
                                         θ=θ_i)
