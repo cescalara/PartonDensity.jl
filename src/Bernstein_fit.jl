@@ -161,7 +161,7 @@ function plot_data_space_impl(pdf_params::BernsteinPDFParams, samples, qcdnum_pa
         θ_i = get_scaled_θ(U_list, D_list, Vector(samples.v.θ_tmp[i]))
 
 
-        pdf_params_i = BernsteinPDFParams(U_list, D_list,
+        pdf_params_i = BernsteinPDFParams(U_list=U_list, D_list=D_list,
                                         λ_g1=samples.v.λ_g1[i], λ_g2=samples.v.λ_g2[i],
                                         K_g=samples.v.K_g[i], λ_q=samples.v.λ_q[i], 
                                         θ=θ_i)
