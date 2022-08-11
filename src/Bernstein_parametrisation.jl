@@ -8,7 +8,6 @@ export BERNSTEIN_TYPE
 export get_scaled_θ, get_scaled_UD
 export plot_input_pdfs, int_xtotx, xtotx, xfx_int
 export get_input_pdf_func
-export input_pdf_map
 
 
 BERNSTEIN_TYPE = 3
