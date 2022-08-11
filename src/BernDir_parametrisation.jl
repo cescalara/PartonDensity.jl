@@ -5,7 +5,7 @@ const sf = SpecialFunctions
 
 export BernDirPDFParams
 export BERNDIR_TYPE
-export get_ud_list
+export get_UD_list
 export plot_input_pdfs, int_xtotx, xtotx
 export get_input_pdf_func
 
@@ -21,8 +21,8 @@ abstract type AbstractPDFParams end
     bspoly_params::Vector{Vector{Int64}} = [[0,3], [0,4], [1,4]]
     initial_U::Vector{Float64}
     initial_D::Vector{Float64}
-    U_list::Vector{Float64} = get_ud_list(θ[1], 2, initial_U, bspoly_params)
-    D_list::Vector{Float64} = get_ud_list(θ[2], 1, initial_D, bspoly_params)
+    U_list::Vector{Float64} = get_UD_list(θ[1], 2, initial_U, bspoly_params)
+    D_list::Vector{Float64} = get_UD_list(θ[2], 1, initial_D, bspoly_params)
     λ_g1::Float64
     λ_g2::Float64
     K_g::Float64
@@ -43,7 +43,7 @@ function get_xbxdx(bspoly_params::Vector{Vector{Int64}})
 end
 
 
-function get_ud_list(Δudv::Float64, intres::Int64, initial_UD::Vector{Float64}, 
+function get_UD_list(Δudv::Float64, intres::Int64, initial_UD::Vector{Float64}, 
                      bspoly_params::Vector{Vector{Int64}})
     
     bxdx_factors = get_bxdx(bspoly_params)
