@@ -7,76 +7,20 @@ export reset_qcdnum_evolfg_ϵ_values
 qcdnum_evolfg_ϵ_values = Vector{Float64}()
 splint_init_complete = false
 
-"""
-# commented out for now, globals in functions reset_qcdnum_evolfg_ϵ_values() and forward_model_init
-# clash with globals in forward_model.jl
-
-function reset_qcdnum_evolfg_ϵ_values()
-
-    global qcdnum_evolfg_ϵ_values = Vector{Float64}()
-    
-end
-
-
-function forward_model_init(qcdnum_grid::QCDNUMGrid, qcdnum_params::QCDNUMParameters,
-                            splint_params::SPLINTParameters)
-
-    # Set up QCDNUM
-    QCDNUM.qcinit(-6, "")
-    QCDNUM.setord(qcdnum_params.order)
-    QCDNUM.setalf(qcdnum_params.α_S, qcdnum_params.q0)
-
-    # Debugging
-    QCDNUM.setval("elim", -1.0)
-    
-    # QCDNUM Grids
-    g = qcdnum_params.grid
-    QCDNUM.gxmake(g.x_min, g.x_weights, g.x_num_bounds, g.nx,
-                  g.spline_interp)
-    QCDNUM.gqmake(g.qq_bounds, g.qq_weights, g.qq_num_bounds, g.nq)
-
-    # Define FFNS/VFNS
-    QCDNUM.setcbt(qcdnum_params.n_fixed_flav, qcdnum_params.iqc,
-                  qcdnum_params.iqb, qcdnum_params.iqt)
-
-    # Build weight tables
-    # TODO: Use saved weights file once QCDNUM fixed
-    nw = QCDNUM.fillwt(qcdnum_params.weight_type)
-    nw = QCDNUM.zmfillw()
-
-    # Define splines, nodes and addresses
-    if !splint_init_complete
-        QCDNUM.ssp_spinit(splint_params.nuser)
-        global splint_init_complete = true
-    end
-    ia = QCDNUM.isp_s2make(splint_params.nsteps_x, splint_params.nsteps_q)
-    xnd = QCDNUM.ssp_unodes(ia, splint_params.nnodes_x, 0)
-    qnd = QCDNUM.ssp_vnodes(ia, splint_params.nnodes_q, 0)
-    QCDNUM.ssp_erase(ia);
-    
-    iaFLup = QCDNUM.isp_s2user(xnd, splint_params.nnodes_x, qnd, splint_params.nnodes_q)
-    iaF2up = QCDNUM.isp_s2user(xnd, splint_params.nnodes_x, qnd, splint_params.nnodes_q)
-    iaF3up = QCDNUM.isp_s2user(xnd, splint_params.nnodes_x, qnd, splint_params.nnodes_q)
-    iaFLdn = QCDNUM.isp_s2user(xnd, splint_params.nnodes_x, qnd, splint_params.nnodes_q)
-    iaF2dn = QCDNUM.isp_s2user(xnd, splint_params.nnodes_x, qnd, splint_params.nnodes_q)
-    iaF3dn = QCDNUM.isp_s2user(xnd, splint_params.nnodes_x, qnd, splint_params.nnodes_q)
-    iaF_eP = QCDNUM.isp_s2make(1, 2)
-    iaF_eM = QCDNUM.isp_s2make(1, 2)
-   
-    # Store spline addresses
-    QCDNUM.ssp_uwrite(splint_params.spline_addresses.F2up, Float64(iaF2up))
-    QCDNUM.ssp_uwrite(splint_params.spline_addresses.F2dn, Float64(iaF2dn))
-    QCDNUM.ssp_uwrite(splint_params.spline_addresses.F3up, Float64(iaF3up))
-    QCDNUM.ssp_uwrite(splint_params.spline_addresses.F3dn, Float64(iaF3dn))
-    QCDNUM.ssp_uwrite(splint_params.spline_addresses.FLup, Float64(iaFLup))
-    QCDNUM.ssp_uwrite(splint_params.spline_addresses.FLdn, Float64(iaFLdn))
-    QCDNUM.ssp_uwrite(splint_params.spline_addresses.F_eP, Float64(iaF_eP))
-    QCDNUM.ssp_uwrite(splint_params.spline_addresses.F_eM, Float64(iaF_eM))
-   
-end
-"""
 
 function forward_model(pdf_params::BernsteinPDFParams, qcdnum_params::QCDNUMParameters,
+                       splint_params::SPLINTParameters, quark_coeffs::QuarkCoefficients)
+    
+    forward_model_impl(pdf_params, qcdnum_params, splint_params, quark_coeffs)
+
+
+function forward_model(pdf_params::BernsteinPDFParams, qcdnum_params::QCDNUMParameters,
+                       splint_params::SPLINTParameters, quark_coeffs::QuarkCoefficients)
+        
+    forward_model_impl(pdf_params, qcdnum_params, splint_params, quark_coeffs)
+
+
+function forward_model_impl(pdf_params::Any, qcdnum_params::QCDNUMParameters,
                        splint_params::SPLINTParameters, quark_coeffs::QuarkCoefficients)
 
 
@@ -171,6 +115,16 @@ end
 
 function pd_write_sim(file_name::String, pdf_params::BernsteinPDFParams, sim_data::Dict{String, Any})
 
+    pd_write_sim_impl(file_name, pdf_params, sim_data)
+    
+    
+ function pd_write_sim(file_name::String, pdf_params::BernDirPDFParams, sim_data::Dict{String, Any})
+    
+    pd_write_sim_impl(file_name, pdf_params, sim_data)
+
+
+function pd_write_sim_impl(file_name::String, pdf_params::Any, sim_data::Dict{String, Any})
+
     h5open(file_name, "w") do fid
 
         # store sim_data
@@ -196,42 +150,3 @@ function pd_write_sim(file_name::String, pdf_params::BernsteinPDFParams, sim_dat
 
     return nothing
 end
-
-
-"""
-###conflicting with pd_read_sim from forward_model.jl
-function pd_read_sim(file_name::String)
-
-    local pdf_params
-    sim_data = Dict{String, Any}()
-    
-    h5open(file_name, "r") do fid
-
-        # read sim_data
-        for (key, value) in zip(keys(fid["data"]), fid["data"])
-            sim_data[key] = read(value)
-        end
-        
-        g = fid["truth"]
-        
-        try
-            
-            pdf_params = BernsteinPDFParams(U_list=read(g["U_list"]), 
-                                            D_list=read(g["D_list"]),
-                                            λ_g1=read(g["λ_g1"]), λ_g2=read(g["λ_g2"]),
-                                            K_g=read(g["K_g"]), λ_q=read(g["λ_q"]),
-                                            seed=read(g["seed"]), weights=read(g["weights"]),
-                                            θ=read(g["θ"]))
-
-        catch error
-
-            @error("PDF parametrisation not recognised. $error")
-
-        end
-        
-    end
-
-    return pdf_params, sim_data
-    
-end
-"""
