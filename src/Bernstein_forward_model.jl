@@ -12,12 +12,16 @@ function forward_model(pdf_params::BernsteinPDFParams, qcdnum_params::QCDNUMPara
                        splint_params::SPLINTParameters, quark_coeffs::QuarkCoefficients)
     
     forward_model_impl(pdf_params, qcdnum_params, splint_params, quark_coeffs)
+  
+end
 
 
-function forward_model(pdf_params::BernsteinPDFParams, qcdnum_params::QCDNUMParameters,
+function forward_model(pdf_params::BernDirPDFParams, qcdnum_params::QCDNUMParameters,
                        splint_params::SPLINTParameters, quark_coeffs::QuarkCoefficients)
         
     forward_model_impl(pdf_params, qcdnum_params, splint_params, quark_coeffs)
+  
+end
 
 
 function forward_model_impl(pdf_params::Any, qcdnum_params::QCDNUMParameters,
@@ -116,13 +120,17 @@ end
 function pd_write_sim(file_name::String, pdf_params::BernsteinPDFParams, sim_data::Dict{String, Any})
 
     pd_write_sim_impl(file_name, pdf_params, sim_data)
+      
+end
     
     
- function pd_write_sim(file_name::String, pdf_params::BernDirPDFParams, sim_data::Dict{String, Any})
+function pd_write_sim(file_name::String, pdf_params::BernDirPDFParams, sim_data::Dict{String, Any})
     
     pd_write_sim_impl(file_name, pdf_params, sim_data)
 
-
+end
+    
+      
 function pd_write_sim_impl(file_name::String, pdf_params::Any, sim_data::Dict{String, Any})
 
     h5open(file_name, "w") do fid
