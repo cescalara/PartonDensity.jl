@@ -5,6 +5,11 @@ using Distributions, Random
 @testset "Forward model" begin
 
     # Define different parametriations for testing
+    bern_pdf_params = BernsteinPDFParams(U_weights = ones(4), D_weights = ones(4),
+                                      λ_g1=0.4, λ_g2=-0.6,
+                                      K_g=4.2, λ_q=-0.2, 
+                                      weights=[5., 5., 1., 1., 1., 0.5, 0.5])
+    
     val_pdf_params = ValencePDFParams(λ_u=0.6, K_u=3.4,
                                       λ_d=0.7, K_d=4.7,
                                       λ_g1=0.4, λ_g2=-0.6,
@@ -16,7 +21,7 @@ using Distributions, Random
                                         K_g=4.2, λ_q=-0.2,
                                         weights=[3., 1., 5., 5., 1., 1., 1., 0.5, 0.5])
 
-    pdf_params_list = [val_pdf_params, dir_pdf_params]
+    pdf_params_list = [val_pdf_params, dir_pdf_params, bern_pdf_params]
 
 
     # Initialise
@@ -39,12 +44,24 @@ using Distributions, Random
         counts_pred_ep, counts_pred_em = forward_model(pdf_params, qcdnum_params, 
                                                        splint_params, quark_coeffs)
 
-        @test all(counts_pred_ep .>= 0.0)
-        @test all(counts_pred_ep .<= 1.0e3)
+        if typeof(pdf_params) == BernsteinPDFParams
 
-        @test all(counts_pred_em .> 0.0)
-        @test all(counts_pred_em .<= 1.0e3)
+            @test all(counts_pred_ep .>= 0.0)
+            @test all(counts_pred_ep .<= 2.0e3)
 
+            @test all(counts_pred_em .> 0.0)
+            @test all(counts_pred_em .<= 2.0e3)
+            
+        else
+            
+            @test all(counts_pred_ep .>= 0.0)
+            @test all(counts_pred_ep .<= 1.0e3)
+
+            @test all(counts_pred_em .> 0.0)
+            @test all(counts_pred_em .<= 1.0e3)
+            
+        end
+        
         nbins = size(counts_pred_ep)[1]
         counts_obs_ep = zeros(UInt64, nbins)
         counts_obs_em = zeros(UInt64, nbins)
