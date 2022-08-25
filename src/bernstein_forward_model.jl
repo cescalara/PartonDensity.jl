@@ -101,7 +101,7 @@ function forward_model(pdf_params::Union{BernsteinPDFParams, BernDirPDFParams}, 
 end
 
       
-function pd_write_sim_impl(file_name::String, pdf_params::Union{BernsteinPDFParams, BernDirPDFParams}, sim_data::Dict{String, Any})
+function pd_write_sim(file_name::String, pdf_params::Union{BernsteinPDFParams, BernDirPDFParams}, sim_data::Dict{String, Any})
 
     h5open(file_name, "w") do fid
 
