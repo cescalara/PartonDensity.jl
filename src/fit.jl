@@ -4,17 +4,24 @@ using DensityInterface
 
 export get_prior, get_likelihood
 export plot_model_space, plot_data_space
+export plot_data_space_sysErr
 
+"""
+    get_prior(pdf_params)
 
+Get a suitable prior for a given PDF parametrisation.
+"""
 function get_prior end
 
 
-function get_prior(pdf_params::BernsteinPDFParams)
+function get_prior(pdf_params::ValencePDFParams)
 
     prior = NamedTupleDist(
         θ_tmp = Dirichlet(pdf_params.weights),
-        U_weights = [Uniform(1, 3), Uniform(1, 3), Uniform(1, 3), Uniform(1, 3)],
-        D_weights = [Uniform(1, 3), Uniform(1, 3), Uniform(1, 3), Uniform(1, 3)],
+        λ_u = Uniform(0, 1), 
+        K_u = Uniform(2, 10),
+        λ_d = Uniform(0, 1), 
+        K_d = Uniform(2, 10),
         λ_g1 = Uniform(0, 1),
         λ_g2 = Uniform(-1, 0),
         K_g =  Uniform(2, 10),
@@ -25,12 +32,12 @@ function get_prior(pdf_params::BernsteinPDFParams)
 end
 
 
-function get_prior(pdf_params::BernDirPDFParams)
+function get_prior(pdf_params::DirichletPDFParams)
 
     prior = NamedTupleDist(
         θ = Dirichlet(pdf_params.weights),
-        initial_U = Uniform(0.,1.),
-        initial_D = Uniform(0.,1.),
+        K_u = Uniform(2, 10),
+        K_d = Uniform(2, 10),
         λ_g1 = Uniform(0, 1),
         λ_g2 = Uniform(-1, 0),
         K_g =  Uniform(2, 10),
@@ -41,7 +48,15 @@ function get_prior(pdf_params::BernDirPDFParams)
 end
 
 
-function get_likelihood(pdf_params::BernsteinPDFParams, sim_data::Dict{String, Any},
+"""
+    get_likelihood(pdf_params)
+
+Get a suitable likelihood for a given PDF parametrisation.
+"""
+function get_likelihood end
+
+
+function get_likelihood(pdf_params::ValencePDFParams, sim_data::Dict{String, Any},
                         qcdnum_params::QCDNUMParameters, splint_params::SPLINTParameters,
                         quark_coeffs::QuarkCoefficients)
 
@@ -53,14 +68,12 @@ function get_likelihood(pdf_params::BernsteinPDFParams, sim_data::Dict{String, A
 
         logfuncdensity(function (params)
             
-            U_list = get_scaled_UD(Vector(params.U_weights), 2)
-            D_list = get_scaled_UD(Vector(params.U_weights), 1)
+            θ = get_scaled_θ(params.λ_u, params.K_u, params.λ_d, 
+                             params.K_d, Vector(params.θ_tmp))
             
-            θ = get_scaled_θ(U_list, D_list, Vector(params.θ_tmp))
-            
-            pdf_params = BernsteinPDFParams(U_list=U_list, D_list=D_list, 
-                                            λ_g1=params.λ_g1, λ_g2=params.λ_g2,
-                                            K_g=params.K_g, λ_q=params.λ_q, θ=θ)
+            pdf_params = ValencePDFParams(λ_u=params.λ_u, K_u=params.K_u, λ_d=params.λ_d,
+                                          K_d=params.K_d, λ_g1=params.λ_g1, λ_g2=params.λ_g2,
+                                          K_g=params.K_g, λ_q=params.λ_q, θ=θ)
             
             counts_pred_ep, counts_pred_em = @critical forward_model(pdf_params, qcdnum_params,
                                                                      splint_params, quark_coeffs)
@@ -91,7 +104,7 @@ function get_likelihood(pdf_params::BernsteinPDFParams, sim_data::Dict{String, A
 end
 
 
-function get_likelihood(pdf_params::BernDirPDFParams, sim_data::Dict{String, Any},
+function get_likelihood(pdf_params::DirichletPDFParams, sim_data::Dict{String, Any},
                         qcdnum_params::QCDNUMParameters, splint_params::SPLINTParameters,
                         quark_coeffs::QuarkCoefficients)
 
@@ -103,11 +116,18 @@ function get_likelihood(pdf_params::BernDirPDFParams, sim_data::Dict{String, Any
 
         logfuncdensity(function (params)
             
-            pdf_params = BernDirPDFParams(initial_U = Vector(params.initial_U), 
-                                            initial_D = Vector(params.initial_D), 
+            pdf_params = DirichletPDFParams(K_u=params.K_u, K_d=params.K_d,
                                             λ_g1=params.λ_g1, λ_g2=params.λ_g2,
-                                            K_g=params.K_g, λ_q=params.λ_q, θ=Vector(params.θ))
+                                            K_g=params.K_g, λ_q=params.λ_q,
+                                            θ=Vector(params.θ))
+
+            # Ensure u-valence weight > d-valence weight
+            if params.θ[2] > params.θ[1]
+                   
+                return -Inf
             
+            end
+                     
             counts_pred_ep, counts_pred_em = @critical forward_model(pdf_params, qcdnum_params,
                                                                      splint_params, quark_coeffs)
 
@@ -137,6 +157,11 @@ function get_likelihood(pdf_params::BernDirPDFParams, sim_data::Dict{String, Any
 end
 
 
+"""
+    plot_model_space(pdf_params, samples)
+
+Compare truth and posterior samples in the model space.
+"""
 function plot_model_space end
 
 
@@ -159,17 +184,16 @@ function plot_model_space(pdf_params::AbstractPDFParams, samples; xmin::Float64=
     return p
 end
 
-
-function plot_model_space_impl(x_grid::StepRangeLen{Float64}, pdf_params::BernsteinPDFParams, samples, p; color=:skyblue3)
+    
+function plot_model_space_impl(x_grid::StepRangeLen{Float64}, pdf_params::ValencePDFParams, samples, p; color=:skyblue3)
 
     for i in eachindex(samples)
-        
-        U_list = get_scaled_UD(Vector(samples.v.U_weights[i]), 2)
-        D_list = get_scaled_UD(Vector(samples.v.U_weights[i]), 1)
 
-        θ_i = get_scaled_θ(U_list, D_list, Vector(samples.v.θ_tmp[i]))
+        θ_i = get_scaled_θ(samples.v.λ_u[i], samples.v.K_u[i], samples.v.λ_d[i],
+                           samples.v.K_d[i], Vector(samples.v.θ_tmp[i]))
         
-        pdf_params_i = BernsteinPDFParams(U_list=U_list, D_list=D_list,
+        pdf_params_i = ValencePDFParams(λ_u=samples.v.λ_u[i], K_u=samples.v.K_u[i], 
+                                        λ_d=samples.v.λ_d[i], K_d=samples.v.K_d[i],
                                         λ_g1=samples.v.λ_g1[i], λ_g2=samples.v.λ_g2[i],
                                         K_g=samples.v.K_g[i], λ_q=samples.v.λ_q[i], 
                                         θ=θ_i)
@@ -182,14 +206,14 @@ function plot_model_space_impl(x_grid::StepRangeLen{Float64}, pdf_params::Bernst
 end
 
 
-function plot_model_space_impl(x_grid::StepRangeLen{Float64}, pdf_params::BernDirPDFParams, samples, p; color=:skyblue3)
+function plot_model_space_impl(x_grid::StepRangeLen{Float64}, pdf_params::DirichletPDFParams, samples, p; color=:skyblue3)
 
     for i in eachindex(samples)
 
-        pdf_params_i = BernsteinPDFParams(initial_U=samples.v.initial_U[i], initial_D=samples.v.initial_D[i],
-                                        λ_g1=samples.v.λ_g1[i], λ_g2=samples.v.λ_g2[i],
-                                        K_g=samples.v.K_g[i], λ_q=samples.v.λ_q[i], 
-                                        θ=Vector(samples.v.θ[i]))
+        pdf_params_i = DirichletPDFParams(K_u=samples.v.K_u[i], K_d=samples.v.K_d[i],
+                                          λ_g1=samples.v.λ_g1[i], λ_g2=samples.v.λ_g2[i],
+                                          K_g=samples.v.K_g[i], λ_q=samples.v.λ_q[i], 
+                                          θ=Vector(samples.v.θ[i]))
         p = plot!(x_grid, [xtotx(x, pdf_params_i) for x in x_grid], color=color, lw=3,
                   alpha=0.01, label="")
         
@@ -199,13 +223,20 @@ function plot_model_space_impl(x_grid::StepRangeLen{Float64}, pdf_params::BernDi
 end
 
 
+"""
+    plot_data_space(pdf_params, sim_data, samples, qcdnum_grid, 
+                    qcdnum_params, splint_params, quark_coeffs)
+
+Compare truth and posterior samples in the data space.
+"""
 function plot_data_space end
 
 
 function plot_data_space(pdf_params::AbstractPDFParams, sim_data::Dict{String, Any}, samples,
                          qcdnum_grid::QCDNUMGrid, qcdnum_params::QCDNUMParameters,
                          splint_params::SPLINTParameters, quark_coeffs::QuarkCoefficients;
-                         ep_color=:firebrick, em_color=:teal, nsamples::Integer=100, plot_size=(1000, 500))
+                         ep_color=:firebrick, em_color=:teal, nsamples::Integer=100, plot_size=(1000, 500),
+                         args...)
 
     forward_model_init(qcdnum_grid, qcdnum_params, splint_params)
 
@@ -221,11 +252,11 @@ function plot_data_space(pdf_params::AbstractPDFParams, sim_data::Dict{String, A
     p1, p2 = plot_data_space_impl(pdf_params, sub_samples, qcdnum_params,
                                   splint_params, quark_coeffs, p1, p2, nbins)
       
-    plot(p1, p2, size=plot_size, xlabel="Bin number")
+    plot(p1, p2, size=plot_size, xlabel="Bin number", bottom_margin=10Plots.mm, markerstrokewidth=0; args...)
 end
 
 
-function plot_data_space_impl(pdf_params::BernsteinPDFParams, samples, qcdnum_params::QCDNUMParameters,
+function plot_data_space_impl(pdf_params::ValencePDFParams, samples, qcdnum_params::QCDNUMParameters,
                               splint_params::SPLINTParameters, quark_coeffs::QuarkCoefficients,
                               p1, p2, nbins::Integer; ep_color=:firebrick, em_color=:teal)
 
@@ -233,14 +264,13 @@ function plot_data_space_impl(pdf_params::BernsteinPDFParams, samples, qcdnum_pa
         
         counts_obs_ep_i = zeros(UInt64, nbins)
         counts_obs_em_i = zeros(UInt64, nbins)
-        
-        U_list = get_scaled_UD(Vector(samples.v.U_weights[i]), 2)
-        D_list = get_scaled_UD(Vector(samples.v.U_weights[i]), 1)
 
-        θ_i = get_scaled_θ(U_list, D_list, Vector(samples.v.θ_tmp[i]))
+        θ_i = get_scaled_θ(samples.v.λ_u[i], samples.v.K_u[i], samples.v.λ_d[i],
+                           samples.v.K_d[i], Vector(samples.v.θ_tmp[i]))
 
 
-        pdf_params_i = BernsteinPDFParams(U_list=U_list, D_list=D_list,
+        pdf_params_i = ValencePDFParams(λ_u=samples.v.λ_u[i], K_u=samples.v.K_u[i], 
+                                        λ_d=samples.v.λ_d[i], K_d=samples.v.K_d[i],
                                         λ_g1=samples.v.λ_g1[i], λ_g2=samples.v.λ_g2[i],
                                         K_g=samples.v.K_g[i], λ_q=samples.v.λ_q[i], 
                                         θ=θ_i)
@@ -280,7 +310,7 @@ function plot_data_space_impl(pdf_params::BernsteinPDFParams, samples, qcdnum_pa
 end
 
 
-function plot_data_space_impl(pdf_params::BernDirPDFParams, samples, qcdnum_params::QCDNUMParameters,
+function plot_data_space_impl(pdf_params::DirichletPDFParams, samples, qcdnum_params::QCDNUMParameters,
                               splint_params::SPLINTParameters, quark_coeffs::QuarkCoefficients,
                               p1, p2, nbins::Integer; ep_color=:firebrick, em_color=:teal)
 
@@ -289,10 +319,10 @@ function plot_data_space_impl(pdf_params::BernDirPDFParams, samples, qcdnum_para
         counts_obs_ep_i = zeros(UInt64, nbins)
         counts_obs_em_i = zeros(UInt64, nbins)
 
-        pdf_params_i = BernsteinPDFParams(initial_U=samples.v.initial_U[i], initial_D=samples.v.initial_D[i],
-                                        λ_g1=samples.v.λ_g1[i], λ_g2=samples.v.λ_g2[i],
-                                        K_g=samples.v.K_g[i], λ_q=samples.v.λ_q[i], 
-                                        θ=Vector(samples.v.θ[i]))
+        pdf_params_i = DirichletPDFParams(K_u=samples.v.K_u[i], K_d=samples.v.K_d[i],
+                                          λ_g1=samples.v.λ_g1[i], λ_g2=samples.v.λ_g2[i],
+                                          K_g=samples.v.K_g[i], λ_q=samples.v.λ_q[i], 
+                                          θ=Vector(samples.v.θ[i]))
         
         counts_pred_ep_i, counts_pred_em_i = forward_model(pdf_params_i, qcdnum_params, 
                                                            splint_params, quark_coeffs)
@@ -305,6 +335,157 @@ function plot_data_space_impl(pdf_params::BernDirPDFParams, samples, qcdnum_para
                 counts_pred_ep_i[j] = 0
                 
             end
+
+            if counts_pred_em_i[j] < 0
+
+                @warn "Predicted counts (eM) found to be < 0, setting to 0" i j counts_pred_em_i[j]
+                counts_pred_em_i[j] = 0
+        
+            end
+            
+            counts_obs_ep_i[j] = rand(Poisson(counts_pred_ep_i[j]))
+            counts_obs_em_i[j] = rand(Poisson(counts_pred_em_i[j]))
+            
+        end
+        
+        p1 = scatter!(p1, 1:nbins, counts_obs_ep_i, label="", color=ep_color, 
+                      lw=3, alpha=0.01)
+        p2 = scatter!(p2, 1:nbins, counts_obs_em_i, label="", color=em_color, 
+                      lw=3, alpha=0.01)
+    
+    end
+  
+    return p1, p2
+end
+
+"""
+    plot_data_space_sysErr(pdf_params, sim_data, samples, qcdnum_grid, 
+                           qcdnum_params, splint_params, quark_coeffs)
+
+Compare truth and posterior samples in the data space.
+This time with systematic errors!
+"""
+function plot_data_space_sysErr end
+
+
+function plot_data_space_sysErr(pdf_params::AbstractPDFParams, sim_data::Dict{String, Any}, samples,
+                                qcdnum_grid::QCDNUMGrid, qcdnum_params::QCDNUMParameters,
+                                splint_params::SPLINTParameters, quark_coeffs::QuarkCoefficients;
+                                ep_color=:firebrick, em_color=:teal, nsamples::Integer=100, plot_size=(1000, 500))
+
+    forward_model_init_sysErr(qcdnum_grid, qcdnum_params, splint_params)
+
+    nbins = sim_data["nbins"]
+
+    p1 = scatter(1:nbins, sim_data["counts_obs_ep"], label="Observed counts (eP)", 
+                 color=ep_color, lw=3)
+    p2 = scatter(1:nbins, sim_data["counts_obs_em"], label="Observed counts (eM)", 
+                 color=em_color, lw=3)
+
+    sub_samples = BAT.bat_sample(samples, BAT.OrderedResampling(nsamples=nsamples)).result
+
+    p1, p2 = plot_data_space_impl_sysErr(pdf_params, sub_samples, qcdnum_params,
+                                         splint_params, quark_coeffs, p1, p2, nbins)
+      
+    plot(p1, p2, size=plot_size, xlabel="Bin number", bottom_margin=10Plots.mm)
+end
+
+
+function plot_data_space_impl_sysErr(pdf_params::ValencePDFParams, samples, qcdnum_params::QCDNUMParameters,
+                                     splint_params::SPLINTParameters, quark_coeffs::QuarkCoefficients,
+                                     p1, p2, nbins::Integer; ep_color=:firebrick, em_color=:teal)
+
+    for i in eachindex(samples)
+        
+        counts_obs_ep_i = zeros(UInt64, nbins)
+        counts_obs_em_i = zeros(UInt64, nbins)
+
+        θ_i = get_scaled_θ(samples.v.λ_u[i], samples.v.K_u[i], samples.v.λ_d[i],
+                           samples.v.K_d[i], Vector(samples.v.θ_tmp[i]))
+
+
+        pdf_params_i = ValencePDFParams(λ_u=samples.v.λ_u[i], K_u=samples.v.K_u[i], 
+                                        λ_d=samples.v.λ_d[i], K_d=samples.v.K_d[i],
+                                        λ_g1=samples.v.λ_g1[i], λ_g2=samples.v.λ_g2[i],
+                                        K_g=samples.v.K_g[i], λ_q=samples.v.λ_q[i], 
+                                        θ=θ_i)
+
+        ParErrs_i = [samples.v.beta0_1[i], samples.v.beta0_2[i], samples.v.beta0_3[i],
+                     samples.v.beta0_4[i], samples.v.beta0_4[i], samples.v.beta0_5[i],
+                     samples.v.beta0_6[i], samples.v.beta0_7[i], samples.v.beta0_8[i]]
+        
+        counts_pred_ep_i, counts_pred_em_i = forward_model_sysErr(pdf_params_i, qcdnum_params, 
+                                                                  splint_params, quark_coeffs, ParErrs_i)
+        
+        for j in 1:nbins
+
+            counts_pred_ep_i[j] *= 1.0 + 0.018 * samples.v.Beta1 
+
+            if counts_pred_ep_i[j] < 0
+
+                @warn "Predicted counts (eP) found to be < 0, setting to 0" i j counts_pred_ep_i[j]
+                counts_pred_ep_i[j] = 0
+                
+            end
+
+            counts_pred_em_i[j] *= 1.0 + 0.018 * samples.v.Beta2 
+            
+            if counts_pred_em_i[j] < 0
+
+                @warn "Predicted counts (eM) found to be < 0, setting to 0" i j counts_pred_em_i[j]
+                counts_pred_em_i[j] = 0
+        
+            end
+            
+            counts_obs_ep_i[j] = rand(Poisson(counts_pred_ep_i[j]))
+            counts_obs_em_i[j] = rand(Poisson(counts_pred_em_i[j]))
+            
+        end
+        
+        p1 = scatter!(p1, 1:nbins, counts_obs_ep_i, label="", color=ep_color, 
+                      lw=3, alpha=0.01)
+        p2 = scatter!(p2, 1:nbins, counts_obs_em_i, label="", color=em_color, 
+                      lw=3, alpha=0.01)
+    
+    end
+  
+    return p1, p2
+end
+
+
+function plot_data_space_impl_sysErr(pdf_params::DirichletPDFParams, samples, qcdnum_params::QCDNUMParameters,
+                                     splint_params::SPLINTParameters, quark_coeffs::QuarkCoefficients,
+                                     p1, p2, nbins::Integer; ep_color=:firebrick, em_color=:teal)
+
+    for i in eachindex(samples)
+        
+        counts_obs_ep_i = zeros(UInt64, nbins)
+        counts_obs_em_i = zeros(UInt64, nbins)
+
+        pdf_params_i = DirichletPDFParams(K_u=samples.v.K_u[i], K_d=samples.v.K_d[i],
+                                          λ_g1=samples.v.λ_g1[i], λ_g2=samples.v.λ_g2[i],
+                                          K_g=samples.v.K_g[i], λ_q=samples.v.λ_q[i], 
+                                          θ=Vector(samples.v.θ[i]))
+
+        ParErrs_i = [samples.v.beta0_1[i], samples.v.beta0_2[i], samples.v.beta0_3[i],
+                     samples.v.beta0_4[i], samples.v.beta0_4[i], samples.v.beta0_5[i],
+                     samples.v.beta0_6[i], samples.v.beta0_7[i], samples.v.beta0_8[i]]
+
+        counts_pred_ep_i, counts_pred_em_i = forward_model_sysErr(pdf_params_i, qcdnum_params, 
+                                                                  splint_params, quark_coeffs, ParErrs_i)
+        
+        for j in 1:nbins
+
+            counts_pred_ep_i[j] *= 1 + 0.018 * samples.v.Beta1[i]
+
+            if counts_pred_ep_i[j] < 0
+
+                @warn "Predicted counts (eP) found to be < 0, setting to 0" i j counts_pred_ep_i[j]
+                counts_pred_ep_i[j] = 0
+                
+            end
+
+            counts_pred_em_i[j] *= 1 + 0.018 * samples.v.Beta2[i]
 
             if counts_pred_em_i[j] < 0
 
