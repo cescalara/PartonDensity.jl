@@ -29,8 +29,8 @@ function get_prior(pdf_params::BernDirPDFParams)
 
     prior = NamedTupleDist(
         θ = Dirichlet(pdf_params.weights),
-        initial_U = [Uniform(0.,1.)],
-        initial_D = [Uniform(0.,1.)],
+        initial_U = Uniform(0.,1.),
+        initial_D = Uniform(0.,1.),
         λ_g1 = Uniform(0, 1),
         λ_g2 = Uniform(-1, 0),
         K_g =  Uniform(2, 10),
@@ -103,8 +103,8 @@ function get_likelihood(pdf_params::BernDirPDFParams, sim_data::Dict{String, Any
 
         logfuncdensity(function (params)
             
-            pdf_params = BernDirPDFParams(initial_U = params.initial_U, 
-                                            initial_D = params.initial_D, 
+            pdf_params = BernDirPDFParams(initial_U = [params.initial_U], 
+                                            initial_D = [params.initial_D], 
                                             λ_g1=params.λ_g1, λ_g2=params.λ_g2,
                                             K_g=params.K_g, λ_q=params.λ_q, θ=Vector(params.θ))
             
