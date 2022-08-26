@@ -186,7 +186,7 @@ function plot_model_space_impl(x_grid::StepRangeLen{Float64}, pdf_params::BernDi
 
     for i in eachindex(samples)
 
-        pdf_params_i = BernDirPDFParams(initial_U=samples.v.initial_U[i], initial_D=samples.v.initial_D[i],
+        pdf_params_i = BernDirPDFParams(initial_U=[samples.v.initial_U[i]], initial_D=[samples.v.initial_D[i]],
                                         λ_g1=samples.v.λ_g1[i], λ_g2=samples.v.λ_g2[i],
                                         K_g=samples.v.K_g[i], λ_q=samples.v.λ_q[i], 
                                         θ=Vector(samples.v.θ[i]))
@@ -289,7 +289,7 @@ function plot_data_space_impl(pdf_params::BernDirPDFParams, samples, qcdnum_para
         counts_obs_ep_i = zeros(UInt64, nbins)
         counts_obs_em_i = zeros(UInt64, nbins)
 
-        pdf_params_i = BernDirPDFParams(initial_U=samples.v.initial_U[i], initial_D=samples.v.initial_D[i],
+        pdf_params_i = BernDirPDFParams(initial_U=[samples.v.initial_U[i]], initial_D=[samples.v.initial_D[i]],
                                         λ_g1=samples.v.λ_g1[i], λ_g2=samples.v.λ_g2[i],
                                         K_g=samples.v.K_g[i], λ_q=samples.v.λ_q[i], 
                                         θ=Vector(samples.v.θ[i]))
