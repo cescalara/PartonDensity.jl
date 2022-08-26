@@ -19,8 +19,8 @@ abstract type AbstractPDFParams end
     weights::Vector{Float64} = ones(9)
     θ::Vector{Float64} = rand(MersenneTwister(seed), Dirichlet(weights))
     bspoly_params::Vector{Vector{Int64}} = [[0,3], [0,4], [1,4]]
-    initial_U::Vector{Float64}
-    initial_D::Vector{Float64}
+    initial_U::Vector{Float64} = ones(length(bspoly_params)-2)
+    initial_D::Vector{Float64} = ones(length(bspoly_params)-2)
     U_list::Vector{Float64} = get_UD_list(θ[1], 2, initial_U, bspoly_params)
     D_list::Vector{Float64} = get_UD_list(θ[2], 1, initial_D, bspoly_params)
     λ_g1::Float64
