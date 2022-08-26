@@ -185,7 +185,7 @@ end
 
 Store the simulation truth and simulated data in an HDF5 file.
 """
-function pd_write_sim(file_name::String, pdf_params::AbstractPDFParams, sim_data::Dict{String, Any})
+function pd_write_sim(file_name::String, pdf_params::Union{ValencePDFParams, DirichletPDFParams}, sim_data::Dict{String, Any})
 
     h5open(file_name, "w") do fid
 
@@ -246,6 +246,15 @@ function pd_read_sim(file_name::String)
 
             pdf_params = DirichletPDFParams(λ_u=read(g["λ_u"]), K_u=read(g["K_u"]), 
                                             λ_d=read(g["λ_d"]), K_d=read(g["K_d"]),
+                                            λ_g1=read(g["λ_g1"]), λ_g2=read(g["λ_g2"]),
+                                            K_g=read(g["K_g"]), λ_q=read(g["λ_q"]),
+                                            seed=read(g["seed"]), weights=read(g["weights"]),
+                                            θ=read(g["θ"]))
+            
+        elseif read(g["param_type"]) == BERNSTEIN_TYPE
+            
+            pdf_params = BernsteinPDFParams(U_list=read(g["U_list"]), 
+                                            D_list=read(g["D_list"]),
                                             λ_g1=read(g["λ_g1"]), λ_g2=read(g["λ_g2"]),
                                             K_g=read(g["K_g"]), λ_q=read(g["λ_q"]),
                                             seed=read(g["seed"]), weights=read(g["weights"]),

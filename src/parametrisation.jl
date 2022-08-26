@@ -26,7 +26,7 @@ Full Dirichlet specification of input PDF parameters.
 @with_kw struct DirichletPDFParams <: AbstractPDFParams
     param_type::Integer = DIRICHLET_TYPE
     seed::Integer = 0
-    weights::Vector{Float64} = [1, 1, 1, 1, 1, 1, 1, 1, 1]
+    weights::Vector{Float64} = ones(9)
     θ::Vector{Float64} = rand(MersenneTwister(seed), Dirichlet(weights))
     K_u::Float64
     λ_u::Float64 = (θ[1] * (K_u + 1)) / (2 - θ[1])
@@ -55,7 +55,7 @@ Valence specification of input PDF parameters.
     K_g::Float64
     λ_q::Float64
     seed::Integer = 0
-    weights::Vector{Float64} = [1, 1, 1, 1, 1, 1, 1]
+    weights::Vector{Float64} = ones(7)
     θ::Vector{Float64} = get_dirichlet_samples(λ_u, K_u, λ_d, K_d, seed, weights)
 end
 
