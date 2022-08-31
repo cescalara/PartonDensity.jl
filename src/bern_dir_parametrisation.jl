@@ -19,10 +19,11 @@ abstract type AbstractPDFParams end
     weights::Vector{Float64} = ones(9)
     θ::Vector{Float64} = rand(MersenneTwister(seed), Dirichlet(weights))
     bspoly_params::Vector{Vector{Int64}} = [[0,3], [0,4], [1,4]]
+    bspoly_params_d::Vector{Vector{Int64}} = bspoly_params
     initial_U::Vector{Float64} = ones(length(bspoly_params)-2)
-    initial_D::Vector{Float64} = ones(length(bspoly_params)-2)
+    initial_D::Vector{Float64} = ones(length(bspoly_params_d)-2)
     U_list::Vector{Float64} = get_UD_list(θ[1], 2, initial_U, bspoly_params)
-    D_list::Vector{Float64} = get_UD_list(θ[2], 1, initial_D, bspoly_params)
+    D_list::Vector{Float64} = get_UD_list(θ[2], 1, initial_D, bspoly_params_d)
     λ_g1::Float64
     λ_g2::Float64
     K_g::Float64
@@ -139,7 +140,7 @@ function xtotx(x::Float64, pdf_params::BernDirPDFParams)
     
     xux = x_uv_x(x, pdf.U_list, pdf.bspoly_params)
     
-    xdx = x_dv_x(x, pdf.D_list, pdf.bspoly_params)
+    xdx = x_dv_x(x, pdf.D_list, pdf.bspoly_params_d)
     
     xgx = x_g_x(x, pdf.λ_g1, pdf.λ_g2, pdf.K_g, pdf.θ[3], pdf.θ[4])
     
@@ -162,7 +163,7 @@ function int_xtotx(pdf_params::BernDirPDFParams)
     pdf = pdf_params
     
     I_u = xfx_int(pdf.U_list, pdf.bspoly_params)
-    I_d = xfx_int(pdf.D_list, pdf.bspoly_params)
+    I_d = xfx_int(pdf.D_list, pdf.bspoly_params_d)
     
     A_g1 = pdf.θ[3] / sf.beta(pdf.λ_g1 + 1, pdf.K_g + 1)
     A_g2 = pdf.θ[4] / sf.beta(pdf.λ_g2 + 1, 5 + 1)
@@ -188,7 +189,7 @@ function plot_input_pdfs(pdf_params::BernDirPDFParams, xmin::Float64=1.0e-2,
     pdf = pdf_params
 
     p = plot(x_grid, [x_uv_x(x, pdf.U_list, pdf.bspoly_params) for x in x_grid], label="x uv(x)", lw=3)
-    p = plot!(x_grid, [x_dv_x(x, pdf.D_list, pdf.bspoly_params) for x in x_grid], label="x dv(x)", lw=3)
+    p = plot!(x_grid, [x_dv_x(x, pdf.D_list, pdf.bspoly_params_d) for x in x_grid], label="x dv(x)", lw=3)
 
     p = plot!(x_grid, [x_g_x(x, pdf.λ_g1, pdf.λ_g2, pdf.K_g, pdf.θ[1], pdf.θ[2]) 
                        for x in x_grid], label="x g(x)", lw=3)    
@@ -232,7 +233,7 @@ function get_input_pdf_func(pdf_params::BernDirPDFParams)::Function
 
         # d valence
         if (i == 2)
-            f = x_dv_x(x, pdf.D_list, pdf.bspoly_params)
+            f = x_dv_x(x, pdf.D_list, pdf.bspoly_params_d)
         end
 
         # ubar
