@@ -11,7 +11,7 @@ using QCDNUM
 using Plots, Random, Distributions, ValueShapes, ParallelProcessingTools
 using StatsBase, LinearAlgebra
 
-gr(fmt=:png); 
+gr(fmt=:png);
 
 # ## Simulate some data
 
@@ -29,8 +29,8 @@ Random.seed!(seed) # for reproducibility
 # See the *Input PDF parametrisation and priors* example for more information on the
 # definition of the input PDFs. Here, we use the Dirichlet parametrisation.
 
-pdf_params = DirichletPDFParams(K_u=4.0, K_d=4.0, λ_g1=1.5, λ_g2=-0.4, K_g=6.0, 
-                                λ_q=-0.25, weights=[30., 15., 12., 6., 3.6, 0.85, 0.85, 0.85, 0.85]);
+pdf_params = DirichletPDFParams(K_u=4.0, K_d=4.0, λ_g1=1.5, λ_g2=-0.4, K_g=6.0,
+    λ_q=-0.25, K_q=5, weights=[30.0, 15.0, 12.0, 6.0, 3.6, 0.85, 0.85, 0.85, 0.85]);
 
 @info "Valence λ:" pdf_params.λ_u pdf_params.λ_d
 
@@ -44,9 +44,9 @@ plot_input_pdfs(pdf_params)
 
 # first specify QCDNUM inputs
 qcdnum_grid = QCDNUMGrid(x_min=[1.0e-3, 1.0e-1, 5.0e-1], x_weights=[1, 2, 2], nx=100,
-                         qq_bounds=[1.0e2, 3.0e4], qq_weights=[1.0, 1.0], nq=50, spline_interp=3)
+    qq_bounds=[1.0e2, 3.0e4], qq_weights=[1.0, 1.0], nq=50, spline_interp=3)
 qcdnum_params = QCDNUMParameters(order=2, α_S=0.118, q0=100.0, grid=qcdnum_grid,
-                                 n_fixed_flav=5, iqc=1, iqb=1, iqt=1, weight_type=1);
+    n_fixed_flav=5, iqc=1, iqb=1, iqt=1, weight_type=1);
 
 # now SPLINT and quark coefficients
 splint_params = SPLINTParameters();
@@ -56,7 +56,7 @@ quark_coeffs = QuarkCoefficients();
 forward_model_init(qcdnum_grid, qcdnum_params, splint_params)
 
 # run forward model 
-counts_pred_ep, counts_pred_em = forward_model(pdf_params, qcdnum_params, 
+counts_pred_ep, counts_pred_em = forward_model(pdf_params, qcdnum_params,
     splint_params, quark_coeffs);
 
 #
@@ -79,7 +79,7 @@ scatter!(1:nbins, counts_obs_em, label="Detected counts (eM)", color="red")
 plot!(xlabel="Bin number")
 
 # store
-sim_data = Dict{String, Any}()
+sim_data = Dict{String,Any}()
 sim_data["nbins"] = nbins;
 sim_data["counts_obs_ep"] = counts_obs_ep;
 sim_data["counts_obs_em"] = counts_obs_em;
@@ -94,13 +94,14 @@ pd_write_sim("output/simulation.h5", pdf_params, sim_data)
 # For now, let's try relatively narrow priors centred on the true values.
 
 prior = NamedTupleDist(
-    θ = Dirichlet(pdf_params.weights),
-    K_u = Uniform(3., 7.),
-    K_d = Uniform(3., 7.),
-    λ_g1 = Uniform(1., 2.),
-    λ_g2 = Uniform(-0.5, -0.1),
-    K_g =  Uniform(3., 7.),
-    λ_q = Uniform(-0.5, -0.1),
+    θ=Dirichlet(pdf_params.weights),
+    K_u=Uniform(3.0, 7.0),
+    K_d=Uniform(3.0, 7.0),
+    λ_g1=Uniform(1.0, 2.0),
+    λ_g2=Uniform(-0.5, -0.1),
+    K_g=Uniform(3.0, 7.0),
+    λ_q=Uniform(-0.5, -0.1),
+    K_q=Uniform(3.0, 7.0),
 );
 
 # The likelihood is similar to that used in the *input PDF parametrisation* example.
@@ -118,38 +119,38 @@ likelihood = let d = sim_data
     nbins = d["nbins"]
 
     logfuncdensity(function (params)
-         
-            pdf_params = DirichletPDFParams(K_u=params.K_u, K_d=params.K_d, λ_g1=params.λ_g1, λ_g2=params.λ_g2,
-                                            K_g=params.K_g, λ_q=params.λ_q, θ=params.θ)
 
-            #Ensure u-valence weight > d-valence weight
-            if params.θ[2] > params.θ[1]
-                   
-                return -Inf
-            
-            end
-                   
-            counts_pred_ep, counts_pred_em = @critical forward_model(pdf_params, 
-                qcdnum_params, splint_params, quark_coeffs);
+        pdf_params = DirichletPDFParams(K_u=params.K_u, K_d=params.K_d, λ_g1=params.λ_g1, λ_g2=params.λ_g2,
+            K_g=params.K_g, λ_q=params.λ_q, K_q=params.K_q, θ=params.θ)
 
-            ll_value = 0.0
-            for i in 1:nbins
-                
-                if counts_pred_ep[i] < 0
-                   @debug "counts_pred_ep[i] < 0, setting to 0" i counts_pred_ep[i]
-                   counts_pred_ep[i] = 0
-                end
+        #Ensure u-valence weight > d-valence weight
+        if params.θ[2] > params.θ[1]
 
-                if counts_pred_em[i] < 0
-                   @debug "counts_pred_em[i] < 0, setting to 0" i counts_pred_em[i]
-                   counts_pred_em[i] = 0
-                end
-                   
-                ll_value += logpdf(Poisson(counts_pred_ep[i]), counts_obs_ep[i])
-                ll_value += logpdf(Poisson(counts_pred_em[i]), counts_obs_em[i])
+            return -Inf
+
+        end
+
+        counts_pred_ep, counts_pred_em = @critical forward_model(pdf_params,
+            qcdnum_params, splint_params, quark_coeffs)
+
+        ll_value = 0.0
+        for i in 1:nbins
+
+            if counts_pred_ep[i] < 0
+                @debug "counts_pred_ep[i] < 0, setting to 0" i counts_pred_ep[i]
+                counts_pred_ep[i] = 0
             end
 
-            return ll_value
+            if counts_pred_em[i] < 0
+                @debug "counts_pred_em[i] < 0, setting to 0" i counts_pred_em[i]
+                counts_pred_em[i] = 0
+            end
+
+            ll_value += logpdf(Poisson(counts_pred_ep[i]), counts_obs_ep[i])
+            ll_value += logpdf(Poisson(counts_pred_em[i]), counts_obs_em[i])
+        end
+
+        return ll_value
     end)
 end
 
@@ -239,16 +240,16 @@ hline!([pdf_params.θ[2]], color="black", label="true θ[2]", lw=3)
 
 # Using BAT recipe
 function wrap_xtotx(p::NamedTuple, x::Real)
-    pdf_params = DirichletPDFParams(K_u=p.K_u, K_d=p.K_d, λ_g1=p.λ_g1, 
-                                    λ_g2=p.λ_g2, K_g=p.K_g, λ_q=p.λ_q, θ=p.θ)
+    pdf_params = DirichletPDFParams(K_u=p.K_u, K_d=p.K_d, λ_g1=p.λ_g1,
+        λ_g2=p.λ_g2, K_g=p.K_g, λ_q=p.λ_q, K_q=p.K_q, θ=p.θ)
     return log(xtotx(x, pdf_params))
 end
 
 x_grid = range(1e-3, stop=1, length=50)
-plot(x_grid, wrap_xtotx, samples, colors=[:skyblue4, :skyblue3, :skyblue1], 
-     legend=:topright)
-plot!(x_grid, [log(xtotx(x, pdf_params)) for x in x_grid], color="black", lw=3, 
-      label="Truth", linestyle=:dash)
+plot(x_grid, wrap_xtotx, samples, colors=[:skyblue4, :skyblue3, :skyblue1],
+    legend=:topright)
+plot!(x_grid, [log(xtotx(x, pdf_params)) for x in x_grid], color="black", lw=3,
+    label="Truth", linestyle=:dash)
 plot!(ylabel="log(xtotx)")
 
 # Using `PartonDensity.jl`
@@ -257,8 +258,8 @@ plot_model_space(pdf_params, samples, nsamples=500)
 # Alternatively, we can also visualise the implications of the fit
 # in the *data space*, as shown below. 
 
-plot_data_space(pdf_params, sim_data, samples, qcdnum_grid, qcdnum_params, 
-                splint_params, quark_coeffs, nsamples=500)
+plot_data_space(pdf_params, sim_data, samples, qcdnum_grid, qcdnum_params,
+    splint_params, quark_coeffs, nsamples=500)
 
 # The first results seem promising, but these are really just first checks
 # and more work will have to be done to verify the method.
