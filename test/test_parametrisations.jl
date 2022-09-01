@@ -2,7 +2,6 @@ using PartonDensity
 using Test
 using Random, Distributions
 using Plots, ValueShapes
-import BAT
 
 @testset "Valence PDF parametrisation" begin
 
