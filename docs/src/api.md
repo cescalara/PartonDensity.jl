@@ -1,5 +1,5 @@
 # API
 
 ```@autodocs
-Modules = [PartonDensity]
+Modules = [PartonDensity, PartonDensity.fit]
 ```
