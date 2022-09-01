@@ -1,6 +1,7 @@
 using ValueShapes
 using ParallelProcessingTools
 using DensityInterface
+using BAT
 
 export get_prior, get_likelihood
 export plot_model_space, plot_data_space
@@ -176,7 +177,7 @@ function plot_model_space(pdf_params::AbstractPDFParams, samples; xmin::Float64=
     p = plot(x_grid, [xtotx(x, pdf_params) for x in x_grid], color=truth_color,
         lw=3, label="Truth")
 
-    sub_samples = BAT.bat_sample(samples, BAT.OrderedResampling(nsamples=nsamples)).result
+    sub_samples = bat_sample(samples, OrderedResampling(nsamples=nsamples)).result
 
     p = plot_model_space_impl(x_grid, pdf_params, sub_samples, p, color=sample_color)
 
@@ -249,7 +250,7 @@ function plot_data_space(pdf_params::AbstractPDFParams, sim_data::Dict{String,An
     p2 = scatter(1:nbins, sim_data["counts_obs_em"], label="Observed counts (eM)",
         color=em_color, lw=3)
 
-    sub_samples = BAT.bat_sample(samples, BAT.OrderedResampling(nsamples=nsamples)).result
+    sub_samples = bat_sample(samples, OrderedResampling(nsamples=nsamples)).result
 
     p1, p2 = plot_data_space_impl(pdf_params, sub_samples, qcdnum_params,
         splint_params, quark_coeffs, p1, p2, nbins)
@@ -384,7 +385,7 @@ function plot_data_space_sysErr(pdf_params::AbstractPDFParams, sim_data::Dict{St
     p2 = scatter(1:nbins, sim_data["counts_obs_em"], label="Observed counts (eM)",
         color=em_color, lw=3)
 
-    sub_samples = BAT.bat_sample(samples, BAT.OrderedResampling(nsamples=nsamples)).result
+    sub_samples = bat_sample(samples, OrderedResampling(nsamples=nsamples)).result
 
     p1, p2 = plot_data_space_impl_sysErr(pdf_params, sub_samples, qcdnum_params,
         splint_params, quark_coeffs, p1, p2, nbins)
