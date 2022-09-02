@@ -60,7 +60,8 @@ function get_likelihood(pdf_params::BernsteinPDFParams, sim_data::Dict{String, A
             
             pdf_params = BernsteinPDFParams(U_list=U_list, D_list=D_list, 
                                             λ_g1=params.λ_g1, λ_g2=params.λ_g2,
-                                            K_g=params.K_g, λ_q=params.λ_q, θ=θ)
+                                            K_g=params.K_g, λ_q=params.λ_q, θ=θ, 
+                                            bspoly_params = Vector(params.bspoly_params))
             
             counts_pred_ep, counts_pred_em = @critical forward_model(pdf_params, qcdnum_params,
                                                                      splint_params, quark_coeffs)
@@ -106,7 +107,8 @@ function get_likelihood(pdf_params::BernDirPDFParams, sim_data::Dict{String, Any
             pdf_params = BernDirPDFParams(initial_U = [params.initial_U], 
                                             initial_D = [params.initial_D], 
                                             λ_g1=params.λ_g1, λ_g2=params.λ_g2,
-                                            K_g=params.K_g, λ_q=params.λ_q, θ=Vector(params.θ))
+                                            K_g=params.K_g, λ_q=params.λ_q, θ=Vector(params.θ), 
+                                            bspoly_params = Vector(params.bspoly_params))
             
             counts_pred_ep, counts_pred_em = @critical forward_model(pdf_params, qcdnum_params,
                                                                      splint_params, quark_coeffs)
