@@ -12,7 +12,7 @@ include("cross_section.jl")
 include("forward_model.jl")
 include("forward_model_sysErr.jl")
 include("zeus.jl")
-include("Bernstein_forward_model.jl")
+include("bernstein_forward_model.jl")
 
 using Requires
 function __init__()

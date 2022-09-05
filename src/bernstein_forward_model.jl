@@ -8,7 +8,7 @@ qcdnum_evolfg_ϵ_values = Vector{Float64}()
 splint_init_complete = false
 
 
-function forward_model(pdf_params::Union{BernsteinPDFParams, BernDirPDFParams}, qcdnum_params::QCDNUMParameters,
+function forward_model(pdf_params::Union{BernsteinPDFParams, BernsteinDirichletPDFParams}, qcdnum_params::QCDNUMParameters,
                        splint_params::SPLINTParameters, quark_coeffs::QuarkCoefficients)
 
 
@@ -101,7 +101,7 @@ function forward_model(pdf_params::Union{BernsteinPDFParams, BernDirPDFParams}, 
 end
 
       
-function pd_write_sim(file_name::String, pdf_params::Union{BernsteinPDFParams, BernDirPDFParams}, sim_data::Dict{String, Any})
+function pd_write_sim(file_name::String, pdf_params::Union{BernsteinPDFParams, BernsteinDirichletPDFParams}, sim_data::Dict{String, Any})
 
     h5open(file_name, "w") do fid
 

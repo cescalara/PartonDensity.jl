@@ -25,8 +25,12 @@ function get_prior(pdf_params::BernsteinPDFParams)
     return prior
 end
 
+"""
+Placeholder function for priors.
+"""
 
-function get_prior(pdf_params::BernDirPDFParams)
+
+function get_prior(pdf_params:BernsteinDirichletPDFParams)
 
     prior = NamedTupleDist(
         θ = Dirichlet(pdf_params.weights),
@@ -93,7 +97,7 @@ function get_likelihood(pdf_params::BernsteinPDFParams, sim_data::Dict{String, A
 end
 
 
-function get_likelihood(pdf_params::BernDirPDFParams, sim_data::Dict{String, Any},
+function get_likelihood(pdf_params::BernsteinDirichletPDFParams, sim_data::Dict{String, Any},
                         qcdnum_params::QCDNUMParameters, splint_params::SPLINTParameters,
                         quark_coeffs::QuarkCoefficients)
 
@@ -105,7 +109,7 @@ function get_likelihood(pdf_params::BernDirPDFParams, sim_data::Dict{String, Any
 
         logfuncdensity(function (params)
             
-            pdf_params = BernDirPDFParams(initial_U = [params.initial_U], 
+            pdf_params = BernsteinDirichletPDFParams(initial_U = [params.initial_U], 
                                             initial_D = [params.initial_D], 
                                             λ_g1=params.λ_g1, λ_g2=params.λ_g2,
                                             K_g=params.K_g, λ_q=params.λ_q, θ=Vector(params.θ), 
@@ -185,11 +189,11 @@ function plot_model_space_impl(x_grid::StepRangeLen{Float64}, pdf_params::Bernst
 end
 
 
-function plot_model_space_impl(x_grid::StepRangeLen{Float64}, pdf_params::BernDirPDFParams, samples, p; color=:skyblue3)
+function plot_model_space_impl(x_grid::StepRangeLen{Float64}, pdf_params::BernsteinDirichletPDFParams, samples, p; color=:skyblue3)
 
     for i in eachindex(samples)
 
-        pdf_params_i = BernDirPDFParams(initial_U=[samples.v.initial_U[i]], initial_D=[samples.v.initial_D[i]],
+        pdf_params_i = BernsteinDirichletPDFParams(initial_U=[samples.v.initial_U[i]], initial_D=[samples.v.initial_D[i]],
                                         λ_g1=samples.v.λ_g1[i], λ_g2=samples.v.λ_g2[i],
                                         K_g=samples.v.K_g[i], λ_q=samples.v.λ_q[i], 
                                         θ=Vector(samples.v.θ[i]))
@@ -283,7 +287,7 @@ function plot_data_space_impl(pdf_params::BernsteinPDFParams, samples, qcdnum_pa
 end
 
 
-function plot_data_space_impl(pdf_params::BernDirPDFParams, samples, qcdnum_params::QCDNUMParameters,
+function plot_data_space_impl(pdf_params::BernsteinDirichletPDFParams, samples, qcdnum_params::QCDNUMParameters,
                               splint_params::SPLINTParameters, quark_coeffs::QuarkCoefficients,
                               p1, p2, nbins::Integer; ep_color=:firebrick, em_color=:teal)
 
@@ -292,7 +296,7 @@ function plot_data_space_impl(pdf_params::BernDirPDFParams, samples, qcdnum_para
         counts_obs_ep_i = zeros(UInt64, nbins)
         counts_obs_em_i = zeros(UInt64, nbins)
 
-        pdf_params_i = BernDirPDFParams(initial_U=[samples.v.initial_U[i]], initial_D=[samples.v.initial_D[i]],
+        pdf_params_i = BernsteinDirichletPDFParams(initial_U=[samples.v.initial_U[i]], initial_D=[samples.v.initial_D[i]],
                                         λ_g1=samples.v.λ_g1[i], λ_g2=samples.v.λ_g2[i],
                                         K_g=samples.v.K_g[i], λ_q=samples.v.λ_q[i], 
                                         θ=Vector(samples.v.θ[i]))
