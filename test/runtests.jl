@@ -4,6 +4,5 @@ using Test
 
     include("test_parametrisations.jl")
     include("test_forward_model.jl")
-    include("test_Bernsteinparametrisation.jl")
-    
+
 end

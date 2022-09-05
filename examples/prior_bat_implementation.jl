@@ -8,7 +8,7 @@ using Plots, SpecialFunctions, Printf, Random, ValueShapes
 using BAT, DensityInterface
 const sf = SpecialFunctions;
 
-gr(fmt=:png); 
+gr(fmt=:png);
 
 # ## Simple two-component model: gluons 
 #
@@ -37,14 +37,14 @@ function xg1x(x, λ_g1, K_g, θ_1)
     return A_g1 * x^λ_g1 * (1 - x)^K_g
 end
 
-function xg2x(x, λ_g2, θ_2)
-    A_g2 = θ_2 / sf.beta(λ_g2 + 1, 5 + 1)
-    return A_g2 * x^λ_g2 * (1 - x)^5
+function xg2x(x, λ_g2, K_q, θ_2)
+    A_g2 = θ_2 / sf.beta(λ_g2 + 1, K_q + 1)
+    return A_g2 * x^λ_g2 * (1 - x)^K_q
 end
 
-function xgx(x, λ_g1, λ_g2, K_g, θ)
+function xgx(x, λ_g1, λ_g2, K_g, K_q, θ)
     xg1 = xg1x(x, λ_g1, K_g, θ[1])
-    xg2 = xg2x(x, λ_g2, θ[2])
+    xg2 = xg2x(x, λ_g2, K_q, θ[2])
     return xg1 + xg2
 end
 
@@ -54,27 +54,28 @@ end
 λ_g1 = 0.5 # rand(Uniform(0, 1))
 λ_g2 = -0.7 # rand(Uniform(-1, 0))
 K_g = 3 # rand(Uniform(2, 10))
-truths = (θ = θ, λ_g1 = λ_g1, λ_g2 = λ_g2, K_g = K_g);
+K_q = 5
+truths = (θ=θ, λ_g1=λ_g1, λ_g2=λ_g2, K_g=K_g, K_q=K_q);
 
-A_g1 = θ[1] / sf.beta(λ_g1+1, K_g+1)
-A_g2 = θ[2] / sf.beta(λ_g2+1, 5+1);
+A_g1 = θ[1] / sf.beta(λ_g1 + 1, K_g + 1)
+A_g2 = θ[2] / sf.beta(λ_g2 + 1, K_q + 1);
 
 # Check integral = 1
-total = A_g1 * sf.beta(λ_g1+1, K_g+1) + A_g2 * sf.beta(λ_g2+1, 5+1)
+total = A_g1 * sf.beta(λ_g1 + 1, K_g + 1) + A_g2 * sf.beta(λ_g2 + 1, K_q + 1)
 print("Integral = ", total)
 
 # Plot true model
 x_grid = range(0, stop=1, length=50)
 
-xg1 = A_g1 * x_grid.^λ_g1 .* (1 .- x_grid).^K_g
-xg2 = A_g2 * x_grid.^λ_g2 .* (1 .- x_grid).^5
+xg1 = A_g1 * x_grid .^ λ_g1 .* (1 .- x_grid) .^ K_g
+xg2 = A_g2 * x_grid .^ λ_g2 .* (1 .- x_grid) .^ K_q
 
-plot(x_grid, [xg1x(x, λ_g1, K_g, θ[1]) for x in x_grid], 
-      alpha=0.7, label="x g1(x)", lw=3, color="green")
-plot!(x_grid, [xg2x(x, λ_g2, θ[2]) for x in x_grid], 
-     alpha=0.7, label="x g2(x)", lw=3, color="blue")
-plot!(x_grid, [xgx(x, λ_g1, λ_g2, K_g, θ) for x in x_grid],
-      alpha=0.7, label="x g1(x) + x g2(x)", lw=3, color="red")
+plot(x_grid, [xg1x(x, λ_g1, K_g, θ[1]) for x in x_grid],
+    alpha=0.7, label="x g1(x)", lw=3, color="green")
+plot!(x_grid, [xg2x(x, λ_g2, K_q, θ[2]) for x in x_grid],
+    alpha=0.7, label="x g2(x)", lw=3, color="blue")
+plot!(x_grid, [xgx(x, λ_g1, λ_g2, K_g, K_q, θ) for x in x_grid],
+    alpha=0.7, label="x g1(x) + x g2(x)", lw=3, color="red")
 plot!(xlabel="x")
 
 # Now, for the purposes of testing the prior implementation,
@@ -96,12 +97,12 @@ nbins = size(bin_centers)[1]
 expected_counts = zeros(nbins)
 observed_counts = zeros(Integer, nbins)
 for i in 1:nbins
-    xg = xgx(bin_centers[i], λ_g1, λ_g2, K_g, θ) * N
-    expected_counts[i] = bin_widths[i] * xg 
+    xg = xgx(bin_centers[i], λ_g1, λ_g2, K_g, K_q, θ) * N
+    expected_counts[i] = bin_widths[i] * xg
     observed_counts[i] = rand(Poisson(expected_counts[i]))
 end
 
-plot(bin_centers, [xgx(x, λ_g1, λ_g2, K_g, θ) for x in bin_centers] .* bin_widths * N,
+plot(bin_centers, [xgx(x, λ_g1, λ_g2, K_g, K_q, θ) for x in bin_centers] .* bin_widths * N,
     alpha=0.7, label="Expected", lw=3, color="red")
 scatter!(bin_centers, observed_counts, lw=3, label="Observed", color="black")
 
@@ -115,7 +116,7 @@ data["bin_widths"] = bin_widths;
 
 # ### Fit
 #
-# To fit this example data, we choose a prior over our hyperparameters `θ`, `λ_g1`, `λ_g2` and `K_g`.
+# To fit this example data, we choose a prior over our hyperparameters `θ`, `λ_g1`, `λ_g2`, `K_g` and `K_q`.
 #
 # We decide to choose a sensible Dirichlet prior, and have a look at
 # some samples to help understand what this means.
@@ -135,10 +136,11 @@ plot!(append!(Histogram(0:0.1:1), test[2, :]))
 # ```
 
 prior = NamedTupleDist(
-    θ = Dirichlet([1, 1]),
-    λ_g1 = Uniform(0, 1), #Truncated(Normal(0.7, 0.1), 0, 1)
-    λ_g2 = Uniform(-1, 0), #Truncated(Normal(-0.7, 0.1), -1, 0),
-    K_g =  Uniform(2, 10), # Truncated(Normal(1, 2), 2, 10),
+    θ=Dirichlet([1, 1]),
+    λ_g1=Uniform(0, 1), #Truncated(Normal(0.7, 0.1), 0, 1)
+    λ_g2=Uniform(-1, 0), #Truncated(Normal(-0.7, 0.1), -1, 0),
+    K_g=Uniform(2, 10), # Truncated(Normal(1, 2), 2, 10),
+    K_q=Uniform(4, 6),
 );
 
 # Define a simple poisson likelihood that describes the test data that we generated above.
@@ -150,10 +152,10 @@ likelihood = let d = data, f = xgx
     bin_widths = d["bin_widths"]
     N = data["N"]
 
-    logfuncdensity(function (params) 
+    logfuncdensity(function (params)
         function bin_log_likelihood(i)
             xg = f(
-                bin_centers[i], params.λ_g1, params.λ_g2, params.K_g, params.θ
+                bin_centers[i], params.λ_g1, params.λ_g2, params.K_g, params.K_q, params.θ
             )
             expected_counts = bin_widths[i] * xg * N
             logpdf(Poisson(expected_counts), observed_counts[i])
@@ -174,7 +176,7 @@ end
 
 posterior = PosteriorDensity(likelihood, prior);
 samples = bat_sample(
-    posterior, 
+    posterior,
     MCMCSampling(mcalg=MetropolisHastings(), nsteps=10^4, nchains=4)
 ).result;
 
@@ -191,13 +193,13 @@ sub_samples = bat_sample(samples, OrderedResampling(nsamples=200)).result
 plot()
 for i in eachindex(sub_samples)
     s = sub_samples[i].v
-    xg = [xgx(x, s.λ_g1, s.λ_g2, s.K_g, s.θ) for x in bin_centers]
-    plot!(bin_centers, xg .* bin_widths * N, alpha=0.1, lw=3, 
+    xg = [xgx(x, s.λ_g1, s.λ_g2, s.K_g, s.K_q, s.θ) for x in bin_centers]
+    plot!(bin_centers, xg .* bin_widths * N, alpha=0.1, lw=3,
         color="darkorange", label="",)
 end
 
-xg = [xgx(x, λ_g1, λ_g2, K_g, θ) for x in bin_centers]
-plot!(bin_centers, xg .* bin_widths * N, alpha=0.7, 
+xg = [xgx(x, λ_g1, λ_g2, K_g, K_q, θ) for x in bin_centers]
+plot!(bin_centers, xg .* bin_widths * N, alpha=0.7,
     label="Expected", lw=3, color="red")
 
 scatter!(bin_centers, observed_counts, lw=3, label="Observed", color="black")
@@ -210,8 +212,8 @@ plot!(xlabel="x")
 # We can also look at marginal distributions for different parameters...
 plot(
     samples, :(λ_g1),
-    mean = true, std = true,
-    nbins = 50, 
+    mean=true, std=true,
+    nbins=50,
 )
 
 # ## Full model with all components
@@ -228,9 +230,9 @@ using PartonDensity
 
 #
 
-pdf_params = ValencePDFParams(λ_u=0.7, K_u=4.0, λ_d=0.5, K_d=6.0, 
-                           λ_g1=0.7, λ_g2=-0.4, K_g=6.0, λ_q=-0.5,
-                           weights=[1, 0.5, 0.3, 0.2, 0.1, 0.1, 0.1])
+pdf_params = ValencePDFParams(λ_u=0.7, K_u=4.0, λ_d=0.5, K_d=6.0,
+    λ_g1=0.7, λ_g2=-0.4, K_g=6.0, λ_q=-0.5, K_q=5,
+    weights=[1, 0.5, 0.3, 0.2, 0.1, 0.1, 0.1])
 
 # Sanity check
 
@@ -253,14 +255,14 @@ expected_counts = zeros(nbins)
 observed_counts = zeros(Integer, nbins)
 for i in 1:nbins
     xt = xtotx(bin_centers[i], pdf_params) * N
-    expected_counts[i] = bin_widths[i] * xt 
+    expected_counts[i] = bin_widths[i] * xt
     observed_counts[i] = rand(Poisson(expected_counts[i]))
 end
 
 # Plot data and expectation
 
 plot(bin_centers, [xtotx(x, pdf_params) for x in bin_centers] .* bin_widths * N,
-     alpha=0.7, label="Expected", lw=3, color="red")
+    alpha=0.7, label="Expected", lw=3, color="red")
 scatter!(bin_centers, observed_counts, lw=3, label="Observed", color="black")
 
 # Store the data 
@@ -276,15 +278,16 @@ data["bin_widths"] = bin_widths;
 # Prior
 
 prior = NamedTupleDist(
-    θ = Dirichlet(pdf_params.weights),
-    λ_u = Truncated(Normal(pdf_params.λ_u, 0.5), 0, 1), #  Uniform(0, 1),
-    K_u = Truncated(Normal(pdf_params.K_u, 1), 2, 10),
-    λ_d = Truncated(Normal(pdf_params.λ_d, 0.5), 0, 1), # Uniform(0, 1),
-    K_d = Truncated(Normal(pdf_params.K_d, 1), 2, 10),
-    λ_g1 = Truncated(Normal(pdf_params.λ_g1, 1), 0, 1), 
-    λ_g2 = Truncated(Normal(pdf_params.λ_g2, 1), -1, 0), 
-    K_g = Truncated(Normal(pdf_params.K_g, 1), 2, 10),
-    λ_q = Truncated(Normal(pdf_params.λ_q, 0.1), -1, 0),
+    θ=Dirichlet(pdf_params.weights),
+    λ_u=Truncated(Normal(pdf_params.λ_u, 0.5), 0, 1), #  Uniform(0, 1),
+    K_u=Truncated(Normal(pdf_params.K_u, 1), 2, 10),
+    λ_d=Truncated(Normal(pdf_params.λ_d, 0.5), 0, 1), # Uniform(0, 1),
+    K_d=Truncated(Normal(pdf_params.K_d, 1), 2, 10),
+    λ_g1=Truncated(Normal(pdf_params.λ_g1, 1), 0, 1),
+    λ_g2=Truncated(Normal(pdf_params.λ_g2, 1), -1, 0),
+    K_g=Truncated(Normal(pdf_params.K_g, 1), 2, 10),
+    λ_q=Truncated(Normal(pdf_params.λ_q, 0.1), -1, 0),
+    K_q=Truncated(Normal(pdf_params.K_q, 0.5), 3, 7)
 );
 
 # Likelihood
@@ -296,10 +299,10 @@ likelihood = let d = data, f = xtotx
     bin_widths = d["bin_widths"]
     N = data["N"]
 
-    logfuncdensity(function (params) 
+    logfuncdensity(function (params)
         function bin_log_likelihood(i)
-            xt = f(bin_centers[i], params.λ_u, params.K_u, params.λ_d, params.K_d, 
-                    params.λ_g1, params.λ_g2, params.K_g, params.λ_q, Vector(params.θ))
+            xt = f(bin_centers[i], params.λ_u, params.K_u, params.λ_d, params.K_d,
+                params.λ_g1, params.λ_g2, params.K_g, params.λ_q, params.K_q, Vector(params.θ))
             expected_counts = bin_widths[i] * xt * N
             if expected_counts < 0
                 expected_counts = 1e-3
@@ -331,9 +334,9 @@ sub_samples = bat_sample(samples, OrderedResampling(nsamples=200)).result
 plot()
 for i in eachindex(sub_samples)
     s = sub_samples[i].v
-    xt = [xtotx(x, s.λ_u, s.K_u, s.λ_d, s.K_d, 
-            s.λ_g1, s.λ_g2, s.K_g, s.λ_q, Vector(s.θ)) for x in bin_centers]
-    plot!(bin_centers, xt .* bin_widths * N, alpha=0.1, lw=3, 
+    xt = [xtotx(x, s.λ_u, s.K_u, s.λ_d, s.K_d,
+        s.λ_g1, s.λ_g2, s.K_g, s.λ_q, s.K_q, Vector(s.θ)) for x in bin_centers]
+    plot!(bin_centers, xt .* bin_widths * N, alpha=0.1, lw=3,
         color="darkorange", label="")
 end
 xt = [xtotx(x, pdf_params) for x in bin_centers]

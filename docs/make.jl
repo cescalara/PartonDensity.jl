@@ -1,7 +1,8 @@
-push!(LOAD_PATH,"../src/")
+push!(LOAD_PATH, "../src/")
 
 using Documenter, PartonDensity
 using Literate
+import BAT
 
 # Generate examples notebooks
 
@@ -24,16 +25,16 @@ Literate.markdown(bat_dirichlet_src, gen_content_dir, name="bat_fit_dirichlet")
 Introduction = "Introduction" => "index.md"
 
 Examples = "Examples" => ["pdf_parametrisation.md",
-                          "zeus_interface.md", "forward_model.md",
-                          "prior_bat_implementation.md", "bat_fit_valence.md", "bat_fit_dirichlet.md"]
+    "zeus_interface.md", "forward_model.md",
+    "prior_bat_implementation.md", "bat_fit_valence.md", "bat_fit_dirichlet.md"]
 
 API = "API" => "api.md"
 
-PAGES = [Introduction, Examples, API] 
+PAGES = [Introduction, Examples, API]
 
 makedocs(modules=[PartonDensity], sitename="PartonDensity.jl", pages=PAGES)
 
 deploydocs(
-    devbranch = "main",
-    repo = "github.com/cescalara/PartonDensity.jl.git",
+    devbranch="main",
+    repo="github.com/cescalara/PartonDensity.jl.git",
 )
