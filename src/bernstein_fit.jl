@@ -27,6 +27,9 @@ end
 
 """
 Placeholder function for priors.
+
+bspoly_params needs to be input as Vector{Int64}
+since NamedTupleDist() cannot work with Vector{Vector{Int64}}
 """
 
 
@@ -40,6 +43,7 @@ function get_prior(pdf_params:BernsteinDirichletPDFParams)
         λ_g2 = Uniform(-1, 0),
         K_g =  Uniform(2, 10),
         λ_q = Uniform(-1, 0),
+        bspoly_params = [0, 4, 1, 4, 0, 5]
     )
 
     return prior
@@ -108,12 +112,15 @@ function get_likelihood(pdf_params::BernsteinDirichletPDFParams, sim_data::Dict{
         nbins = d["nbins"]
 
         logfuncdensity(function (params)
+       
+            vec_bspp = Vector(params.bspoly_params)
+            bspoly_params = [[vec_bspp[Int(2*i-1)], vec_bspp[Int(2*i)]] for i in 1:length(vec_bspp)/2]
             
             pdf_params = BernsteinDirichletPDFParams(initial_U = [params.initial_U], 
                                             initial_D = [params.initial_D], 
                                             λ_g1=params.λ_g1, λ_g2=params.λ_g2,
                                             K_g=params.K_g, λ_q=params.λ_q, θ=Vector(params.θ), 
-                                            bspoly_params = Vector(params.bspoly_params))
+                                            bspoly_params = bspoly_params)
             
             counts_pred_ep, counts_pred_em = @critical forward_model(pdf_params, qcdnum_params,
                 splint_params, quark_coeffs)
