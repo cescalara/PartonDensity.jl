@@ -1,21 +1,22 @@
-using SpecialFunctions
-using Parameters, Distributions
-using Plots, Random
-const sf = SpecialFunctions
-
-export BernsteinPDFParams
-export BERNSTEIN_TYPE
-export get_scaled_θ, get_scaled_UD
-export plot_input_pdfs, int_xtotx, xtotx, xfx_int
-export get_input_pdf_func
-
+export BernsteinPDFParams, BERNSTEIN_TYPE
 
 BERNSTEIN_TYPE = 3
+BERNSTEIN_DIRICHLET_TYPE = 4
 
 
-abstract type AbstractPDFParams end
+"""
+    struct BernsteinPDFParams <: AbstractPDFParams
 
+Bernstein polynomial specification of input PDF parameters.
+Valence-style treatment. 
 
+Constructors:
+
+* ```$(FUNCTIONNAME)(; fields...)```
+
+Fields:
+$(TYPEDFIELDS)
+"""
 @with_kw struct BernsteinPDFParams <: AbstractPDFParams
     param_type::Integer = BERNSTEIN_TYPE
     bspoly_params::Vector{Vector{Int64}} = [[0, 3], [0, 4], [1, 4], [0, 5]]
@@ -33,6 +34,35 @@ abstract type AbstractPDFParams end
     θ::Vector{Float64} = get_dirichlet_samples(U_list, D_list, seed, weights, bspoly_params)
 end
 
+"""
+    struct BernsteinDirichletPDFParams <: AbstractPDFParams
+
+Bernstein polynomial specification of input PDF parameters.
+Dirichlet-style treament. 
+
+Constructors:
+
+* ```$(FUNCTIONNAME)(; fields...)```
+
+Fields:
+$(TYPEDFIELDS)
+"""
+@with_kw struct BernsteinDirichletPDFParams <: AbstractPDFParams
+    param_type::Integer = BERNSTEIN_DIRICHLET_TYPE
+    seed::Integer = 0
+    weights::Vector{Float64} = ones(9)
+    θ::Vector{Float64} = rand(MersenneTwister(seed), Dirichlet(weights))
+    bspoly_params::Vector{Vector{Int64}} = [[0, 3], [0, 4], [1, 4]]
+    initial_U::Vector{Float64}
+    initial_D::Vector{Float64}
+    U_list::Vector{Float64} = get_UD_list(θ[1], 2, initial_U, bspoly_params)
+    D_list::Vector{Float64} = get_UD_list(θ[2], 1, initial_D, bspoly_params)
+    λ_g1::Float64
+    λ_g2::Float64
+    K_g::Float64
+    λ_q::Float64
+    K_q::Float64
+end
 
 function get_scaled_UD(UD_tmp::Vector{Float64}, intres::Integer, bspoly_params::Vector{Vector{Int64}}=[[0, 3], [0, 4], [1, 4], [0, 5]])
 
@@ -46,7 +76,6 @@ function get_scaled_UD(UD_tmp::Vector{Float64}, intres::Integer, bspoly_params::
 
 end
 
-
 function get_dirichlet_UD(UD_weights::Vector{Float64}, intres::Integer, seed::Integer,
     bspoly_params::Vector{Vector{Int64}})
 
@@ -56,7 +85,6 @@ function get_dirichlet_UD(UD_weights::Vector{Float64}, intres::Integer, seed::In
     return get_scaled_UD(UD_tmp, intres, bspoly_params)
 
 end
-
 
 function xfx_int(UD_list::Vector{Float64}, bspoly_params::Vector{Vector{Int64}}=[[0, 3], [0, 4], [1, 4], [0, 5]])
 
@@ -70,7 +98,6 @@ function xfx_int(UD_list::Vector{Float64}, bspoly_params::Vector{Vector{Int64}}=
 
 end
 
-
 function get_scaled_θ(U_list::Vector{Float64}, D_list::Vector{Float64}, θ_tmp::Vector{Float64},
     bspoly_params::Vector{Vector{Int64}}=[[0, 3], [0, 4], [1, 4], [0, 5]])
 
@@ -82,7 +109,6 @@ function get_scaled_θ(U_list::Vector{Float64}, D_list::Vector{Float64}, θ_tmp:
     return θ_tmp * remaining
 
 end
-
 
 function get_dirichlet_samples(U_list::Vector{Float64}, D_list::Vector{Float64}, seed::Integer,
     weights::Vector{Float64}, bspoly_params::Vector{Vector{Int64}})
@@ -102,6 +128,47 @@ function get_dirichlet_samples(U_list::Vector{Float64}, D_list::Vector{Float64},
 
 end
 
+function get_bxdx(bspoly_params::Vector{Vector{Int64}})
+
+    return [1 / (x[2] + 1) for x in bspoly_params]
+
+end
+
+
+function get_xbxdx(bspoly_params::Vector{Vector{Int64}})
+
+    return [(x[1] + 1) / ((x[2] + 1) * (x[2] + 2)) for x in bspoly_params]
+
+end
+
+
+function get_UD_list(Δudv::Float64, intres::Int64, initial_UD::Vector{Float64},
+    bspoly_params::Vector{Vector{Int64}})
+
+    bxdx_factors = get_bxdx(bspoly_params)
+    xbxdx_factors = get_xbxdx(bspoly_params)
+
+    if length(initial_UD) != length(bspoly_params) - 2
+        @error("The list for initial_UD must be 2 entries shorter than bspoly_params!")
+    end
+
+    UD_1_extended = 0
+    UD_2_extended = 0
+
+    for x in 1:length(initial_UD)
+        UD_1_extended += bxdx_factors[x+2] * initial_UD[x]
+        UD_2_extended += (xbxdx_factors[x+2] - bxdx_factors[x+2] * (xbxdx_factors[1] / bxdx_factors[1])) *
+                         initial_UD[x]
+    end
+
+    UD_2 = (Δudv - intres * (xbxdx_factors[1] / bxdx_factors[1]) - UD_2_extended) /
+           (xbxdx_factors[2] - bxdx_factors[2] * (xbxdx_factors[1] / bxdx_factors[1]))
+
+    UD_1 = (intres - bxdx_factors[2] * UD_2 - UD_1_extended) / bxdx_factors[1]
+
+    return append!([UD_1, UD_2], initial_UD)
+
+end
 
 function bs_poly(x::Float64, vn::Vector{Int64})
 
@@ -111,7 +178,6 @@ function bs_poly(x::Float64, vn::Vector{Int64})
     return binomial(n, v) * x^v * (1 - x)^(n - v)
 
 end
-
 
 function x_uv_x(x::Float64, U_list::Vector{Float64}, bspoly_params::Vector{Vector{Int64}})
 
@@ -125,7 +191,6 @@ function x_uv_x(x::Float64, U_list::Vector{Float64}, bspoly_params::Vector{Vecto
 
 end
 
-
 function x_dv_x(x::Float64, D_list::Vector{Float64}, bspoly_params::Vector{Vector{Int64}})
 
     res = 0
@@ -138,33 +203,7 @@ function x_dv_x(x::Float64, D_list::Vector{Float64}, bspoly_params::Vector{Vecto
 
 end
 
-
-function x_g_x(x::Float64, λ_g1::Float64, λ_g2::Float64, K_g::Float64,
-    K_q::Float64, w1::Float64, w2::Float64)
-
-    A_g1 = w1 / sf.beta(λ_g1 + 1, K_g + 1)
-
-    x_g1_x = A_g1 * x^λ_g1 * (1 - x)^K_g
-
-    A_g2 = w2 / sf.beta(λ_g2 + 1, K_q + 1)
-
-    x_g2_x = A_g2 * x^λ_g2 * (1 - x)^K_q
-
-    return x_g1_x + x_g2_x
-
-end
-
-
-function x_q_x(x::Float64, λ_q::Float64, K_q::Float64, w::Float64)
-
-    A_q = (w / 2) / sf.beta(λ_q + 1, K_q + 1)
-
-    return A_q * x^λ_q * (1 - x)^K_q
-
-end
-
-
-function xtotx(x::Float64, pdf_params::BernsteinPDFParams)
+function xtotx(x::Float64, pdf_params::Union{BernsteinPDFParams,BernsteinDirichletPDFParams})
 
     pdf = pdf_params
 
@@ -188,7 +227,7 @@ function xtotx(x::Float64, pdf_params::BernsteinPDFParams)
 end
 
 
-function int_xtotx(pdf_params::BernsteinPDFParams)
+function int_xtotx(pdf_params::Union{BernsteinPDFParams,BernsteinDirichletPDFParams})
 
     pdf = pdf_params
 
@@ -211,9 +250,8 @@ function int_xtotx(pdf_params::BernsteinPDFParams)
     return I_u + I_d + I_g + I_q
 end
 
-
-function plot_input_pdfs(pdf_params::BernsteinPDFParams, xmin::Float64=1.0e-2,
-    xmax::Float64=1.0, nx::Integer=1000)
+function plot_input_pdfs(pdf_params::Union{BernsteinPDFParams,BernsteinDirichletPDFParams};
+    xmin::Float64=1.0e-2, xmax::Float64=1.0, nx::Integer=1000)
 
     x_grid = range(xmin, stop=xmax, length=nx)
     pdf = pdf_params
@@ -237,11 +275,7 @@ function plot_input_pdfs(pdf_params::BernsteinPDFParams, xmin::Float64=1.0e-2,
 
 end
 
-
-function get_input_pdf_func end
-
-
-function get_input_pdf_func(pdf_params::BernsteinPDFParams)::Function
+function get_input_pdf_func(pdf_params::Union{BernsteinPDFParams,BernsteinDirichletPDFParams})::Function
 
     pdf = pdf_params
 
@@ -296,19 +330,3 @@ function get_input_pdf_func(pdf_params::BernsteinPDFParams)::Function
 
     return func
 end
-
-
-#                         tb  bb  cb  sb  ub  db  g   d   u   s   c   b   t
-input_pdf_map = Float64.([0.0, 0.0, 0.0, 0.0, -1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, # 1 # U valence
-    0.0, 0.0, 0.0, 0.0, 0.0, -1.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, # 2 # D valence
-    0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, # 3 # u sea
-    0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, # 4 # d sea
-    0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, # 5 # s
-    0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, # 6 # sbar
-    0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, # 7 # c
-    0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, # 8 # cbar
-    0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, # 9 # b
-    0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, # 10 # bbar
-    0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, # 11
-    0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]); # 12
-
