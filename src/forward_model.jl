@@ -255,20 +255,20 @@ function pd_read_sim(file_name::String)
         elseif read(g["param_type"]) == BERNSTEIN_TYPE
             
             pdf_params = BernsteinPDFParams(U_list=read(g["U_list"]), 
-                                            D_list=read(g["D_list"]),
-                                            λ_g1=read(g["λ_g1"]), λ_g2=read(g["λ_g2"]),
-                                            K_g=read(g["K_g"]), λ_q=read(g["λ_q"]),
-                                            seed=read(g["seed"]), weights=read(g["weights"]),
-                                            θ=read(g["θ"]))
+                D_list=read(g["D_list"]),
+                λ_g1=read(g["λ_g1"]), λ_g2=read(g["λ_g2"]),
+                K_g=read(g["K_g"]), λ_q=read(g["λ_q"]), K_q=read(g["K_q"]),
+                seed=read(g["seed"]), weights=read(g["weights"]),
+                θ=read(g["θ"]))
             
         elseif read(g["param_type"]) == BERNSTEIN_DIRICHLET_TYPE
             
             pdf_params = BernsteinDirichletPDFParams(U_list=read(g["U_list"]), 
-                                          D_list=read(g["D_list"]),
-                                          λ_g1=read(g["λ_g1"]), λ_g2=read(g["λ_g2"]),
-                                          K_g=read(g["K_g"]), λ_q=read(g["λ_q"]),
-                                          seed=read(g["seed"]), weights=read(g["weights"]),
-                                          θ=read(g["θ"]))
+                D_list=read(g["D_list"]),
+                λ_g1=read(g["λ_g1"]), λ_g2=read(g["λ_g2"]),
+                K_g=read(g["K_g"]), λ_q=read(g["λ_q"]), K_q=read(g["K_q"]),
+                seed=read(g["seed"]), weights=read(g["weights"]), 
+                θ=read(g["θ"]))
             
         else
 
