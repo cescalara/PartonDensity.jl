@@ -33,7 +33,7 @@ since NamedTupleDist() cannot work with Vector{Vector{Int64}}
 """
 
 
-function get_prior(pdf_params:BernsteinDirichletPDFParams)
+function get_prior(pdf_params::BernsteinDirichletPDFParams)
 
     prior = NamedTupleDist(
         θ = Dirichlet(pdf_params.weights),
