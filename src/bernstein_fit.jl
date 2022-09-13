@@ -43,7 +43,8 @@ function get_prior(pdf_params::BernsteinDirichletPDFParams)
         λ_g2 = Uniform(-1, 0),
         K_g =  Uniform(2, 10),
         λ_q = Uniform(-1, 0),
-        bspoly_params = [0, 4, 1, 4, 0, 5]
+        bspoly_params = [0, 4, 1, 4, 0, 5],
+        K_q=Uniform(1., 5.),
     )
 
     return prior
@@ -69,7 +70,7 @@ function get_likelihood(pdf_params::BernsteinPDFParams, sim_data::Dict{String, A
             
             pdf_params = BernsteinPDFParams(U_list=U_list, D_list=D_list, 
                                             λ_g1=params.λ_g1, λ_g2=params.λ_g2,
-                                            K_g=params.K_g, λ_q=params.λ_q, θ=θ, 
+                                            K_g=params.K_g, λ_q=params.λ_q, θ=θ, K_q=params.K_q,
                                             bspoly_params = Vector(params.bspoly_params))
             
             counts_pred_ep, counts_pred_em = @critical forward_model(pdf_params, qcdnum_params,
@@ -119,7 +120,7 @@ function get_likelihood(pdf_params::BernsteinDirichletPDFParams, sim_data::Dict{
             pdf_params = BernsteinDirichletPDFParams(initial_U = [params.initial_U], 
                                             initial_D = [params.initial_D], 
                                             λ_g1=params.λ_g1, λ_g2=params.λ_g2,
-                                            K_g=params.K_g, λ_q=params.λ_q, θ=Vector(params.θ), 
+                                            K_g=params.K_g, λ_q=params.λ_q, θ=Vector(params.θ), K_q=params.K_q,
                                             bspoly_params = bspoly_params)
             
             counts_pred_ep, counts_pred_em = @critical forward_model(pdf_params, qcdnum_params,
