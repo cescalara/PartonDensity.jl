@@ -124,8 +124,11 @@ function get_likelihood(pdf_params::BernsteinDirichletPDFParams, sim_data::Dict{
                 vec_bsppd = Vector(params.bspoly_params_d)
                 bspoly_params_d = [[vec_bsppd[Int(2*i-1)], vec_bsppd[Int(2*i)]] for i in 1:length(vec_bsppd)/2]
             
-            pdf_params = BernsteinDirichletPDFParams(initial_U = [params.initial_U], 
-                                            initial_D = [params.initial_D], 
+            initU = Vector(params.initial_U)
+            initD = Vector(params.initial_D)
+            
+            pdf_params = BernsteinDirichletPDFParams(initial_U = initU, 
+                                            initial_D = initD, 
                                             λ_g1=params.λ_g1, λ_g2=params.λ_g2,
                                             K_g=params.K_g, λ_q=params.λ_q, θ=Vector(params.θ), K_q=params.K_q,
                                             bspoly_params = bspoly_params,
