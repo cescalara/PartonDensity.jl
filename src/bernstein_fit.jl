@@ -123,9 +123,9 @@ function get_likelihood(pdf_params::BernsteinDirichletPDFParams, sim_data::Dict{
             try
                 vec_bsppd = Vector(params.bspoly_params_d)
                 bspoly_params_d = [[vec_bsppd[Int(2*i-1)], vec_bsppd[Int(2*i)]] for i in 1:length(vec_bsppd)/2]
-	        catch err
-		        bspoly_params_d = bspoly_params
-	        end
+	    catch err
+		bspoly_params_d = bspoly_params
+	    end
             
             initU = Vector(params.initial_U)
             initD = Vector(params.initial_D)
@@ -206,8 +206,8 @@ function plot_model_space_impl(x_grid::StepRangeLen{Float64}, pdf_params::Bernst
         try
             vec_bsppd = Vector(samples.bspoly_params_d[i])
             bspoly_params_d = [[vec_bsppd[Int(2*i-1)], vec_bsppd[Int(2*i)]] for i in 1:length(vec_bsppd)/2]
-	    catch err
-	        bspoly_params_d = bspoly_params
+	catch err
+	    bspoly_params_d = bspoly_params
         end
 
         pdf_params_i = BernsteinPDFParams(U_list=U_list, D_list=D_list,
@@ -238,8 +238,8 @@ function plot_model_space_impl(x_grid::StepRangeLen{Float64}, pdf_params::Bernst
         try
             vec_bsppd = Vector(samples.bspoly_params_d[i])
             bspoly_params_d = [[vec_bsppd[Int(2*i-1)], vec_bsppd[Int(2*i)]] for i in 1:length(vec_bsppd)/2]
-	    catch err
-	        bspoly_params_d = bspoly_params
+	catch err
+	    bspoly_params_d = bspoly_params
         end
 
         pdf_params_i = BernsteinDirichletPDFParams(initial_U=[samples.v.initial_U[i]], initial_D=[samples.v.initial_D[i]],
@@ -306,9 +306,9 @@ function plot_data_space_impl(pdf_params::BernsteinPDFParams, samples, qcdnum_pa
         try
             vec_bsppd = Vector(samples.bspoly_params_d[i])
             bspoly_params_d = [[vec_bsppd[Int(2*i-1)], vec_bsppd[Int(2*i)]] for i in 1:length(vec_bsppd)/2]
-	    catch err
-	        bspoly_params_d = bspoly_params
-        end
+	catch err
+	    bspoly_params_d = bspoly_params
+	end
 
         pdf_params_i = BernsteinPDFParams(U_list=U_list, D_list=D_list,
             λ_g1=samples.v.λ_g1[i], λ_g2=samples.v.λ_g2[i],
@@ -365,11 +365,11 @@ function plot_data_space_impl(pdf_params::BernsteinDirichletPDFParams, samples, 
         
         bspoly_params_d = 0
         
-        try
+	try
             vec_bsppd = Vector(samples.bspoly_params_d[i])
             bspoly_params_d = [[vec_bsppd[Int(2*i-1)], vec_bsppd[Int(2*i)]] for i in 1:length(vec_bsppd)/2]
-	    catch err
-	        bspoly_params_d = bspoly_params
+	catch err
+	    bspoly_params_d = bspoly_params
         end
 
         pdf_params_i = BernsteinDirichletPDFParams(initial_U=[samples.v.initial_U[i]], initial_D=[samples.v.initial_D[i]],
