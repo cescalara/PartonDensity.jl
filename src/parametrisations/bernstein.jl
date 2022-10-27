@@ -21,6 +21,7 @@ $(TYPEDFIELDS)
 @with_kw struct BernsteinPDFParams <: AbstractPDFParams
     param_type::Integer = BERNSTEIN_TYPE
     bspoly_params::Vector{Vector{Int64}} = [[0, 3], [0, 4], [1, 4], [0, 5]]
+    bspoly_params_d::Vector{Vector{Int64}} = bspoly_params
     U_weights::Vector{Float64} = zeros(length(bspoly_params))
     D_weights::Vector{Float64} = zeros(length(bspoly_params))
     λ_g1::Float64
