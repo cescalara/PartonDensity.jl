@@ -105,7 +105,7 @@ end
 
 function get_likelihood(pdf_params::BernsteinDirichletPDFParams, sim_data::Dict{String, Any},
                         qcdnum_params::QCDNUMParameters, splint_params::SPLINTParameters,
-                        quark_coeffs::QuarkCoefficients)
+                        quark_coeffs::QuarkCoefficients, pos_init_u_only::Bool)
 
     likelihood = let d = sim_data
 
@@ -129,33 +129,40 @@ function get_likelihood(pdf_params::BernsteinDirichletPDFParams, sim_data::Dict{
             
             initU = Vector(params.initial_U)
             initD = Vector(params.initial_D)
+		
+	    if any(x->x<=0., initU)
+		ll_value = -1000
+	    
+ 	    else
             
-            pdf_params = BernsteinDirichletPDFParams(initial_U = initU, 
+            	pdf_params = BernsteinDirichletPDFParams(initial_U = initU, 
                                             initial_D = initD, 
                                             λ_g1=params.λ_g1, λ_g2=params.λ_g2,
                                             K_g=params.K_g, λ_q=params.λ_q, θ=Vector(params.θ), K_q=params.K_q,
                                             bspoly_params = bspoly_params,
                                             bspoly_params_d = bspoly_params_d)
             
-            counts_pred_ep, counts_pred_em = @critical forward_model(pdf_params, qcdnum_params,
-                splint_params, quark_coeffs)
+            	counts_pred_ep, counts_pred_em = @critical forward_model(pdf_params, qcdnum_params,
+                	splint_params, quark_coeffs)
 
-            ll_value = 0.0
-            for i in 1:nbins
+            	ll_value = 0.0
+            	for i in 1:nbins
 
-                if counts_pred_ep[i] < 0
-                    @debug "counts_pred_ep[i] < 0, setting to 0" i counts_pred_ep[i]
-                    counts_pred_ep[i] = 0
-                end
+                    if counts_pred_ep[i] < 0
+                    	@debug "counts_pred_ep[i] < 0, setting to 0" i counts_pred_ep[i]
+                        counts_pred_ep[i] = 0
+                    end
 
-                if counts_pred_em[i] < 0
-                    @debug "counts_pred_em[i] < 0, setting to 0" i counts_pred_em[i]
-                    counts_pred_em[i] = 0
-                end
+                    if counts_pred_em[i] < 0
+                    	@debug "counts_pred_em[i] < 0, setting to 0" i counts_pred_em[i]
+                    	counts_pred_em[i] = 0
+                    end
 
-                ll_value += logpdf(Poisson(counts_pred_ep[i]), counts_obs_ep[i])
-                ll_value += logpdf(Poisson(counts_pred_em[i]), counts_obs_em[i])
-            end
+                    ll_value += logpdf(Poisson(counts_pred_ep[i]), counts_obs_ep[i])
+                    ll_value += logpdf(Poisson(counts_pred_em[i]), counts_obs_em[i])
+            	end
+			
+	    end
 
             return ll_value
         end)
