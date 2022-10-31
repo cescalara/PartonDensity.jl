@@ -66,12 +66,13 @@ function get_likelihood(pdf_params::BernsteinPDFParams, sim_data::Dict{String, A
             U_list = get_scaled_UD(Vector(params.U_weights), 2)
             D_list = get_scaled_UD(Vector(params.U_weights), 1)
             
-            θ = get_scaled_θ(U_list, D_list, Vector(params.θ_tmp))
+            θ = get_scaled_θ(U_list, D_list, Vector(params.θ_tmp)) 
             
             pdf_params = BernsteinPDFParams(U_list=U_list, D_list=D_list, 
                                             λ_g1=params.λ_g1, λ_g2=params.λ_g2,
                                             K_g=params.K_g, λ_q=params.λ_q, θ=θ, K_q=params.K_q,
-                                            bspoly_params = Vector(params.bspoly_params))
+                                            bspoly_params = Vector(params.bspoly_params)
+                                            )
             
             counts_pred_ep, counts_pred_em = @critical forward_model(pdf_params, qcdnum_params,
                                                                      splint_params, quark_coeffs)
@@ -104,7 +105,7 @@ end
 
 function get_likelihood(pdf_params::BernsteinDirichletPDFParams, sim_data::Dict{String, Any},
                         qcdnum_params::QCDNUMParameters, splint_params::SPLINTParameters,
-                        quark_coeffs::QuarkCoefficients)
+                        quark_coeffs::QuarkCoefficients, pos_init_u_only::Bool)
 
     likelihood = let d = sim_data
 
@@ -116,32 +117,52 @@ function get_likelihood(pdf_params::BernsteinDirichletPDFParams, sim_data::Dict{
        
             vec_bspp = Vector(params.bspoly_params)
             bspoly_params = [[vec_bspp[Int(2*i-1)], vec_bspp[Int(2*i)]] for i in 1:length(vec_bspp)/2]
+
+            bspoly_params_d = 0
+
+            try
+                vec_bsppd = Vector(params.bspoly_params_d)
+                bspoly_params_d = [[vec_bsppd[Int(2*i-1)], vec_bsppd[Int(2*i)]] for i in 1:length(vec_bsppd)/2]
+	    catch err
+		bspoly_params_d = bspoly_params
+	    end
             
-            pdf_params = BernsteinDirichletPDFParams(initial_U = [params.initial_U], 
-                                            initial_D = [params.initial_D], 
+            initU = Vector(params.initial_U)
+            initD = Vector(params.initial_D)
+		
+	    if any(x->x<=0., initU)
+		ll_value = -1000
+	    
+ 	    else
+            
+            	pdf_params = BernsteinDirichletPDFParams(initial_U = initU, 
+                                            initial_D = initD, 
                                             λ_g1=params.λ_g1, λ_g2=params.λ_g2,
                                             K_g=params.K_g, λ_q=params.λ_q, θ=Vector(params.θ), K_q=params.K_q,
-                                            bspoly_params = bspoly_params)
+                                            bspoly_params = bspoly_params,
+                                            bspoly_params_d = bspoly_params_d)
             
-            counts_pred_ep, counts_pred_em = @critical forward_model(pdf_params, qcdnum_params,
-                splint_params, quark_coeffs)
+            	counts_pred_ep, counts_pred_em = @critical forward_model(pdf_params, qcdnum_params,
+                	splint_params, quark_coeffs)
 
-            ll_value = 0.0
-            for i in 1:nbins
+            	ll_value = 0.0
+            	for i in 1:nbins
 
-                if counts_pred_ep[i] < 0
-                    @debug "counts_pred_ep[i] < 0, setting to 0" i counts_pred_ep[i]
-                    counts_pred_ep[i] = 0
-                end
+                    if counts_pred_ep[i] < 0
+                    	@debug "counts_pred_ep[i] < 0, setting to 0" i counts_pred_ep[i]
+                        counts_pred_ep[i] = 0
+                    end
 
-                if counts_pred_em[i] < 0
-                    @debug "counts_pred_em[i] < 0, setting to 0" i counts_pred_em[i]
-                    counts_pred_em[i] = 0
-                end
+                    if counts_pred_em[i] < 0
+                    	@debug "counts_pred_em[i] < 0, setting to 0" i counts_pred_em[i]
+                    	counts_pred_em[i] = 0
+                    end
 
-                ll_value += logpdf(Poisson(counts_pred_ep[i]), counts_obs_ep[i])
-                ll_value += logpdf(Poisson(counts_pred_em[i]), counts_obs_em[i])
-            end
+                    ll_value += logpdf(Poisson(counts_pred_ep[i]), counts_obs_ep[i])
+                    ll_value += logpdf(Poisson(counts_pred_em[i]), counts_obs_em[i])
+            	end
+			
+	    end
 
             return ll_value
         end)
@@ -183,11 +204,26 @@ function plot_model_space_impl(x_grid::StepRangeLen{Float64}, pdf_params::Bernst
         D_list = get_scaled_UD(Vector(samples.v.U_weights[i]), 1)
 
         θ_i = get_scaled_θ(U_list, D_list, Vector(samples.v.θ_tmp[i]))
+            
+        vec_bspp = Vector(samples.bspoly_params[i])
+        bspoly_params = [[vec_bspp[Int(2*i-1)], vec_bspp[Int(2*i)]] for i in 1:length(vec_bspp)/2]
+        
+        bspoly_params_d = 0
+
+        try
+            vec_bsppd = Vector(samples.bspoly_params_d[i])
+            bspoly_params_d = [[vec_bsppd[Int(2*i-1)], vec_bsppd[Int(2*i)]] for i in 1:length(vec_bsppd)/2]
+	catch err
+	    bspoly_params_d = bspoly_params
+        end
 
         pdf_params_i = BernsteinPDFParams(U_list=U_list, D_list=D_list,
             λ_g1=samples.v.λ_g1[i], λ_g2=samples.v.λ_g2[i],
             K_g=samples.v.K_g[i], λ_q=samples.v.λ_q[i], K_q=samples.v.K_q[i],
-            θ=θ_i)
+            θ=θ_i,
+            bspoly_params = bspoly_params,
+            bspoly_params_d = bspoly_params_d)
+        
         p = plot!(x_grid, [xtotx(x, pdf_params_i) for x in x_grid], color=color, lw=3,
             alpha=0.01, label="")
 
@@ -200,11 +236,26 @@ end
 function plot_model_space_impl(x_grid::StepRangeLen{Float64}, pdf_params::BernsteinDirichletPDFParams, samples, p; color=:skyblue3)
 
     for i in eachindex(samples)
+        
+        vec_bspp = Vector(samples.bspoly_params[i])
+        bspoly_params = [[vec_bspp[Int(2*i-1)], vec_bspp[Int(2*i)]] for i in 1:length(vec_bspp)/2]
+        
+        bspoly_params_d = 0
+
+        try
+            vec_bsppd = Vector(samples.bspoly_params_d[i])
+            bspoly_params_d = [[vec_bsppd[Int(2*i-1)], vec_bsppd[Int(2*i)]] for i in 1:length(vec_bsppd)/2]
+	catch err
+	    bspoly_params_d = bspoly_params
+        end
 
         pdf_params_i = BernsteinDirichletPDFParams(initial_U=[samples.v.initial_U[i]], initial_D=[samples.v.initial_D[i]],
                                         λ_g1=samples.v.λ_g1[i], λ_g2=samples.v.λ_g2[i],
                                         K_g=samples.v.K_g[i], λ_q=samples.v.λ_q[i], 
-                                        θ=Vector(samples.v.θ[i]))
+                                        θ=Vector(samples.v.θ[i]),
+                                        bspoly_params = bspoly_params,
+                                        bspoly_params_d = bspoly_params_d)
+        
         p = plot!(x_grid, [xtotx(x, pdf_params_i) for x in x_grid], color=color, lw=3,
                   alpha=0.01, label="")
         
@@ -254,11 +305,23 @@ function plot_data_space_impl(pdf_params::BernsteinPDFParams, samples, qcdnum_pa
 
         θ_i = get_scaled_θ(U_list, D_list, Vector(samples.v.θ_tmp[i]))
 
+        vec_bspp = Vector(samples.bspoly_params[i])
+        bspoly_params = [[vec_bspp[Int(2*i-1)], vec_bspp[Int(2*i)]] for i in 1:length(vec_bspp)/2]
+        
+        bspoly_params_d = 0
+
+        try
+            vec_bsppd = Vector(samples.bspoly_params_d[i])
+            bspoly_params_d = [[vec_bsppd[Int(2*i-1)], vec_bsppd[Int(2*i)]] for i in 1:length(vec_bsppd)/2]
+	catch err
+	    bspoly_params_d = bspoly_params
+	end
 
         pdf_params_i = BernsteinPDFParams(U_list=U_list, D_list=D_list,
             λ_g1=samples.v.λ_g1[i], λ_g2=samples.v.λ_g2[i],
             K_g=samples.v.K_g[i], λ_q=samples.v.λ_q[i], K_q=samples.v.K_q[i],
-            θ=θ_i)
+            θ=θ_i, bspoly_params = bspoly_params,
+            bspoly_params_d = bspoly_params_d)
 
         counts_pred_ep_i, counts_pred_em_i = forward_model(pdf_params_i, qcdnum_params,
             splint_params, quark_coeffs)
@@ -303,11 +366,25 @@ function plot_data_space_impl(pdf_params::BernsteinDirichletPDFParams, samples, 
         
         counts_obs_ep_i = zeros(UInt64, nbins)
         counts_obs_em_i = zeros(UInt64, nbins)
+            
+        vec_bspp = Vector(samples.bspoly_params[i])
+        bspoly_params = [[vec_bspp[Int(2*i-1)], vec_bspp[Int(2*i)]] for i in 1:length(vec_bspp)/2]
+        
+        bspoly_params_d = 0
+        
+	try
+            vec_bsppd = Vector(samples.bspoly_params_d[i])
+            bspoly_params_d = [[vec_bsppd[Int(2*i-1)], vec_bsppd[Int(2*i)]] for i in 1:length(vec_bsppd)/2]
+	catch err
+	    bspoly_params_d = bspoly_params
+        end
 
         pdf_params_i = BernsteinDirichletPDFParams(initial_U=[samples.v.initial_U[i]], initial_D=[samples.v.initial_D[i]],
                                         λ_g1=samples.v.λ_g1[i], λ_g2=samples.v.λ_g2[i],
                                         K_g=samples.v.K_g[i], λ_q=samples.v.λ_q[i], 
-                                        θ=Vector(samples.v.θ[i]))
+                                        θ=Vector(samples.v.θ[i]),
+                                        bspoly_params = bspoly_params,
+                                        bspoly_params_d = bspoly_params_d)
         
         counts_pred_ep_i, counts_pred_em_i = forward_model(pdf_params_i, qcdnum_params, 
                                                            splint_params, quark_coeffs)
