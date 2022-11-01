@@ -130,7 +130,7 @@ function get_likelihood(pdf_params::BernsteinDirichletPDFParams, sim_data::Dict{
             initU = Vector(params.initial_U)
             initD = Vector(params.initial_D)
 		
-	    if any(x->x<=0., initU)
+	    if pos_init_u_only && any(x->x<=0., initU) 
 		ll_value = -1000
 	    
  	    else
