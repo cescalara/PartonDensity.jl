@@ -1,5 +1,4 @@
-using SpecialFunctions
-const sf = SpecialFunctions
+import SpecialFunctions as SF
 
 export xtotx, int_xtotx
 export plot_input_pdfs, get_input_pdf_func
@@ -20,9 +19,9 @@ Beta function
     A_u x^λ_u (1-x)^K_u
 A_u is set by λ_u and K_u.
 """
-function x_uv_x(x::Float64, λ_u::Float64, K_u::Float64)
+function x_uv_x(x::Real, λ_u::Real, K_u::Real)
 
-    A_u = 2 / sf.beta(λ_u, K_u + 1)
+    A_u = 2 / SF.beta(λ_u, K_u + 1)
 
     return A_u * x^λ_u * (1 - x)^K_u
 
@@ -36,9 +35,9 @@ Beta function
     A_d x^λ_d (1 - x)^K_d
 A_d is set by λ_d and K_d.
 """
-function x_dv_x(x::Float64, λ_d::Float64, K_d::Float64)
+function x_dv_x(x::Real, λ_d::Real, K_d::Real)
 
-    A_d = 1 / sf.beta(λ_d, K_d + 1)
+    A_d = 1 / SF.beta(λ_d, K_d + 1)
 
     return A_d * x^λ_d * (1 - x)^K_d
 
@@ -51,14 +50,14 @@ Momentum density of gluon component.
     A_g1 x^λ_g1 (1 - x)^K_g + A_g2 x^λ_g2 (1 - x)^K_q
 Amplitudes are set by weights `w1` and `w2`.
 """
-function x_g_x(x::Float64, λ_g1::Float64, λ_g2::Float64, K_g::Float64,
-    K_q::Float64, w1::Float64, w2::Float64)
+function x_g_x(x::Real, λ_g1::Real, λ_g2::Real, K_g::Real,
+    K_q::Real, w1::Real, w2::Real)
 
-    A_g1 = w1 / sf.beta(λ_g1 + 1, K_g + 1)
+    A_g1 = w1 / SF.beta(λ_g1 + 1, K_g + 1)
 
     x_g1_x = A_g1 * x^λ_g1 * (1 - x)^K_g
 
-    A_g2 = w2 / sf.beta(λ_g2 + 1, K_q + 1)
+    A_g2 = w2 / SF.beta(λ_g2 + 1, K_q + 1)
 
     x_g2_x = A_g2 * x^λ_g2 * (1 - x)^K_q
 
@@ -75,9 +74,9 @@ quark component.
     A_q x^λ_q (1 - x)^K_q 
 Amplitude is set by weight `w`
 """
-function x_q_x(x::Float64, λ_q::Float64, K_q::Float64, w::Float64)
+function x_q_x(x::Real, λ_q::Real, K_q::Real, w::Real)
 
-    A_q = (w / 2) / sf.beta(λ_q + 1, K_q + 1)
+    A_q = (w / 2) / SF.beta(λ_q + 1, K_q + 1)
 
     return A_q * x^λ_q * (1 - x)^K_q
 
@@ -113,7 +112,7 @@ function get_input_pdf_func end
 The relevant mapping for use with QCDNUM and `get_input_pdf_func`.
 """
 #                         tb  bb  cb  sb  ub  db  g   d   u   s   c   b   t
-input_pdf_map = Float64.([0.0, 0.0, 0.0, 0.0, -1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, # 1 # U valence
+const input_pdf_map = Float64.([0.0, 0.0, 0.0, 0.0, -1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, # 1 # U valence
     0.0, 0.0, 0.0, 0.0, 0.0, -1.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, # 2 # D valence
     0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, # 3 # u sea
     0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, # 4 # d sea
