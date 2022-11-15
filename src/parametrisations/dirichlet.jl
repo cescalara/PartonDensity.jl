@@ -179,3 +179,14 @@ function get_input_pdf_func(pdf_params::DirichletPDFParams)::Function
 
     return func
 end
+
+
+function parton_pdf_func end
+export parton_pdf_func
+
+function parton_pdf_func(pdf_params::DirichletPDFParams, ::typeof(gluon))
+    let λ_g1 = pdf.λ_g1, λ_g2 = pdf.λ_g2, K_g = pdf.K_g, K_q = pdf.K_q, w1 = pdf.θ[3], w2 = pdf.θ[4]
+        gluon_pdf(x::Real) = x_g_x(x, λ_g1, λ_g2, K_g, K_q, w1, w2)
+        return gluon_pdf
+    end
+end
