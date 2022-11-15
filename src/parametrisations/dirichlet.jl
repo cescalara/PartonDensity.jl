@@ -14,23 +14,23 @@ Constructors:
 Fields:
 $(TYPEDFIELDS)
 """
-@with_kw struct DirichletPDFParams <: AbstractPDFParams
+@with_kw struct DirichletPDFParams{T<:Real,TV<:AbstractVector{T}} <: AbstractPDFParams
     param_type::Integer = DIRICHLET_TYPE
     seed::Integer = 0
-    weights::Vector{Float64} = ones(9)
-    θ::Vector{Float64} = rand(MersenneTwister(seed), Dirichlet(weights))
-    K_u::Float64
-    λ_u::Float64 = (θ[1] * (K_u + 1)) / (2 - θ[1])
-    K_d::Float64
-    λ_d::Float64 = (θ[2] * (K_d + 1)) / (1 - θ[2])
-    λ_g1::Float64
-    λ_g2::Float64
-    K_g::Float64
-    λ_q::Float64
-    K_q::Float64
+    weights::TV = ones(9)
+    θ::TV = rand(MersenneTwister(seed), Dirichlet(weights))
+    K_u::T
+    λ_u::T = (θ[1] * (K_u + 1)) / (2 - θ[1])
+    K_d::T
+    λ_d::T = (θ[2] * (K_d + 1)) / (1 - θ[2])
+    λ_g1::T
+    λ_g2::T
+    K_g::T
+    λ_q::T
+    K_q::T
 end
 
-function xtotx(x::Float64, pdf_params::DirichletPDFParams)
+function xtotx(x::Real, pdf_params::DirichletPDFParams)
 
     pdf = pdf_params
 
@@ -39,9 +39,9 @@ function xtotx(x::Float64, pdf_params::DirichletPDFParams)
 
 end
 
-function xtotx_dirichlet(x::Float64, λ_u::Float64, K_u::Float64, λ_d::Float64,
-    K_d::Float64, λ_g1::Float64, λ_g2::Float64, K_g::Float64, λ_q::Float64,
-    K_q::Float64, θ::Vector{Float64})
+function xtotx_dirichlet(x::Real, λ_u::Real, K_u::Real, λ_d::Real,
+    K_d::Real, λ_g1::Real, λ_g2::Real, K_g::Real, λ_q::Real,
+    K_q::Real, θ::Vector{Real})
 
     xuvx = x_uv_x(x, λ_u, K_u)
 
@@ -73,9 +73,9 @@ function int_xtotx(pdf_params::DirichletPDFParams)
     return result
 end
 
-function int_xtotx_dirichlet(λ_u::Float64, K_u::Float64, λ_d::Float64,
-    K_d::Float64, λ_g1::Float64, λ_g2::Float64, K_g::Float64, λ_q::Float64,
-    K_q::Float64, θ::Array{Float64})
+function int_xtotx_dirichlet(λ_u::Real, K_u::Real, λ_d::Real,
+    K_d::Real, λ_g1::Real, λ_g2::Real, K_g::Real, λ_q::Real,
+    K_q::Real, θ::AbstractArray{<:Real})
 
     A_u = 2 / sf.beta(λ_u, K_u + 1)
     A_d = 1 / sf.beta(λ_d, K_d + 1)
@@ -100,8 +100,8 @@ function int_xtotx_dirichlet(λ_u::Float64, K_u::Float64, λ_d::Float64,
     I_tot
 end
 
-function plot_input_pdfs(pdf_params::DirichletPDFParams; xmin::Float64=1.0e-2,
-    xmax::Float64=1.0, nx::Integer=1000)
+function plot_input_pdfs(pdf_params::DirichletPDFParams; xmin::Real=1.0e-2,
+    xmax::Real=1.0, nx::Integer=1000)
 
     x_grid = range(xmin, stop=xmax, length=nx)
     pdf = pdf_params
@@ -128,7 +128,7 @@ function get_input_pdf_func(pdf_params::DirichletPDFParams)::Function
 
     pdf = pdf_params
 
-    func = function _input_pdfs(i, x)::Float64
+    func = function _input_pdfs(i::Int, x::Float64)::Float64
         i = i[]
         x = x[]
 
