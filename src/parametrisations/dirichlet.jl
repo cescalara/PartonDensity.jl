@@ -15,10 +15,7 @@ Fields:
 $(TYPEDFIELDS)
 """
 @with_kw struct DirichletPDFParams{T<:Real,TV<:AbstractVector{T}} <: AbstractPDFParams
-    param_type::Integer = DIRICHLET_TYPE
-    seed::Integer = 0
-    weights::TV = ones(9)
-    θ::TV = rand(MersenneTwister(seed), Dirichlet(weights))
+    θ::TV
     K_u::T
     λ_u::T = (θ[1] * (K_u + 1)) / (2 - θ[1])
     K_d::T
@@ -29,6 +26,7 @@ $(TYPEDFIELDS)
     λ_q::T
     K_q::T
 end
+
 
 function xtotx(x::Real, pdf_params::DirichletPDFParams)
 
@@ -128,11 +126,11 @@ function get_input_pdf_func(pdf_params::DirichletPDFParams)::Function
 
     pdf = pdf_params
 
-    func = function _input_pdfs(i::Int, x::Float64)::Float64
+    func = function _input_pdfs(i::Integer, x::T)::T where {T<:Real}
         i = i[]
         x = x[]
 
-        f = 0.0
+        f::T = 0.0
 
         # gluon
         if (i == 0)
