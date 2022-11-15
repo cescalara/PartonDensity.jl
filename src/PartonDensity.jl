@@ -6,6 +6,7 @@ using Random
 using Parameters
 using Plots
 
+include("parton.jl")
 include("parametrisations/parametrisations.jl")
 include("qcdnum_interface.jl")
 include("cross_section.jl")
