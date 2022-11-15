@@ -123,68 +123,88 @@ function plot_input_pdfs(pdf_params::DirichletPDFParams; xmin::Real=1.0e-2,
 end
 
 function get_input_pdf_func(pdf_params::DirichletPDFParams)::Function
-
-    pdf = pdf_params
-
-    func = function _input_pdfs(i::Integer, x::T)::T where {T<:Real}
+    return function _input_pdfs(i::Integer, x::T)::T where {T<:Real}
         i = i[]
         x = x[]
 
         f::T = 0.0
 
-        # gluon
-        if (i == 0)
-            f = x_g_x(x, pdf.λ_g1, pdf.λ_g2, pdf.K_g, pdf.K_q, pdf.θ[3], pdf.θ[4])
-        end
-
-        # u valence
-        if (i == 1)
-            f = x_uv_x(x, pdf.λ_u, pdf.K_u)
-        end
-
-        # d valence
-        if (i == 2)
-            f = x_dv_x(x, pdf.λ_d, pdf.K_d)
-        end
-
-        # ubar
-        if (i == 3)
-            f = x_q_x(x, pdf.λ_q, pdf.K_q, pdf.θ[5])
-        end
-
-        # dbar
-        if (i == 4)
-            f = x_q_x(x, pdf.λ_q, pdf.K_q, pdf.θ[6])
-        end
-
-        # s and sbar
-        if (i == 5) || (i == 6)
-            f = x_q_x(x, pdf.λ_q, pdf.K_q, pdf.θ[7])
-        end
-
-        # c and cbar
-        if (i == 7) || (i == 8)
-            f = x_q_x(x, pdf.λ_q, pdf.K_q, pdf.θ[8])
-        end
-
-        # d and dbar
-        if (i == 9) || (i == 10)
-            f = x_q_x(x, pdf.λ_q, pdf.K_q, pdf.θ[9])
+        if i == 0
+            f = parton_pdf_func(gluon, pdf_params)(x)
+        elseif i == 1
+            f = parton_pdf_func(u_valence, pdf_params)(x)
+        elseif i == 2
+            f = parton_pdf_func(d_valence, pdf_params)(x)
+        elseif i == 3
+            f = parton_pdf_func(u_bar, pdf_params)(x)
+        elseif i == 4
+            f = parton_pdf_func(d_bar, pdf_params)(x)
+        elseif i == 5
+            f = parton_pdf_func(s_quark, pdf_params)(x)
+        elseif i == 6
+            f = parton_pdf_func(s_bar, pdf_params)(x)
+        elseif i == 7
+            f = parton_pdf_func(c_quark, pdf_params)(x)
+        elseif i == 8
+            f = parton_pdf_func(c_bar, pdf_params)(x)
+        elseif i == 9
+            f = parton_pdf_func(b_quark, pdf_params)(x)
+        elseif i == 10
+            f = parton_pdf_func(b_bar, pdf_params)(x)
         end
 
         return f
     end
-
-    return func
 end
 
 
 function parton_pdf_func end
 export parton_pdf_func
 
-function parton_pdf_func(pdf_params::DirichletPDFParams, ::typeof(gluon))
-    let λ_g1 = pdf.λ_g1, λ_g2 = pdf.λ_g2, K_g = pdf.K_g, K_q = pdf.K_q, w1 = pdf.θ[3], w2 = pdf.θ[4]
-        gluon_pdf(x::Real) = x_g_x(x, λ_g1, λ_g2, K_g, K_q, w1, w2)
-        return gluon_pdf
+function parton_pdf_func(::typeof(gluon), p::DirichletPDFParams)
+    let λ_g1 = p.λ_g1, λ_g2 = p.λ_g2, K_g = p.K_g, K_q = p.K_q, w1 = p.θ[3], w2 = p.θ[4]
+        return _gluon_pdf(x::Real) = x_g_x(x, λ_g1, λ_g2, K_g, K_q, w1, w2)
+    end
+end
+
+function parton_pdf_func(::typeof(u_valence), p::DirichletPDFParams)
+    let λ_u = p.λ_u, K_u = p.K_u
+        return _u_valuence_pdf(x::Real) = x_uv_x(x, λ_u, K_u)
+    end
+end
+
+function parton_pdf_func(::typeof(d_valence), p::DirichletPDFParams)
+    let λ_d = p.λ_d, K_d = p.K_d
+        return _d_valence_pdf(x::Real) = x_dv_x(x, λ_d, K_d)
+    end
+end
+
+function parton_pdf_func(::typeof(u_bar), p::DirichletPDFParams)
+    let λ_q = p.λ_q, K_q = p.K_q, θ_5 = p.θ[5]
+        return _u_bar_pdf(x) = x_q_x(x, λ_q, K_q, θ_5)
+    end
+end
+
+function parton_pdf_func(::typeof(d_bar), p::DirichletPDFParams)
+    let λ_q = p.λ_q, K_q = p.K_q, θ_6 = p.θ[6]
+        return _d_bar_pdf(x) = x_q_x(x, λ_q, K_q, θ_6)
+    end
+end
+
+function parton_pdf_func(::Union{typeof(s_quark),typeof(s_bar)}, p::DirichletPDFParams)
+    let λ_q = p.λ_q, K_q = p.K_q, θ_7 = p.θ[7]
+        return _s_bar_pdf(x) = x_q_x(x, λ_q, K_q, θ_7)
+    end
+end
+
+function parton_pdf_func(::Union{typeof(c_quark),typeof(c_bar)}, p::DirichletPDFParams)
+    let λ_q = p.λ_q, K_q = p.K_q, θ_8 = p.θ[8]
+        return _c_bar_pdf(x) = x_q_x(x, λ_q, K_q, θ_8)
+    end
+end
+
+function parton_pdf_func(::Union{typeof(b_quark),typeof(b_bar)}, p::DirichletPDFParams)
+    let λ_q = p.λ_q, K_q = p.K_q, θ_9 = p.θ[9]
+        return _d_bar_pdf(x) = x_q_x(x, λ_q, K_q, θ_9)
     end
 end
