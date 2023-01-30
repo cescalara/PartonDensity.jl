@@ -174,9 +174,9 @@ function forward_model(pdf_params::AbstractPDFParams, qcdnum_params::QCDNUMParam
 
     syserr_axis = axes(SysError_params, 1)
 
-    @archeck axes(TM_eP, 2) == axes(TM_eM, 2) == axes(Tnm_sys_ePp, 2) == axes(Tnm_sys_eMp, 2)
-    @archeck axes(TM_eP, i) == axes(TM_eM, 1) == axes(K_eP, 1) == axes(K_eM, 1)
-    @archeck axes(SysError_params, 1) == axes(Tnm_sys_ePp, 3) == axes(Tnm_sys_eMp, 3)
+    @argcheck axes(TM_eP, 2) == axes(TM_eM, 2) == axes(Tnm_sys_ePp, 2) == axes(Tnm_sys_eMp, 2)
+    @argcheck axes(TM_eP, i) == axes(TM_eM, 1) == axes(K_eP, 1) == axes(K_eM, 1)
+    @argcheck axes(SysError_params, 1) == axes(Tnm_sys_ePp, 3) == axes(Tnm_sys_eMp, 3)
 
     # Calculate TotSys_var_em == SysError_params[k] * Tnm_sys_ePp[i,j,k] up front?
 
