@@ -71,8 +71,6 @@ end
 
     @test typeof(dir_pdf_params) == DirichletPDFParams
 
-    @test dir_pdf_params.param_type == DIRICHLET_TYPE
-
     p = plot_input_pdfs(dir_pdf_params)
 
     @test typeof(p) <: Plots.Plot

@@ -7,20 +7,20 @@ using Distributions, Random
     # Define different parametriations for testing
     bern_pdf_params = BernsteinPDFParams(U_weights=ones(4), D_weights=ones(4),
         λ_g1=0.4, λ_g2=-0.6,
-        K_g=4.2, λ_q=-0.2, K_q=5,
+        K_g=4.2, λ_q=-0.2, K_q=5.0,
         weights=[5.0, 5.0, 1.0, 1.0, 1.0, 0.5, 0.5])
 
     val_pdf_params = ValencePDFParams(λ_u=0.6, K_u=3.4,
         λ_d=0.7, K_d=4.7,
         λ_g1=0.4, λ_g2=-0.6,
-        K_g=4.2, λ_q=-0.2, K_q=5,
+        K_g=4.2, λ_q=-0.2, K_q=5.0,
         weights=[5.0, 5.0, 1.0, 1.0, 1.0, 0.5, 0.5])
 
     weights = [3.0, 1.0, 5.0, 5.0, 1.0, 1.0, 1.0, 0.5, 0.5]
     θ = rand(Dirichlet(weights))
     dir_pdf_params = DirichletPDFParams(K_u=3.4, K_d=4.7,
         λ_g1=0.4, λ_g2=-0.6,
-        K_g=4.2, λ_q=-0.2, K_q=5,
+        K_g=4.2, λ_q=-0.2, K_q=5.0,
         θ=θ)
 
     pdf_params_list = [val_pdf_params, dir_pdf_params, bern_pdf_params]
