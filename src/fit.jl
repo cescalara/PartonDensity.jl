@@ -416,7 +416,7 @@ function plot_data_space_impl_sysErr(pdf_params::ValencePDFParams, samples, qcdn
             samples.v.beta0_4[i], samples.v.beta0_4[i], samples.v.beta0_5[i],
             samples.v.beta0_6[i], samples.v.beta0_7[i], samples.v.beta0_8[i]]
 
-        counts_pred_ep_i, counts_pred_em_i = forward_model_sysErr(pdf_params_i, qcdnum_params,
+        counts_pred_ep_i, counts_pred_em_i = forward_model(pdf_params_i, qcdnum_params,
             splint_params, quark_coeffs, ParErrs_i)
 
         for j in 1:nbins
@@ -473,7 +473,7 @@ function plot_data_space_impl_sysErr(pdf_params::DirichletPDFParams, samples, qc
             samples.v.beta0_4[i], samples.v.beta0_4[i], samples.v.beta0_5[i],
             samples.v.beta0_6[i], samples.v.beta0_7[i], samples.v.beta0_8[i]]
 
-        counts_pred_ep_i, counts_pred_em_i = forward_model_sysErr(pdf_params_i, qcdnum_params,
+        counts_pred_ep_i, counts_pred_em_i = forward_model(pdf_params_i, qcdnum_params,
             splint_params, quark_coeffs, ParErrs_i)
 
         for j in 1:nbins
