@@ -1,5 +1,6 @@
 export ValencePDFParams, VALENCE_TYPE
 export get_scaled_θ
+import SpecialFunctions as sf
 
 VALENCE_TYPE = 1
 
