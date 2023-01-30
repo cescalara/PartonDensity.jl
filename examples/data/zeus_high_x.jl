@@ -37,9 +37,9 @@ include("eMp_jl/SysTnm_AriMepsDown_eMp.jl")
 include("zeus_bin_edges.jl")
 
 
-UInt64::NP1 = size(BinQ2low)
-UInt64::NP2 = size(Binxlow)
-UInt64::nsyst = 8
+NP1 = size(BinQ2low)
+NP2 = size(Binxlow)
+nsyst = 8
 
 
 Tnm_sys_ePp = zeros(NP1,NP1,nsyst)
