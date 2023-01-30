@@ -1,4 +1,4 @@
-export forward_model_sysErr, forward_model_init_sysErr, SysPenality, Init_sys
+export SysPenality, Init_sys
 export Tnm_sys_ePp, Tnm_sys_eMp
 
 include("ePp_jl/SysTnm_Eehigh_ePp.jl")
