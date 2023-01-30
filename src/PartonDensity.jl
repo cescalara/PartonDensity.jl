@@ -1,5 +1,6 @@
 module PartonDensity
 
+using ArgCheck
 using Distributions
 using DocStringExtensions
 using Random

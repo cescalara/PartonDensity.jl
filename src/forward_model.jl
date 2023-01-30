@@ -140,10 +140,12 @@ function forward_model(pdf_params::AbstractPDFParams, qcdnum_params::QCDNUMParam
 
     # Integrate over cross section
     nbins = size(xbins_M_begin)[1]
-    integ_xsec_ep = zeros(nbins)
-    integ_xsec_em = zeros(nbins)
+    bins_axis = axes(xbins_M_begin, 1)
+
+    integ_xsec_ep = similar(xbins_M_begin)
+    integ_xsec_em = similar(xbins_M_begin)
     sqrtS::Float64 = 318.0
-    for i in 1:nbins
+    for i in bins_axis
         integ_xsec_ep[i] = QCDNUM.dsp_ints2(iaF_eP, xbins_M_begin[i], xbins_M_end[i],
             q2bins_M_begin[i], q2bins_M_end[i], sqrtS, 4)
         integ_xsec_em[i] = QCDNUM.dsp_ints2(iaF_eM, xbins_M_begin[i], xbins_M_end[i],
@@ -160,30 +162,39 @@ function forward_model(pdf_params::AbstractPDFParams, qcdnum_params::QCDNUMParam
     K_eP = get_K_elements(ePp)
     K_eM = get_K_elements(eMp)
 
-    nbins_out = size(TM_eP)[2]
+    bin_out_axis = axes(TM_eP, 2)
 
-    counts_pred_ep = zeros(nbins_out)
-    counts_pred_em = zeros(nbins_out)
+    T = promote_type(map(eltype, (
+        TotSys_var_ep, TotSys_var_em, SysError_params, Tnm_sys_ePp, Tnm_sys_eMp,
+        TM_eP, TM_eM, K_eP, K_eM, integ_xsec_ep, integ_xsec_em
+    ))...)
 
-    for j in 1:nbins_out
-        TotSys_var_ep =0.
-        TotSys_var_em =0.
-        for i in 1:nbins
+    counts_pred_ep = similar(TM_eP, T, size(TM_eP, 2))
+    counts_pred_em = similar(TM_eM, T, size(TM_eM, 2))
 
-           # add variation for 8 parameters
-           for k in 1:size(SysError_params)
-              #This is a hack, in case no systematic errors are provided, this code will be unreachable.
-              TotSys_var_ep += SysError_params[k]*Tnm_sys_ePp[i,j,k]
-              TotSys_var_em += SysError_params[k]*Tnm_sys_eMp[i,j,k]
-           end
+    syserr_axis = axes(SysError_params, 1)
+
+    @archeck axes(TM_eP, 2) == axes(TM_eM, 2) == axes(Tnm_sys_ePp, 2) == axes(Tnm_sys_eMp, 2)
+    @archeck axes(TM_eP, i) == axes(TM_eM, 1) == axes(K_eP, 1) == axes(K_eM, 1)
+    @archeck axes(SysError_params, 1) == axes(Tnm_sys_ePp, 3) == axes(Tnm_sys_eMp, 3)
+
+    # Calculate TotSys_var_em == SysError_params[k] * Tnm_sys_ePp[i,j,k] up front?
+
+    for j in bin_out_axis
+        TotSys_var_ep::T = 0 # Move into loop over i?
+        TotSys_var_em::T = 0 # Move into loop over i?
+        for i in bin_axis
+           # Add variation for parameters, will do nothing if no systematic errors are provided:
+            for k in syserr_axis
+                TotSys_var_ep += SysError_params[k] * Tnm_sys_ePp[i,j,k]
+                TotSys_var_em += SysError_params[k] * Tnm_sys_eMp[i,j,k]
+            end
             counts_pred_ep[j] += (TM_eP[i, j] + TotSys_var_ep) * (1.0 / K_eP[i]) * integ_xsec_ep[i]
             counts_pred_em[j] += (TM_eM[i, j] + TotSys_var_em) * (1.0 / K_eM[i]) * integ_xsec_em[i]
-
         end
     end
 
     return counts_pred_ep, counts_pred_em
-
 end
 
 """
