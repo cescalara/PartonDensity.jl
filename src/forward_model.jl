@@ -84,7 +84,7 @@ end
 
 """
     forward_model(pdf_params, qcdnum_grid, 
-                  splint_params, quark_coeffs)
+                  splint_params, quark_coeffs, SysError_params)
 
 Go from input PDF parameters to the expected number of events in bins.
 """
@@ -142,7 +142,7 @@ function forward_model(pdf_params::AbstractPDFParams, qcdnum_params::QCDNUMParam
     nbins = size(xbins_M_begin)[1]
     integ_xsec_ep = zeros(nbins)
     integ_xsec_em = zeros(nbins)
-    Float64::sqrtS = 318.0
+    sqrtS::Float64 = 318.0
     for i in 1:nbins
         integ_xsec_ep[i] = QCDNUM.dsp_ints2(iaF_eP, xbins_M_begin[i], xbins_M_end[i],
             q2bins_M_begin[i], q2bins_M_end[i], sqrtS, 4)
