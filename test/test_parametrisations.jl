@@ -59,10 +59,11 @@ end
         λ_q = rand(Uniform(-1, 0))
         K_q = rand(Uniform(1, 5))
         weights = ones(9)
+        θ = rand(Dirichlet(weights))
 
         dir_pdf_params = DirichletPDFParams(K_u=K_u, K_d=K_d, λ_g1=λ_g2,
             λ_g2=λ_g2, K_g=K_g, λ_q=λ_q, K_q=K_q,
-            weights=weights)
+            θ=θ)
 
         @test int_xtotx(dir_pdf_params) ≈ 1.0
 
