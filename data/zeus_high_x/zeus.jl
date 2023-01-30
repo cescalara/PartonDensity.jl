@@ -10,8 +10,8 @@ S = Born-level integrated sigma
 Based on C++ code by R. Aggarwal.
 """
 
-include("../data/zeus_transfer_matrix.jl")
-include("../data/zeus_bin_edges.jl")
+include("./zeus_transfer_matrix.jl")
+include("./zeus_bin_edges.jl")
 
 export get_pred_N
 export get_data_events

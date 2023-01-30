@@ -4,12 +4,13 @@
 
 using PartonDensity, CSV, DelimitedFiles
 
+include("zeus_high_x.jl")
 # ## Transfer matrix
 
 eMPp = 1 # e+/e- switch 0/1
 
 # Read in an example integrated cross section
-numbers_from_file = readdlm("data/HERAPDF20_NNLO_EIG_ePp.txt") 
+numbers_from_file = readdlm("./HERAPDF20_NNLO_EIG_ePp.txt") 
 
 # List of integrated cross section values in 429 bins 
 integ_xsec = numbers_from_file[:,3] 

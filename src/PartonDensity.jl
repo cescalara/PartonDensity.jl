@@ -12,7 +12,6 @@ include("parametrisations/parametrisations.jl")
 include("qcdnum_interface.jl")
 include("cross_section.jl")
 include("forward_model.jl")
-include("zeus.jl")
 include("bernstein_forward_model.jl")
 
 using Requires
