@@ -1,4 +1,4 @@
-import SpecialFunctions as SF
+import SpecialFunctions as sf
 
 export xtotx, int_xtotx
 export plot_input_pdfs, get_input_pdf_func
@@ -21,7 +21,7 @@ A_u is set by λ_u and K_u.
 """
 function x_uv_x(x::Real, λ_u::Real, K_u::Real)
 
-    A_u = 2 / SF.beta(λ_u, K_u + 1)
+    A_u = 2 / sf.beta(λ_u, K_u + 1)
 
     return A_u * x^λ_u * (1 - x)^K_u
 
@@ -37,7 +37,7 @@ A_d is set by λ_d and K_d.
 """
 function x_dv_x(x::Real, λ_d::Real, K_d::Real)
 
-    A_d = 1 / SF.beta(λ_d, K_d + 1)
+    A_d = 1 / sf.beta(λ_d, K_d + 1)
 
     return A_d * x^λ_d * (1 - x)^K_d
 
@@ -53,11 +53,11 @@ Amplitudes are set by weights `w1` and `w2`.
 function x_g_x(x::Real, λ_g1::Real, λ_g2::Real, K_g::Real,
     K_q::Real, w1::Real, w2::Real)
 
-    A_g1 = w1 / SF.beta(λ_g1 + 1, K_g + 1)
+    A_g1 = w1 / sf.beta(λ_g1 + 1, K_g + 1)
 
     x_g1_x = A_g1 * x^λ_g1 * (1 - x)^K_g
 
-    A_g2 = w2 / SF.beta(λ_g2 + 1, K_q + 1)
+    A_g2 = w2 / sf.beta(λ_g2 + 1, K_q + 1)
 
     x_g2_x = A_g2 * x^λ_g2 * (1 - x)^K_q
 
@@ -76,7 +76,7 @@ Amplitude is set by weight `w`
 """
 function x_q_x(x::Real, λ_q::Real, K_q::Real, w::Real)
 
-    A_q = (w / 2) / SF.beta(λ_q + 1, K_q + 1)
+    A_q = (w / 2) / sf.beta(λ_q + 1, K_q + 1)
 
     return A_q * x^λ_q * (1 - x)^K_q
 
