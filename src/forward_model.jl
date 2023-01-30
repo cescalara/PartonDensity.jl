@@ -184,10 +184,10 @@ function forward_model(pdf_params::AbstractPDFParams, qcdnum_params::QCDNUMParam
         TotSys_var_ep::T = 0 # Move into loop over i?
         TotSys_var_em::T = 0 # Move into loop over i?
         for i in bin_axis
-           # Add variation for parameters, will do nothing if no systematic errors are provided:
+            # Add variation for parameters, will do nothing if no systematic errors are provided:
             for k in syserr_axis
-                TotSys_var_ep += SysError_params[k] * Tnm_sys_ePp[i,j,k]
-                TotSys_var_em += SysError_params[k] * Tnm_sys_eMp[i,j,k]
+                TotSys_var_ep += SysError_params[k] * Tnm_sys_ePp[i, j, k]
+                TotSys_var_em += SysError_params[k] * Tnm_sys_eMp[i, j, k]
             end
             counts_pred_ep[j] += (TM_eP[i, j] + TotSys_var_ep) * (1.0 / K_eP[i]) * integ_xsec_ep[i]
             counts_pred_em[j] += (TM_eM[i, j] + TotSys_var_em) * (1.0 / K_eM[i]) * integ_xsec_em[i]
@@ -270,23 +270,23 @@ function pd_read_sim(file_name::String)
                 θ=read(g["θ"]))
 
         elseif read(g["param_type"]) == BERNSTEIN_TYPE
-            
-            pdf_params = BernsteinPDFParams(U_list=read(g["U_list"]), 
+
+            pdf_params = BernsteinPDFParams(U_list=read(g["U_list"]),
                 D_list=read(g["D_list"]),
                 λ_g1=read(g["λ_g1"]), λ_g2=read(g["λ_g2"]),
                 K_g=read(g["K_g"]), λ_q=read(g["λ_q"]), K_q=read(g["K_q"]),
                 seed=read(g["seed"]), weights=read(g["weights"]),
                 θ=read(g["θ"]))
-            
+
         elseif read(g["param_type"]) == BERNSTEIN_DIRICHLET_TYPE
-            
-            pdf_params = BernsteinDirichletPDFParams(U_list=read(g["U_list"]), 
+
+            pdf_params = BernsteinDirichletPDFParams(U_list=read(g["U_list"]),
                 D_list=read(g["D_list"]),
                 λ_g1=read(g["λ_g1"]), λ_g2=read(g["λ_g2"]),
                 K_g=read(g["K_g"]), λ_q=read(g["λ_q"]), K_q=read(g["K_q"]),
-                seed=read(g["seed"]), weights=read(g["weights"]), 
+                seed=read(g["seed"]), weights=read(g["weights"]),
                 θ=read(g["θ"]))
-            
+
         else
 
             @error "PDF parametrisation not recognised."
