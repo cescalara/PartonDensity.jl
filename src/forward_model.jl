@@ -89,7 +89,7 @@ end
 Go from input PDF parameters to the expected number of events in bins.
 """
 function forward_model(pdf_params::AbstractPDFParams, qcdnum_params::QCDNUMParameters,
-    splint_params::SPLINTParameters, quark_coeffs::QuarkCoefficients)
+    splint_params::SPLINTParameters, quark_coeffs::QuarkCoefficients, SysError_params::Vector{Float64})
 
 
     # Get input PDF function
@@ -142,12 +142,12 @@ function forward_model(pdf_params::AbstractPDFParams, qcdnum_params::QCDNUMParam
     nbins = size(xbins_M_begin)[1]
     integ_xsec_ep = zeros(nbins)
     integ_xsec_em = zeros(nbins)
-
+    Float64::sqrtS = 318.0
     for i in 1:nbins
         integ_xsec_ep[i] = QCDNUM.dsp_ints2(iaF_eP, xbins_M_begin[i], xbins_M_end[i],
-            q2bins_M_begin[i], q2bins_M_end[i], 318.0, 4)
+            q2bins_M_begin[i], q2bins_M_end[i], sqrtS, 4)
         integ_xsec_em[i] = QCDNUM.dsp_ints2(iaF_eM, xbins_M_begin[i], xbins_M_end[i],
-            q2bins_M_begin[i], q2bins_M_end[i], 318.0, 4)
+            q2bins_M_begin[i], q2bins_M_end[i], sqrtS, 4)
     end
 
     # Fold through response to get counts
@@ -166,14 +166,20 @@ function forward_model(pdf_params::AbstractPDFParams, qcdnum_params::QCDNUMParam
     counts_pred_em = zeros(nbins_out)
 
     for j in 1:nbins_out
-
+        TotSys_var_ep =0.
+        TotSys_var_em =0.
         for i in 1:nbins
 
-            counts_pred_ep[j] += TM_eP[i, j] * (1.0 / K_eP[i]) * integ_xsec_ep[i]
-            counts_pred_em[j] += TM_eM[i, j] * (1.0 / K_eM[i]) * integ_xsec_em[i]
+           # add variation for 8 parameters
+           for k in 1:size(SysError_params)
+              #This is a hack, in case no systematic errors are provided, this code will be unreachable.
+              TotSys_var_ep += SysError_params[k]*Tnm_sys_ePp[i,j,k]
+              TotSys_var_em += SysError_params[k]*Tnm_sys_eMp[i,j,k]
+           end
+            counts_pred_ep[j] += (TM_eP[i, j] + TotSys_var_ep) * (1.0 / K_eP[i]) * integ_xsec_ep[i]
+            counts_pred_em[j] += (TM_eM[i, j] + TotSys_var_em) * (1.0 / K_eM[i]) * integ_xsec_em[i]
 
         end
-
     end
 
     return counts_pred_ep, counts_pred_em

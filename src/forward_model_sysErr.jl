@@ -36,12 +36,16 @@ include("../examples/data/eMp_jl/SysTnm_FCALyhigh_eMp.jl")
 include("../examples/data/eMp_jl/SysTnm_FCALylow_eMp.jl")
 include("../examples/data/eMp_jl/SysTnm_AriMepsUp_eMp.jl")
 include("../examples/data/eMp_jl/SysTnm_AriMepsDown_eMp.jl")
+include("../examples/data/zeus_bin_edges.jl")
 
 
+UInt64::NP1 = size(BinQ2low)
+UInt64::NP2 = size(Binxlow)
+UInt64::nsyst = 8
 
 
- Tnm_sys_ePp = zeros(429,153,8)
- Tnm_sys_eMp = zeros(429,153,8)
+Tnm_sys_ePp = zeros(NP1,NP1,nsyst)
+Tnm_sys_eMp = zeros(NP1,NP2,nsyst)
 
 
 """
@@ -61,19 +65,22 @@ end
 Reads various systematic errors and feeds them for further use
 """
 function Init_sys()
+# NP1 429
+# NP2 153
+# nsyst 8
 
-TM_Elements_ePp  = zeros(429,153)
-TM_Elements_eMp  = zeros(429,153)
+TM_Elements_ePp  = zeros(NP1,NP2)
+TM_Elements_eMp  = zeros(NP1,NP2)
     
  TM_Elements_ePp = get_TM_elements(0);
  TM_Elements_eMp = get_TM_elements(1);
 
 
- Tnm_Ee_sys_ePp = zeros(429,153)
- Tnm_Eehigh_ePp[426,153]
+ Tnm_Ee_sys_ePp = zeros(NP1,NP2)
+ Tnm_Eehigh_ePp[NP1,NP2]
     
- Tnm_sys_ePp = zeros(429,153,8)
- Tnm_sys_eMp = zeros(429,153,8)
+ Tnm_sys_ePp = zeros(NP1,NP2,nsyst)
+ Tnm_sys_eMp = zeros(NP1,NP2,nsyst)
 
 
     
@@ -81,8 +88,8 @@ TM_Elements_eMp  = zeros(429,153)
     TM_Elements_eMp = TM_Elements_eMp / get_L_data(1)
     
 
- for i in 1:429
-    for j in 1:153
+ for i in 1:NP1
+    for j in 1:NP2
 
             
 
@@ -150,17 +157,17 @@ TM_Elements_eMp  = zeros(429,153)
     end
  end
     
-     println(TM_Elements_ePp[429,153])
-     println(Tnm_Eehigh_ePp[429,153])
-     println(Tnm_Eelow_ePp[429,153])
-     println(Tnm_Ee_sys_ePp[429,153])
-     println(Tnm_sys_ePp[429,153,1])
+     println(TM_Elements_ePp[NP1,NP2])
+     println(Tnm_Eehigh_ePp[NP1,NP2])
+     println(Tnm_Eelow_ePp[NP1,NP2])
+     println(Tnm_Ee_sys_ePp[NP1,NP2])
+     println(Tnm_sys_ePp[NP1,NP2,1])
     
      Tnm_sys_ePp = Tnm_sys_ePp * get_L_data(0)
      Tnm_sys_eMp = Tnm_sys_eMp * get_L_data(1)
     
-     println(Tnm_Ee_sys_ePp[429,153])
-     println(Tnm_sys_ePp[429,153,1])
+     println(Tnm_Ee_sys_ePp[NP1,NP2])
+     println(Tnm_sys_ePp[NP1,NP2,1])
     
 end
 
@@ -200,7 +207,7 @@ function forward_model_init_sysErr(qcdnum_grid::QCDNUMGrid, qcdnum_params::QCDNU
     ia = QCDNUM.isp_s2make(splint_params.nsteps_x, splint_params.nsteps_q)
     xnd = QCDNUM.ssp_unodes(ia, splint_params.nnodes_x, 0)
     qnd = QCDNUM.ssp_vnodes(ia, splint_params.nnodes_q, 0)
-    QCDNUM.ssp_erase(ia);
+    QCDNUM.ssp_erase(ia)
     
     iaFLup = QCDNUM.isp_s2user(xnd, splint_params.nnodes_x, qnd, splint_params.nnodes_q)
     iaF2up = QCDNUM.isp_s2user(xnd, splint_params.nnodes_x, qnd, splint_params.nnodes_q)
@@ -222,100 +229,5 @@ function forward_model_init_sysErr(qcdnum_grid::QCDNUMGrid, qcdnum_params::QCDNU
     QCDNUM.ssp_uwrite(splint_params.spline_addresses.F_eM, Float64(iaF_eM))
     Init_sys()
    
-end
-
-
-"""
-    forward_model(pdf_params, qcdnum_grid, 
-                  splint_params, quark_coeffs)
-
-Go from input PDF parameters to the expected number of events in bins.
-"""
-function forward_model_sysErr(pdf_params::AbstractPDFParams, qcdnum_params::QCDNUMParameters,
-                       splint_params::SPLINTParameters, quark_coeffs::QuarkCoefficients,                       SysError_params::Vector{Float64})
-
-
-    # Get input PDF function
-    my_func = get_input_pdf_func(pdf_params)
-    input_pdf = @cfunction($my_func, Float64, (Ref{Int32}, Ref{Float64}))
-
-    # Evolve PDFs
-    iq0 = QCDNUM.iqfrmq(qcdnum_params.q0)
-    pdf_loc = 1
-    eps = QCDNUM.evolfg(pdf_loc, input_pdf, input_pdf_map, iq0)
-
-    # Read spline addresses
-    iaF2up = Int64(QCDNUM.dsp_uread(splint_params.spline_addresses.F2up))
-    iaF2dn = Int64(QCDNUM.dsp_uread(splint_params.spline_addresses.F2dn))
-    iaF3up = Int64(QCDNUM.dsp_uread(splint_params.spline_addresses.F3up))
-    iaF3dn = Int64(QCDNUM.dsp_uread(splint_params.spline_addresses.F3dn))
-    iaFLup = Int64(QCDNUM.dsp_uread(splint_params.spline_addresses.FLup))
-    iaFLdn = Int64(QCDNUM.dsp_uread(splint_params.spline_addresses.FLdn))
-    iaF_eP = Int64(QCDNUM.dsp_uread(splint_params.spline_addresses.F_eP))
-    iaF_eM = Int64(QCDNUM.dsp_uread(splint_params.spline_addresses.F_eM))
-    
-    # Splines for structure functions
-    QCDNUM.ssp_s2f123(iaFLup, pdf_loc, quark_coeffs.proup, 1, 0.0)
-    QCDNUM.ssp_s2f123(iaF2up, pdf_loc, quark_coeffs.proup, 2, 0.0)
-    QCDNUM.ssp_s2f123(iaF3up, pdf_loc, quark_coeffs.valup, 3, 0.0)  
-    QCDNUM.ssp_s2f123(iaFLdn, pdf_loc, quark_coeffs.prodn, 1, 0.0)  
-    QCDNUM.ssp_s2f123(iaF2dn, pdf_loc, quark_coeffs.prodn, 2, 0.0)
-    QCDNUM.ssp_s2f123(iaF3dn, 1, quark_coeffs.valdn, 3, 0.0)
-
-    # Get input cross section function
-    my_func = get_input_xsec_func()
-    input_xsec = @cfunction($my_func, Float64, (Ref{Int32}, Ref{Int32}, Ref{UInt8}))
-
-    # Make two cross section splines
-    set_lepcharge(1)
-    QCDNUM.ssp_s2fill(iaF_eP, input_xsec, splint_params.rscut)
-
-    set_lepcharge(-1)
-    QCDNUM.ssp_s2fill(iaF_eM, input_xsec, splint_params.rscut)
-
-    # Integrate over cross section
-    nbins = size(xbins_M_begin)[1]
-    integ_xsec_ep = zeros(nbins);
-    integ_xsec_em = zeros(nbins);
-
-    for i in 1:nbins
-        integ_xsec_ep[i] = QCDNUM.dsp_ints2(iaF_eP, xbins_M_begin[i], xbins_M_end[i],
-                                            q2bins_M_begin[i], q2bins_M_end[i], 318., 4)
-        integ_xsec_em[i] = QCDNUM.dsp_ints2(iaF_eM, xbins_M_begin[i], xbins_M_end[i],
-                                            q2bins_M_begin[i], q2bins_M_end[i], 318., 4)
-    end
-
-    # Fold through response to get counts
-    ePp = 0
-    eMp = 1
-
-    TM_eP = get_TM_elements(ePp)
-    TM_eM = get_TM_elements(eMp)
-
-    K_eP = get_K_elements(ePp)
-    K_eM = get_K_elements(eMp)
-
-    nbins_out = size(TM_eP)[2]
-
-    counts_pred_ep = zeros(nbins_out)
-    counts_pred_em = zeros(nbins_out)
-
-    for j in 1:nbins_out
-         TotSys_var_ep =0.
-         TotSys_var_em =0.
-        for i in 1:nbins
-   # add variation for 8 parameters
-            for k in 1:8
-                TotSys_var_ep += SysError_params[k]*Tnm_sys_ePp[i,j,k]
-                TotSys_var_em += SysError_params[k]*Tnm_sys_eMp[i,j,k]
-             end 
-                  counts_pred_ep[j] += (TM_eP[i, j]+TotSys_var_ep) * (1.0/K_eP[i]) * integ_xsec_ep[i]
-                  counts_pred_em[j] += (TM_eM[i, j]+TotSys_var_em) * (1.0/K_eM[i]) * integ_xsec_em[i]
-           
-        end
-    end
-
-    return counts_pred_ep, counts_pred_em
-    
 end
 
