@@ -36,7 +36,7 @@ end
 function get_prior(pdf_params::DirichletPDFParams)
 
     prior = NamedTupleDist(
-        θ=Dirichlet(pdf_params.weights),
+        θ=Dirichlet(ones(9)),
         K_u=Uniform(2, 10),
         K_d=Uniform(2, 10),
         λ_g1=Uniform(0, 1),
