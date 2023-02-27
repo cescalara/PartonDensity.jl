@@ -34,7 +34,7 @@ include("eMp_jl/SysTnm_FCALyhigh_eMp.jl")
 include("eMp_jl/SysTnm_FCALylow_eMp.jl")
 include("eMp_jl/SysTnm_AriMepsUp_eMp.jl")
 include("eMp_jl/SysTnm_AriMepsDown_eMp.jl")
-include("zeus_bin_edges.jl")
+# include("../../zeus_bin_edges.jl")
 
 
 NP1 = size(BinQ2low)
@@ -42,8 +42,8 @@ NP2 = size(Binxlow)
 nsyst = 8
 
 
-Tnm_sys_ePp = zeros(NP1,NP1,nsyst)
-Tnm_sys_eMp = zeros(NP1,NP2,nsyst)
+Tnm_sys_ePp = zeros(NP1...,NP1...,nsyst)
+Tnm_sys_eMp = zeros(NP1...,NP2...,nsyst)
 
 
 
