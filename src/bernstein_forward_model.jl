@@ -8,7 +8,7 @@ splint_init_complete = false
 
 function forward_model(pdf_params::Union{BernsteinPDFParams, BernsteinDirichletPDFParams}, qcdnum_params::QCDNUMParameters,
                        splint_params::SPLINTParameters,
-                        quark_coeffs::QuarkCoefficients, TM_eP::Vector{Float64},TP_eP::Vector{Float64}, K_eP::Vector{Float64}, K_eM::Vector{Float64}, SysError_params::Vector{Float64} = zeros(8)))
+                        quark_coeffs::QuarkCoefficients, TM_eP::Vector{Float64},TP_eP::Vector{Float64}, K_eP::Vector{Float64}, K_eM::Vector{Float64}, SysError_params::Vector{Float64} = zeros(8))
 
 
     # Get input PDF function
