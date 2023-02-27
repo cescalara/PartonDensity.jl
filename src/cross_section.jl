@@ -266,7 +266,7 @@ function _fun_xsec_i(ix, iq)::Float64
     
     # structure function calculation
     pz = q2 / ((ZMass*ZMass+q2) * (4*(Sin2ThetaW) * (1-Sin2ThetaW)));
-    #=
+
     Au = 4.0/9.0 -2*pz*(2.0/3.0)*(vu)*(ve) + pz*pz*(ve*ve+ae*ae)*(vu*vu+au*au);
     Ad = 1.0/9.0 -2*pz*(-1.0/3.0)*(vd)*(ve) + pz*pz*(ve*ve+ae*ae)*(vd*vd+ad*ad);
     Bu = -2*(2.0/3.0)*au*ae*pz + 4*au*ae*vu*ve*pz*pz;
@@ -279,7 +279,6 @@ function _fun_xsec_i(ix, iq)::Float64
     xsec = dd_xsecnc_xq2_i(x, q2, F2, xF3, FL);
     
     return  xsec;
-    =#
 end
 
 function get_input_xsec_func()
