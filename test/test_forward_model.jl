@@ -1,6 +1,9 @@
 using PartonDensity
 using Test
 using Distributions, Random
+include("zeus.jl")
+include("../examples/data/zeus_high_x.jl")
+
 
 @testset "Forward model" begin
 
@@ -40,11 +43,20 @@ using Distributions, Random
 
     forward_model_init(qcdnum_grid, qcdnum_params, splint_params)
 
+    ePp = 0
+    eMp = 1
+
+    TM_eP = get_TM_elements(ePp)
+    TM_eM = get_TM_elements(eMp)
+
+    K_eP = get_K_elements(ePp)
+    K_eM = get_K_elements(eMp)
+
+
     # Run forward model
     for pdf_params in pdf_params_list
 
-        counts_pred_ep, counts_pred_em = forward_model(pdf_params, qcdnum_params,
-            splint_params, quark_coeffs)
+        counts_pred_ep, counts_pred_em = forward_model(pdf_params, qcdnum_params,splint_params, quark_coeffs,TM_eP,TM_eM,K_eP,K_eM)
 
         if typeof(pdf_params) == BernsteinPDFParams
 

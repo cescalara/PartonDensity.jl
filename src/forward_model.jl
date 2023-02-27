@@ -89,7 +89,8 @@ end
 Go from input PDF parameters to the expected number of events in bins.
 """
 function forward_model(pdf_params::AbstractPDFParams, qcdnum_params::QCDNUMParameters,
-    splint_params::SPLINTParameters, quark_coeffs::QuarkCoefficients, SysError_params::Vector{Float64} = zeros(8))
+    splint_params::SPLINTParameters, quark_coeffs::QuarkCoefficients, 
+    TM_eP::Vector{Float64},TP_eP::Vector{Float64}, K_eP::Vector{Float64}, K_eM::Vector{Float64}, SysError_params::Vector{Float64} = zeros(8))
 
     # Get input PDF function
     my_func = get_input_pdf_func(pdf_params)
@@ -152,14 +153,14 @@ function forward_model(pdf_params::AbstractPDFParams, qcdnum_params::QCDNUMParam
     end
 
     # Fold through response to get counts
-    ePp = 0
-    eMp = 1
+#    ePp = 0
+#    eMp = 1
 
-    TM_eP = get_TM_elements(ePp)
-    TM_eM = get_TM_elements(eMp)
+#    TM_eP = get_TM_elements(ePp)
+#    TM_eM = get_TM_elements(eMp)
 
-    K_eP = get_K_elements(ePp)
-    K_eM = get_K_elements(eMp)
+#    K_eP = get_K_elements(ePp)
+#    K_eM = get_K_elements(eMp)
 
     bin_out_axis = axes(TM_eP, 2)
 

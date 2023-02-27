@@ -3,6 +3,8 @@ using Test
 using Random, Distributions
 using Plots, ValueShapes
 import BAT
+include("zeus.jl")
+include("../examples/data/zeus_high_x.jl")
 
 @testset "Valence PDF parametrisation" begin
 

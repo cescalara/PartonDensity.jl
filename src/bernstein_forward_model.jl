@@ -9,7 +9,8 @@ splint_init_complete = false
 
 
 function forward_model(pdf_params::Union{BernsteinPDFParams, BernsteinDirichletPDFParams}, qcdnum_params::QCDNUMParameters,
-                       splint_params::SPLINTParameters, quark_coeffs::QuarkCoefficients)
+                       splint_params::SPLINTParameters,
+                        quark_coeffs::QuarkCoefficients, TM_eP::Vector{Float64},TP_eP::Vector{Float64}, K_eP::Vector{Float64}, K_eM::Vector{Float64}, SysError_params::Vector{Float64} = zeros(8)))
 
 
     # Get input PDF function
@@ -71,14 +72,14 @@ function forward_model(pdf_params::Union{BernsteinPDFParams, BernsteinDirichletP
     end
 
     # Fold through response to get counts
-    ePp = 0
-    eMp = 1
+#    ePp = 0
+#    eMp = 1
 
-    TM_eP = get_TM_elements(ePp)
-    TM_eM = get_TM_elements(eMp)
+#    TM_eP = get_TM_elements(ePp)
+#    TM_eM = get_TM_elements(eMp)
 
-    K_eP = get_K_elements(ePp)
-    K_eM = get_K_elements(eMp)
+#    K_eP = get_K_elements(ePp)
+#    K_eM = get_K_elements(eMp)
 
     nbins_out = size(TM_eP)[2]
 
