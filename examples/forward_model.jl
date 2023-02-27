@@ -154,12 +154,12 @@ plot!(xaxis=:log, legend=:bottomleft, xlabel="x",
 
 #
 
-set_lepcharge(1)
+#set_lepcharge(1)
 iaF_eP = QCDNUM.isp_s2make(1, 2);
 QCDNUM.ssp_uwrite(splint_params.spline_addresses.F_eP, Float64(iaF_eP));
 QCDNUM.ssp_s2fill(iaF_eP, input_xsec, splint_params.rscut);
 
-set_lepcharge(-1)
+#set_lepcharge(-1)
 iaF_eM = QCDNUM.isp_s2make(1, 2);
 QCDNUM.ssp_uwrite(splint_params.spline_addresses.F_eM, Float64(iaF_eM));
 QCDNUM.ssp_s2fill(iaF_eM, input_xsec, splint_params.rscut);

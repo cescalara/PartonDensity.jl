@@ -49,10 +49,10 @@ function forward_model(pdf_params::Union{BernsteinPDFParams, BernsteinDirichletP
     input_xsec = @cfunction($my_func, Float64, (Ref{Int32}, Ref{Int32}, Ref{UInt8}))
 
     # Make two cross section splines
-    set_lepcharge(1)
+    #set_lepcharge(1)
     QCDNUM.ssp_s2fill(iaF_eP, input_xsec, splint_params.rscut)
 
-    set_lepcharge(-1)
+    #set_lepcharge(-1)
     QCDNUM.ssp_s2fill(iaF_eM, input_xsec, splint_params.rscut)
 
     # Integrate over cross section
