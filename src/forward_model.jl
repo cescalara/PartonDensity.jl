@@ -164,7 +164,7 @@ function forward_model(pdf_params::AbstractPDFParams, qcdnum_params::QCDNUMParam
     bin_out_axis = axes(TM_eP, 2)
 
     T = promote_type(map(eltype, (
-        TotSys_var_ep, TotSys_var_em, SysError_params, Tnm_sys_ePp, Tnm_sys_eMp,
+        SysError_params, Tnm_sys_ePp, Tnm_sys_eMp,
         TM_eP, TM_eM, K_eP, K_eM, integ_xsec_ep, integ_xsec_em
     ))...)
 
@@ -174,7 +174,7 @@ function forward_model(pdf_params::AbstractPDFParams, qcdnum_params::QCDNUMParam
     syserr_axis = axes(SysError_params, 1)
 
     @argcheck axes(TM_eP, 2) == axes(TM_eM, 2) == axes(Tnm_sys_ePp, 2) == axes(Tnm_sys_eMp, 2)
-    @argcheck axes(TM_eP, i) == axes(TM_eM, 1) == axes(K_eP, 1) == axes(K_eM, 1)
+    @argcheck axes(TM_eP, 1) == axes(TM_eM, 1) == axes(K_eP, 1) == axes(K_eM, 1)
     @argcheck axes(SysError_params, 1) == axes(Tnm_sys_ePp, 3) == axes(Tnm_sys_eMp, 3)
 
     # Calculate TotSys_var_em == SysError_params[k] * Tnm_sys_ePp[i,j,k] up front?
