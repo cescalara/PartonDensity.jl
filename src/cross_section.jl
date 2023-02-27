@@ -45,8 +45,9 @@ const ad = -0.5
 const ae = -0.5
 
 # Should be configurable 
-const sqrt_s = 318.1  
-const Lepcharge = 1 
+const sqrt_s = 318.1
+# ToDo: Lepcharge must not be global!
+Lepcharge::Int = 1 
 
 export _fun_xsec_i, get_input_xsec_func
 export set_lepcharge
