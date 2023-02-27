@@ -17,7 +17,7 @@ Fields:
 $(TYPEDFIELDS)
 """
 @with_kw struct ValencePDFParams <: AbstractPDFParams
-    param_type::Integer = VALENCE_TYPE
+    param_type::Int = VALENCE_TYPE
     λ_u::Float64
     K_u::Float64
     λ_d::Float64
@@ -27,7 +27,7 @@ $(TYPEDFIELDS)
     K_g::Float64
     λ_q::Float64
     K_q::Float64
-    seed::Integer = 0
+    seed::Int = 0
     weights::Vector{Float64} = ones(7)
     θ::Vector{Float64} = get_dirichlet_samples(λ_u, K_u, λ_d, K_d, seed, weights)
 end

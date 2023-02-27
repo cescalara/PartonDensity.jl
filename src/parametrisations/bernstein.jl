@@ -19,7 +19,7 @@ Fields:
 $(TYPEDFIELDS)
 """
 @with_kw struct BernsteinPDFParams <: AbstractPDFParams
-    param_type::Integer = BERNSTEIN_TYPE
+    param_type::Int = BERNSTEIN_TYPE
     bspoly_params::Vector{Vector{Int64}} = [[0, 3], [0, 4], [1, 4], [0, 5]]
     bspoly_params_d::Vector{Vector{Int64}} = bspoly_params
     U_weights::Vector{Float64} = zeros(length(bspoly_params))
@@ -29,7 +29,7 @@ $(TYPEDFIELDS)
     K_g::Float64
     λ_q::Float64
     K_q::Float64
-    seed::Integer = 0
+    seed::Int = 0
     weights::Vector{Float64} = ones(7)
     U_list::Vector{Float64} = get_dirichlet_UD(U_weights, 2, seed, bspoly_params)
     D_list::Vector{Float64} = get_dirichlet_UD(D_weights, 1, seed, bspoly_params)
@@ -50,8 +50,8 @@ Fields:
 $(TYPEDFIELDS)
 """
 @with_kw struct BernsteinDirichletPDFParams <: AbstractPDFParams
-    param_type::Integer = BERNSTEIN_DIRICHLET_TYPE
-    seed::Integer = 0
+    param_type::Int = BERNSTEIN_DIRICHLET_TYPE
+    seed::Int = 0
     weights::Vector{Float64} = ones(9)
     θ::Vector{Float64} = rand(MersenneTwister(seed), Dirichlet(weights))
     bspoly_params::Vector{Vector{Int64}} = [[0, 3], [0, 4], [1, 4]]
