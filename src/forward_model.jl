@@ -89,8 +89,7 @@ end
 Go from input PDF parameters to the expected number of events in bins.
 """
 function forward_model(pdf_params::AbstractPDFParams, qcdnum_params::QCDNUMParameters,
-    splint_params::SPLINTParameters, quark_coeffs::QuarkCoefficients, SysError_params::Vector{Float64})
-
+    splint_params::SPLINTParameters, quark_coeffs::QuarkCoefficients, SysError_params::Vector{Float64} = Float64[])
 
     # Get input PDF function
     my_func = get_input_pdf_func(pdf_params)
