@@ -17,7 +17,7 @@ function get_prior end
 function get_prior(pdf_params::ValencePDFParams)
 
     prior = NamedTupleDist(
-        θ_tmp=Dirichlet(pdf_params.weights),
+        θ_tmp=Dirichlet(ones(7)),
         λ_u=Uniform(0, 1),
         K_u=Uniform(2, 10),
         λ_d=Uniform(0, 1),

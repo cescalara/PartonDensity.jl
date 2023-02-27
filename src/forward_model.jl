@@ -224,8 +224,6 @@ function pd_write_sim(file_name::String, pdf_params::Union{ValencePDFParams,Diri
         truth_group["K_g"] = pdf_params.K_g
         truth_group["λ_q"] = pdf_params.λ_q
         truth_group["K_q"] = pdf_params.K_q
-        truth_group["seed"] = pdf_params.seed
-        truth_group["weights"] = pdf_params.weights
         truth_group["θ"] = pdf_params.θ
         truth_group["param_type"] = pdf_params.param_type
 
@@ -258,7 +256,6 @@ function pd_read_sim(file_name::String)
                 λ_d=read(g["λ_d"]), K_d=read(g["K_d"]),
                 λ_g1=read(g["λ_g1"]), λ_g2=read(g["λ_g2"]),
                 K_g=read(g["K_g"]), λ_q=read(g["λ_q"]), K_q=read(g["K_q"]),
-                seed=read(g["seed"]), weights=read(g["weights"]),
                 θ=read(g["θ"]))
 
         elseif read(g["param_type"]) == DIRICHLET_TYPE
@@ -267,7 +264,6 @@ function pd_read_sim(file_name::String)
                 λ_d=read(g["λ_d"]), K_d=read(g["K_d"]),
                 λ_g1=read(g["λ_g1"]), λ_g2=read(g["λ_g2"]),
                 K_g=read(g["K_g"]), λ_q=read(g["λ_q"]), K_q=read(g["K_q"]),
-                seed=read(g["seed"]), weights=read(g["weights"]),
                 θ=read(g["θ"]))
 
         elseif read(g["param_type"]) == BERNSTEIN_TYPE
@@ -276,7 +272,7 @@ function pd_read_sim(file_name::String)
                 D_list=read(g["D_list"]),
                 λ_g1=read(g["λ_g1"]), λ_g2=read(g["λ_g2"]),
                 K_g=read(g["K_g"]), λ_q=read(g["λ_q"]), K_q=read(g["K_q"]),
-                seed=read(g["seed"]), weights=read(g["weights"]),
+                weights=read(g["weights"]),
                 θ=read(g["θ"]))
             
         elseif read(g["param_type"]) == BERNSTEIN_DIRICHLET_TYPE
@@ -285,7 +281,7 @@ function pd_read_sim(file_name::String)
                 D_list=read(g["D_list"]),
                 λ_g1=read(g["λ_g1"]), λ_g2=read(g["λ_g2"]),
                 K_g=read(g["K_g"]), λ_q=read(g["λ_q"]), K_q=read(g["K_q"]),
-                seed=read(g["seed"]), weights=read(g["weights"]), 
+                weights=read(g["weights"]), 
                 θ=read(g["θ"]))
             
         else

@@ -15,6 +15,7 @@ Fields:
 $(TYPEDFIELDS)
 """
 @with_kw struct DirichletPDFParams{T<:Real,TV<:AbstractVector{T}} <: AbstractPDFParams
+    param_type::Int = DIRICHLET_TYPE
     θ::TV
     K_u::T
     λ_u::T = (θ[1] * (K_u + 1)) / (2 - θ[1])
