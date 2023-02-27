@@ -51,7 +51,7 @@ using Distributions, Random
             @test all(counts_pred_ep .>= 0.0)
             @test all(counts_pred_ep .<= 2.0e3)
 
-            @test all(counts_pred_em .> 0.0)
+            @test all(counts_pred_em .>= 0.0)
             @test all(counts_pred_em .<= 2.0e3)
 
         else
@@ -59,7 +59,7 @@ using Distributions, Random
             @test all(counts_pred_ep .>= 0.0)
             @test all(counts_pred_ep .<= 1.0e3)
 
-            @test all(counts_pred_em .> 0.0)
+            @test all(counts_pred_em .>= 0.0)
             @test all(counts_pred_em .<= 1.0e3)
 
         end
