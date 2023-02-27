@@ -285,11 +285,11 @@ end
 function get_input_xsec_func(charge::Int32)
 
 if ( charge == 1 )
-    funcp = function _my_fun_xsec_i(ipx, ipq, first)::Float64
+    funcp = function _my_fun_xsec_ip(ipx, ipq, first)::Float64
     
         ix = ipx[]
         iq = ipq[]
-        mycharge::Int_32 = 1
+        mycharge::Int32 = 1
         
         xsec = _fun_xsec_i(mycharge, ix, iq)
     
@@ -299,11 +299,11 @@ if ( charge == 1 )
 end
 if (charge == -1 ) 
 
-    funcm = function _my_fun_xsec_i(ipx, ipq, first)::Float64
+    funcm = function _my_fun_xsec_im(ipx, ipq, first)::Float64
     
         ix = ipx[]
         iq = ipq[]
-        mycharge::Int_32 = -1
+        mycharge::Int32 = -1
         
         xsec = _fun_xsec_i(mycharge, ix, iq)
     
