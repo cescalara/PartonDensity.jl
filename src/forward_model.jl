@@ -164,8 +164,7 @@ function forward_model(pdf_params::AbstractPDFParams, qcdnum_params::QCDNUMParam
 
     bin_out_axis = axes(TM_eP, 2)
 
-    T = promote_type(map(eltype, (
-        TotSys_var_ep, TotSys_var_em, SysError_params, Tnm_sys_ePp, Tnm_sys_eMp,
+    T = promote_type(map(eltype, (SysError_params, Tnm_sys_ePp, Tnm_sys_eMp,
         TM_eP, TM_eM, K_eP, K_eM, integ_xsec_ep, integ_xsec_em
     ))...)
 
