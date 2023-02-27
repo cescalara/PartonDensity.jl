@@ -1,7 +1,7 @@
 using PartonDensity
 using Test
 using Distributions, Random
-include("zeus.jl")
+include("../src/zeus.jl")
 include("../examples/data/zeus_high_x.jl")
 
 
