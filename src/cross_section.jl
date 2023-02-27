@@ -282,17 +282,35 @@ function _fun_xsec_i(charge::Int32,ix, iq)::Float64
     return  xsec;
 end
 
-function get_input_xsec_func()
+function get_input_xsec_func(charge::Int32)
 
-    func = function _my_fun_xsec_i(ipx, ipq, first)::Float64
+if ( charge == 1 )
+    funcp = function _my_fun_xsec_i(ipx, ipq, first)::Float64
     
         ix = ipx[]
         iq = ipq[]
+        mycharge::Int_32 = 1
+        
+        xsec = _fun_xsec_i(mycharge, ix, iq)
     
-        xsec = _fun_xsec_i(ix, iq)
+        return xsec
+    end
+        return funcp
+end
+if (charge == -1 ) 
+
+    funcm = function _my_fun_xsec_i(ipx, ipq, first)::Float64
+    
+        ix = ipx[]
+        iq = ipq[]
+        mycharge::Int_32 = -1
+        
+        xsec = _fun_xsec_i(mycharge, ix, iq)
     
         return xsec
     end
 
-    return func
+    return funcm
+end
+
 end

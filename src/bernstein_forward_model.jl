@@ -45,15 +45,19 @@ function forward_model(pdf_params::Union{BernsteinPDFParams, BernsteinDirichletP
     QCDNUM.ssp_s2f123(iaF3dn, 1, quark_coeffs.valdn, 3, 0.0)
 
     # Get input cross section function
-    my_func = get_input_xsec_func()
-    input_xsec = @cfunction($my_func, Float64, (Ref{Int32}, Ref{Int32}, Ref{UInt8}))
+    my_funcp = get_input_xsec_func(1)
+    input_xsecp = @cfunction($my_funcp, Float64, (Ref{Int32}, Ref{Int32}, Ref{UInt8}))
+
+    my_funcm = get_input_xsec_func(-1)
+    input_xsecm = @cfunction($my_funcm, Float64, (Ref{Int32}, Ref{Int32}, Ref{UInt8}))
+
 
     # Make two cross section splines
     #set_lepcharge(1)
-    QCDNUM.ssp_s2fill(iaF_eP, input_xsec, splint_params.rscut)
+    QCDNUM.ssp_s2fill(iaF_eP, input_xsecp, splint_params.rscut)
 
     #set_lepcharge(-1)
-    QCDNUM.ssp_s2fill(iaF_eM, input_xsec, splint_params.rscut)
+    QCDNUM.ssp_s2fill(iaF_eM, input_xsecm, splint_params.rscut)
 
     # Integrate over cross section
     nbins = size(xbins_M_begin)[1]
