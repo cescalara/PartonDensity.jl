@@ -136,7 +136,7 @@ end
 
 Reduced cross section for single x, q2.
 """
-function rxsecnc_xq2_i(charge::Int32, x::Float64, q2::Float64, F2::Float64, xF3::Float64, FL::Float64)::Float64
+function rxsecnc_xq2_i(charge::Int, x::Float64, q2::Float64, F2::Float64, xF3::Float64, FL::Float64)::Float64
 
     rxsec = -1.0 #?
     y = 0.04  #?
@@ -163,7 +163,7 @@ end
 
 Reduced cross section for all bins.
 """
-function rxsecnc_xq2(chager::Int32, x_bin_cen::Array{Float64}, q2_bin_cen::Array{Float64})::Array{Float64}
+function rxsecnc_xq2(chage::Int, x_bin_cen::Array{Float64}, q2_bin_cen::Array{Float64})::Array{Float64}
 
     n_bins = length(x_bin_cen)
 
@@ -206,7 +206,7 @@ Double differential cross section for single
 x and q2 values. 
 NB: modifications needed to include pol and order.
 """
-function dd_xsecnc_xq2_i(charge::Int32, x::Float64, q2::Float64, F2::Float64, xF3::Float64, FL::Float64)::Float64
+function dd_xsecnc_xq2_i(charge::Int, x::Float64, q2::Float64, F2::Float64, xF3::Float64, FL::Float64)::Float64
 
     dd_xsec = -1.0
     
@@ -222,7 +222,7 @@ Double differential cross section for all x and
 q2 bins.
 NB: modifications needed to include pol and order.
 """
-function dd_xsecnc_xq2(charge::Int32, x_bin_cen::Array{Float64},
+function dd_xsecnc_xq2(charge::Int, x_bin_cen::Array{Float64},
                        q2_bin_cen::Array{Float64})::Array{Float64}
 
     n_bins = length(x_bin_cen)
@@ -251,7 +251,7 @@ end
 Input function for cross section spline.
 Must be wrapped for interface to SPLINT.
 """
-function _fun_xsec_i(charge::Int32,ix, iq)::Float64
+function _fun_xsec_i(charge::Int,ix, iq)::Float64
     
     # get q2 and x values
     q2 = QCDNUM.qfrmiq(iq);
@@ -282,14 +282,14 @@ function _fun_xsec_i(charge::Int32,ix, iq)::Float64
     return  xsec;
 end
 
-function get_input_xsec_func(charge::Int32)
+function get_input_xsec_func(charge::Int)
 
 if ( charge == 1 )
     funcp = function _my_fun_xsec_ip(ipx, ipq, first)::Float64
     
         ix = ipx[]
         iq = ipq[]
-        mycharge::Int32 = 1
+        mycharge::Int = 1
         
         xsec = _fun_xsec_i(mycharge, ix, iq)
     
@@ -303,7 +303,7 @@ if (charge == -1 )
     
         ix = ipx[]
         iq = ipq[]
-        mycharge::Int32 = -1
+        mycharge::Int = -1
         
         xsec = _fun_xsec_i(mycharge, ix, iq)
     
