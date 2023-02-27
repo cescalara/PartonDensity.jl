@@ -43,8 +43,9 @@ using Distributions, Random
     # Run forward model
     for pdf_params in pdf_params_list
 
+        sys_error_params = zeros(9)
         counts_pred_ep, counts_pred_em = forward_model(pdf_params, qcdnum_params,
-            splint_params, quark_coeffs)
+            splint_params, quark_coeffs, sys_error_params)
 
         if typeof(pdf_params) == BernsteinPDFParams
 

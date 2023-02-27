@@ -69,7 +69,7 @@ end
 
     end
 
-    @test typeof(dir_pdf_params) == DirichletPDFParams
+    @test typeof(dir_pdf_params) == DirichletPDFParams{Float64, Vector{Float64}}
 
     p = plot_input_pdfs(dir_pdf_params)
 
