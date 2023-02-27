@@ -501,10 +501,8 @@ function plot_data_space_impl_sysErr(pdf_params::DirichletPDFParams, samples, qc
 
         end
 
-        p1 = scatter!(p1, 1:nbins, counts_obs_ep_i, label="", color=ep_color,
-            lw=3, alpha=0.01)
-        p2 = scatter!(p2, 1:nbins, counts_obs_em_i, label="", color=em_color,
-            lw=3, alpha=0.01)
+        p1 = scatter!(p1, 1:nbins, counts_obs_ep_i, label="", color=ep_color, lw=3, alpha=0.01)
+        p2 = scatter!(p2, 1:nbins, counts_obs_em_i, label="", color=em_color, lw=3, alpha=0.01)
 
     end
 
