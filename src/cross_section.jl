@@ -24,29 +24,30 @@ calculations.
 end
 
 # These globals will later be set by user
-ZMass = 91.1876
-WMass = 80.398 
-AlphaEM = 7.297352570e-03
-GFermi = 1.16637e-05 
-TopMass = 171.2 
-BottomMass = 4.20
+const ZMass = 91.1876
+const WMass = 80.398 
+const AlphaEM = 7.297352570e-03
+const GFermi = 1.16637e-05 
+const TopMass = 171.2 
+const BottomMass = 4.20
 
-Vub = 41.2e-3
-Vcb = 3.93e-3
+const Vub = 41.2e-3
+const Vcb = 3.93e-3
 
-Sin2ThetaW = 0.23127 
-Sin2ThetaC = 0.05 
-vu = 0.19164
-vd = -0.34582
-ve = -0.03746
+const Sin2ThetaW = 0.23127 
+const Sin2ThetaC = 0.05 
+const vu = 0.19164
+const vd = -0.34582
+const ve = -0.03746
 
-au = 0.5
-ad = -0.5
-ae = -0.5
+const au = 0.5
+const ad = -0.5
+const ae = -0.5
 
 # Should be configurable 
-sqrt_s = 318.1  
-Lepcharge = 1 
+const sqrt_s = 318.1
+# ToDo: Lepcharge must not be global!
+Lepcharge::Int = 1 
 
 export _fun_xsec_i, get_input_xsec_func
 export set_lepcharge
@@ -255,7 +256,7 @@ function _fun_xsec_i(ix, iq)::Float64
     # get q2 and x values
     q2 = QCDNUM.qfrmiq(iq);
     x = QCDNUM.xfrmix(ix);
-    
+
     # get spline addresses
     iF2up = Int32(QCDNUM.dsp_uread(1));
     iF2dn = Int32(QCDNUM.dsp_uread(2));
@@ -266,6 +267,7 @@ function _fun_xsec_i(ix, iq)::Float64
     
     # structure function calculation
     pz = q2 / ((ZMass*ZMass+q2) * (4*(Sin2ThetaW) * (1-Sin2ThetaW)));
+
     Au = 4.0/9.0 -2*pz*(2.0/3.0)*(vu)*(ve) + pz*pz*(ve*ve+ae*ae)*(vu*vu+au*au);
     Ad = 1.0/9.0 -2*pz*(-1.0/3.0)*(vd)*(ve) + pz*pz*(ve*ve+ae*ae)*(vd*vd+ad*ad);
     Bu = -2*(2.0/3.0)*au*ae*pz + 4*au*ae*vu*ve*pz*pz;
@@ -278,7 +280,6 @@ function _fun_xsec_i(ix, iq)::Float64
     xsec = dd_xsecnc_xq2_i(x, q2, F2, xF3, FL);
     
     return  xsec;
-    
 end
 
 function get_input_xsec_func()
