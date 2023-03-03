@@ -1,6 +1,7 @@
 using PartonDensity
 using Test
 using Distributions, Random
+using CSV
 
 @testset "Forward model" begin
 
@@ -31,6 +32,9 @@ using Distributions, Random
     pdf_params_list = [val_pdf_params, dir_pdf_params, bern_pdf_params]
 
     # Initialise
+    reference_data_file = string(@__DIR__, "/reference_test_data/counts_pred.csv")
+    counts_pred = CSV.read(reference_data_file, NamedTuple)
+
     qcdnum_grid = QCDNUMGrid(x_min=[1.0e-3], x_weights=[1], nx=100,
         qq_bounds=[1.0e2, 3.0e4], qq_weights=[1.0, 1.0],
         nq=50, spline_interp=3)
@@ -58,13 +62,30 @@ using Distributions, Random
             @test all(counts_pred_em .>= 0.0)
             @test all(counts_pred_em .<= 2.0e3)
 
-        else
+            @test all(counts_pred_ep .== counts_pred.counts_pred_ep_bern)
+            @test all(counts_pred_em .== counts_pred.counts_pred_em_bern)
+
+        elseif typeof(pdf_params) == DirichletPDFParams
 
             @test all(counts_pred_ep .>= 0.0)
             @test all(counts_pred_ep .<= 1.0e3)
 
             @test all(counts_pred_em .>= 0.0)
             @test all(counts_pred_em .<= 1.0e3)
+
+            @test all(counts_pred_ep .== counts_pred.counts_pred_ep_dir)
+            @test all(counts_pred_em .== counts_pred.counts_pred_em_dir)
+
+        elseif typeof(pdf_params) == ValencePDFParams
+
+            @test all(counts_pred_ep .>= 0.0)
+            @test all(counts_pred_ep .<= 1.0e3)
+
+            @test all(counts_pred_em .>= 0.0)
+            @test all(counts_pred_em .<= 1.0e3)
+
+            @test all(counts_pred_ep .== counts_pred.counts_pred_ep_val)
+            @test all(counts_pred_em .== counts_pred.counts_pred_em_val)
 
         end
 
