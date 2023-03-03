@@ -1,30 +1,40 @@
 using PartonDensity
 using Test
 using Distributions, Random
+using CSV
 
 @testset "Forward model" begin
+
+    seed = 0
 
     # Define different parametriations for testing
     bern_pdf_params = BernsteinPDFParams(U_weights=ones(4), D_weights=ones(4),
         λ_g1=0.4, λ_g2=-0.6,
-        K_g=4.2, λ_q=-0.2, K_q=5,
+        K_g=4.2, λ_q=-0.2, K_q=5.0,
         weights=[5.0, 5.0, 1.0, 1.0, 1.0, 0.5, 0.5])
 
+    θ_val = [0.3027113383772114, 0.21562307667168612, 0.037706327593135316, 0.014630127386380845,
+        0.03372023967525289, 0.03878412120839827, 0.007449769087935228]
     val_pdf_params = ValencePDFParams(λ_u=0.6, K_u=3.4,
         λ_d=0.7, K_d=4.7,
         λ_g1=0.4, λ_g2=-0.6,
-        K_g=4.2, λ_q=-0.2, K_q=5,
-        weights=[5.0, 5.0, 1.0, 1.0, 1.0, 0.5, 0.5])
+        K_g=4.2, λ_q=-0.2, K_q=5.0,
+        θ=θ_val)
 
+    θ_dir = [0.23532642809197413, 0.06635605959465533, 0.2412750016688464,
+        0.3719253531266372, 0.05301033816739624, 0.023468633864992115,
+        0.0018706294432919719, 0.0034686372652611964, 0.0032989187769455093]
     dir_pdf_params = DirichletPDFParams(K_u=3.4, K_d=4.7,
         λ_g1=0.4, λ_g2=-0.6,
-        K_g=4.2, λ_q=-0.2, K_q=5,
-        weights=[3.0, 1.0, 5.0, 5.0, 1.0, 1.0, 1.0, 0.5, 0.5])
+        K_g=4.2, λ_q=-0.2, K_q=5.0,
+        θ=θ_dir)
 
     pdf_params_list = [val_pdf_params, dir_pdf_params, bern_pdf_params]
 
-
     # Initialise
+    reference_data_file = string(@__DIR__, "/reference_test_data/counts_pred.csv")
+    counts_pred = CSV.read(reference_data_file, NamedTuple)
+
     qcdnum_grid = QCDNUMGrid(x_min=[1.0e-3], x_weights=[1], nx=100,
         qq_bounds=[1.0e2, 3.0e4], qq_weights=[1.0, 1.0],
         nq=50, spline_interp=3)
@@ -49,16 +59,33 @@ using Distributions, Random
             @test all(counts_pred_ep .>= 0.0)
             @test all(counts_pred_ep .<= 2.0e3)
 
-            @test all(counts_pred_em .> 0.0)
+            @test all(counts_pred_em .>= 0.0)
             @test all(counts_pred_em .<= 2.0e3)
 
-        else
+            @test all(counts_pred_ep .== counts_pred.counts_pred_ep_bern)
+            @test all(counts_pred_em .== counts_pred.counts_pred_em_bern)
+
+        elseif typeof(pdf_params) == DirichletPDFParams
 
             @test all(counts_pred_ep .>= 0.0)
             @test all(counts_pred_ep .<= 1.0e3)
 
-            @test all(counts_pred_em .> 0.0)
+            @test all(counts_pred_em .>= 0.0)
             @test all(counts_pred_em .<= 1.0e3)
+
+            @test all(counts_pred_ep .== counts_pred.counts_pred_ep_dir)
+            @test all(counts_pred_em .== counts_pred.counts_pred_em_dir)
+
+        elseif typeof(pdf_params) == ValencePDFParams
+
+            @test all(counts_pred_ep .>= 0.0)
+            @test all(counts_pred_ep .<= 1.0e3)
+
+            @test all(counts_pred_em .>= 0.0)
+            @test all(counts_pred_em .<= 1.0e3)
+
+            @test all(counts_pred_ep .== counts_pred.counts_pred_ep_val)
+            @test all(counts_pred_em .== counts_pred.counts_pred_em_val)
 
         end
 
