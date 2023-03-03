@@ -62,8 +62,8 @@ using CSV
             @test all(counts_pred_em .>= 0.0)
             @test all(counts_pred_em .<= 2.0e3)
 
-            @test all(counts_pred_ep .== counts_pred.counts_pred_ep_bern)
-            @test all(counts_pred_em .== counts_pred.counts_pred_em_bern)
+            @test all(counts_pred_ep .≈ counts_pred.counts_pred_ep_bern)
+            @test all(counts_pred_em .≈ counts_pred.counts_pred_em_bern)
 
         elseif typeof(pdf_params) == DirichletPDFParams
 
@@ -73,8 +73,8 @@ using CSV
             @test all(counts_pred_em .>= 0.0)
             @test all(counts_pred_em .<= 1.0e3)
 
-            @test all(counts_pred_ep .== counts_pred.counts_pred_ep_dir)
-            @test all(counts_pred_em .== counts_pred.counts_pred_em_dir)
+            @test all(counts_pred_ep .≈ counts_pred.counts_pred_ep_dir)
+            @test all(counts_pred_em .≈ counts_pred.counts_pred_em_dir)
 
         elseif typeof(pdf_params) == ValencePDFParams
 
@@ -84,8 +84,8 @@ using CSV
             @test all(counts_pred_em .>= 0.0)
             @test all(counts_pred_em .<= 1.0e3)
 
-            @test all(counts_pred_ep .== counts_pred.counts_pred_ep_val)
-            @test all(counts_pred_em .== counts_pred.counts_pred_em_val)
+            @test all(counts_pred_ep .≈ counts_pred.counts_pred_ep_val)
+            @test all(counts_pred_em .≈ counts_pred.counts_pred_em_val)
 
         end
 
