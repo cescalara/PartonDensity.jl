@@ -12,24 +12,21 @@ using Distributions, Random
         K_g=4.2, λ_q=-0.2, K_q=5.0,
         weights=[5.0, 5.0, 1.0, 1.0, 1.0, 0.5, 0.5])
 
-    weights=[5.0, 5.0, 1.0, 1.0, 1.0, 0.5, 0.5]
-    λ_u = 0.6
-    K_u = 3.4
-    λ_d = 0.7
-    K_d = 4.7
-    θ = get_dirichlet_samples(λ_u, K_u, λ_d, K_d, seed, weights)
-    val_pdf_params = ValencePDFParams(λ_u=λ_u, K_u=K_u,
-        λ_d=λ_d, K_d=K_d,
+    θ_val = [0.3027113383772114, 0.21562307667168612, 0.037706327593135316, 0.014630127386380845,
+        0.03372023967525289, 0.03878412120839827, 0.007449769087935228]
+    val_pdf_params = ValencePDFParams(λ_u=0.6, K_u=3.4,
+        λ_d=0.7, K_d=4.7,
         λ_g1=0.4, λ_g2=-0.6,
         K_g=4.2, λ_q=-0.2, K_q=5.0,
-        θ=θ)
+        θ=θ_val)
 
-    weights = [3.0, 1.0, 5.0, 5.0, 1.0, 1.0, 1.0, 0.5, 0.5]
-    θ = rand(MersenneTwister(seed), Dirichlet(weights))
+    θ_dir = [0.23532642809197413, 0.06635605959465533, 0.2412750016688464,
+        0.3719253531266372, 0.05301033816739624, 0.023468633864992115,
+        0.0018706294432919719, 0.0034686372652611964, 0.0032989187769455093]
     dir_pdf_params = DirichletPDFParams(K_u=3.4, K_d=4.7,
         λ_g1=0.4, λ_g2=-0.6,
         K_g=4.2, λ_q=-0.2, K_q=5.0,
-        θ=θ)
+        θ=θ_dir)
 
     pdf_params_list = [val_pdf_params, dir_pdf_params, bern_pdf_params]
 
