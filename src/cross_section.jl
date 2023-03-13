@@ -24,38 +24,39 @@ calculations.
 end
 
 # These globals will later be set by user
-ZMass = 91.1876
-WMass = 80.398 
-AlphaEM = 7.297352570e-03
-GFermi = 1.16637e-05 
-TopMass = 171.2 
-BottomMass = 4.20
+const ZMass = 91.1876
+const WMass = 80.398 
+const AlphaEM = 7.297352570e-03
+const GFermi = 1.16637e-05 
+const TopMass = 171.2 
+const BottomMass = 4.20
 
-Vub = 41.2e-3
-Vcb = 3.93e-3
+const Vub = 41.2e-3
+const Vcb = 3.93e-3
 
-Sin2ThetaW = 0.23127 
-Sin2ThetaC = 0.05 
-vu = 0.19164
-vd = -0.34582
-ve = -0.03746
+const Sin2ThetaW = 0.23127 
+const Sin2ThetaC = 0.05 
+const vu = 0.19164
+const vd = -0.34582
+const ve = -0.03746
 
-au = 0.5
-ad = -0.5
-ae = -0.5
+const au = 0.5
+const ad = -0.5
+const ae = -0.5
 
 # Should be configurable 
-sqrt_s = 318.1  
-Lepcharge = 1 
+const sqrt_s = 318.1
+# ToDo: Lepcharge must not be global!
+#Lepcharge::Int = 1 
 
 export _fun_xsec_i, get_input_xsec_func
-export set_lepcharge
+#export set_lepcharge
 
-function set_lepcharge(value::Integer)
+#function set_lepcharge(value::Integer)
 
-    global Lepcharge = value;
+#    global Lepcharge = value;
     
-end
+#end
 
 """
     f2_lo(x, q2)
@@ -131,11 +132,11 @@ function fl_lo(x::Float64, q2::Float64)::Float64
 end
 
 """
-    rxsecnc_xq2_i(x, q2)
+    rxsecnc_xq2_i(charge, x, q2, F2, xF3, FL)
 
 Reduced cross section for single x, q2.
 """
-function rxsecnc_xq2_i(x::Float64, q2::Float64, F2::Float64, xF3::Float64, FL::Float64)::Float64
+function rxsecnc_xq2_i(charge::Int, x::Float64, q2::Float64, F2::Float64, xF3::Float64, FL::Float64)::Float64
 
     rxsec = -1.0 #?
     y = 0.04  #?
@@ -144,11 +145,11 @@ function rxsecnc_xq2_i(x::Float64, q2::Float64, F2::Float64, xF3::Float64, FL::F
     Y_plus = 1 + (1 - y)^2
     Y_minus = 1 - (1 - y)^2
 
-    if (Lepcharge == 1)
+    if (charge == 1)
         
         rxsec =  F2 - (Y_minus / Y_plus)*xF3 - (y^2 / Y_plus) * FL
         
-    elseif (Lepcharge == -1)
+    elseif (charge == -1)
 
         rxsec =  F2 + (Y_minus / Y_plus)*xF3 - (y^2 / Y_plus) * FL
         
@@ -162,7 +163,7 @@ end
 
 Reduced cross section for all bins.
 """
-function rxsecnc_xq2(x_bin_cen::Array{Float64}, q2_bin_cen::Array{Float64})::Array{Float64}
+function rxsecnc_xq2(chage::Int, x_bin_cen::Array{Float64}, q2_bin_cen::Array{Float64})::Array{Float64}
 
     n_bins = length(x_bin_cen)
 
@@ -178,7 +179,7 @@ function rxsecnc_xq2(x_bin_cen::Array{Float64}, q2_bin_cen::Array{Float64})::Arr
 
     for i = 1:n_bins
         
-        rxsec[i] = rxsecnc_xq2_i(x_bin_cen[i], q2_bin_cen[i])
+        rxsec[i] = rxsecnc_xq2_i(charge,x_bin_cen[i], q2_bin_cen[i])
         
     end
     
@@ -199,29 +200,29 @@ function nc_propagator(q2::Float64, x::Float64)::Float64
 end
 
 """
-    dd_xsecnc_xq2_i(x, q2)
+    dd_xsecnc_xq2_i(charge, x, q2)
 
 Double differential cross section for single 
 x and q2 values. 
 NB: modifications needed to include pol and order.
 """
-function dd_xsecnc_xq2_i(x::Float64, q2::Float64, F2::Float64, xF3::Float64, FL::Float64)::Float64
+function dd_xsecnc_xq2_i(charge::Int, x::Float64, q2::Float64, F2::Float64, xF3::Float64, FL::Float64)::Float64
 
     dd_xsec = -1.0
     
-    dd_xsec = nc_propagator(q2, x) * rxsecnc_xq2_i(x, q2, F2, xF3, FL)
+    dd_xsec = nc_propagator(q2, x) * rxsecnc_xq2_i(charge, x, q2, F2, xF3, FL)
     
     return dd_xsec
 end
 
 """
-    dd_xsecnc_xq2(x_bin_cen, q2_bin_cen)
+    dd_xsecnc_xq2(charge, x_bin_cen, q2_bin_cen)
 
 Double differential cross section for all x and 
 q2 bins.
 NB: modifications needed to include pol and order.
 """
-function dd_xsecnc_xq2(x_bin_cen::Array{Float64},
+function dd_xsecnc_xq2(charge::Int, x_bin_cen::Array{Float64},
                        q2_bin_cen::Array{Float64})::Array{Float64}
 
     n_bins = length(x_bin_cen)
@@ -237,7 +238,7 @@ function dd_xsecnc_xq2(x_bin_cen::Array{Float64},
     
     for i = 1:n_bins
         
-        xsec[i] = dd_xsecnc_xq2_i(x_bin_cen[i], q2_bin_cen[i])
+        xsec[i] = dd_xsecnc_xq2_i(charge,x_bin_cen[i], q2_bin_cen[i])
         
     end
     
@@ -250,12 +251,12 @@ end
 Input function for cross section spline.
 Must be wrapped for interface to SPLINT.
 """
-function _fun_xsec_i(ix, iq)::Float64
+function _fun_xsec_i(charge::Int,ix, iq)::Float64
     
     # get q2 and x values
     q2 = QCDNUM.qfrmiq(iq);
     x = QCDNUM.xfrmix(ix);
-    
+
     # get spline addresses
     iF2up = Int32(QCDNUM.dsp_uread(1));
     iF2dn = Int32(QCDNUM.dsp_uread(2));
@@ -266,6 +267,7 @@ function _fun_xsec_i(ix, iq)::Float64
     
     # structure function calculation
     pz = q2 / ((ZMass*ZMass+q2) * (4*(Sin2ThetaW) * (1-Sin2ThetaW)));
+
     Au = 4.0/9.0 -2*pz*(2.0/3.0)*(vu)*(ve) + pz*pz*(ve*ve+ae*ae)*(vu*vu+au*au);
     Ad = 1.0/9.0 -2*pz*(-1.0/3.0)*(vd)*(ve) + pz*pz*(ve*ve+ae*ae)*(vd*vd+ad*ad);
     Bu = -2*(2.0/3.0)*au*ae*pz + 4*au*ae*vu*ve*pz*pz;
@@ -275,23 +277,40 @@ function _fun_xsec_i(ix, iq)::Float64
     xF3 = Bu * QCDNUM.dsp_funs2(iF3up, x, q2, 1) + Bd * QCDNUM.dsp_funs2(iF3dn, x, q2, 1);
     FL = Au * QCDNUM.dsp_funs2(iFLup, x, q2, 1) + Ad * QCDNUM.dsp_funs2(iFLdn, x, q2, 1);
     
-    xsec = dd_xsecnc_xq2_i(x, q2, F2, xF3, FL);
+    xsec = dd_xsecnc_xq2_i(charge, x, q2, F2, xF3, FL);
     
     return  xsec;
-    
 end
 
-function get_input_xsec_func()
+function get_input_xsec_func(charge::Int)
 
-    func = function _my_fun_xsec_i(ipx, ipq, first)::Float64
+if ( charge == 1 )
+    funcp = function _my_fun_xsec_ip(ipx, ipq, first)::Float64
     
         ix = ipx[]
         iq = ipq[]
+        mycharge::Int = 1
+        
+        xsec = _fun_xsec_i(mycharge, ix, iq)
     
-        xsec = _fun_xsec_i(ix, iq)
+        return xsec
+    end
+        return funcp
+end
+if (charge == -1 ) 
+
+    funcm = function _my_fun_xsec_im(ipx, ipq, first)::Float64
+    
+        ix = ipx[]
+        iq = ipq[]
+        mycharge::Int = -1
+        
+        xsec = _fun_xsec_i(mycharge, ix, iq)
     
         return xsec
     end
 
-    return func
+    return funcm
+end
+
 end

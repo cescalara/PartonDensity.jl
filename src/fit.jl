@@ -17,7 +17,7 @@ function get_prior end
 function get_prior(pdf_params::ValencePDFParams)
 
     prior = NamedTupleDist(
-        θ_tmp=Dirichlet(pdf_params.weights),
+        θ_tmp=Dirichlet(ones(7)),
         λ_u=Uniform(0, 1),
         K_u=Uniform(2, 10),
         λ_d=Uniform(0, 1),
@@ -36,7 +36,7 @@ end
 function get_prior(pdf_params::DirichletPDFParams)
 
     prior = NamedTupleDist(
-        θ=Dirichlet(pdf_params.weights),
+        θ=Dirichlet(ones(9)),
         K_u=Uniform(2, 10),
         K_d=Uniform(2, 10),
         λ_g1=Uniform(0, 1),
@@ -416,7 +416,7 @@ function plot_data_space_impl_sysErr(pdf_params::ValencePDFParams, samples, qcdn
             samples.v.beta0_4[i], samples.v.beta0_4[i], samples.v.beta0_5[i],
             samples.v.beta0_6[i], samples.v.beta0_7[i], samples.v.beta0_8[i]]
 
-        counts_pred_ep_i, counts_pred_em_i = forward_model_sysErr(pdf_params_i, qcdnum_params,
+        counts_pred_ep_i, counts_pred_em_i = forward_model(pdf_params_i, qcdnum_params,
             splint_params, quark_coeffs, ParErrs_i)
 
         for j in 1:nbins
@@ -473,7 +473,7 @@ function plot_data_space_impl_sysErr(pdf_params::DirichletPDFParams, samples, qc
             samples.v.beta0_4[i], samples.v.beta0_4[i], samples.v.beta0_5[i],
             samples.v.beta0_6[i], samples.v.beta0_7[i], samples.v.beta0_8[i]]
 
-        counts_pred_ep_i, counts_pred_em_i = forward_model_sysErr(pdf_params_i, qcdnum_params,
+        counts_pred_ep_i, counts_pred_em_i = forward_model(pdf_params_i, qcdnum_params,
             splint_params, quark_coeffs, ParErrs_i)
 
         for j in 1:nbins
@@ -501,10 +501,8 @@ function plot_data_space_impl_sysErr(pdf_params::DirichletPDFParams, samples, qc
 
         end
 
-        p1 = scatter!(p1, 1:nbins, counts_obs_ep_i, label="", color=ep_color,
-            lw=3, alpha=0.01)
-        p2 = scatter!(p2, 1:nbins, counts_obs_em_i, label="", color=em_color,
-            lw=3, alpha=0.01)
+        p1 = scatter!(p1, 1:nbins, counts_obs_ep_i, label="", color=ep_color, lw=3, alpha=0.01)
+        p2 = scatter!(p2, 1:nbins, counts_obs_em_i, label="", color=em_color, lw=3, alpha=0.01)
 
     end
 

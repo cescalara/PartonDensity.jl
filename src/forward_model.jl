@@ -2,19 +2,8 @@ using HDF5
 
 export forward_model, forward_model_init
 export pd_write_sim, pd_read_sim
-export reset_qcdnum_evolfg_ϵ_values
 
-qcdnum_evolfg_ϵ_values = Vector{Float64}()
 splint_init_complete = false
-
-"""
-    reset_qcdnum_evolfg_ϵ_values()
-"""
-function reset_qcdnum_evolfg_ϵ_values()
-
-    global qcdnum_evolfg_ϵ_values = Vector{Float64}()
-
-end
 
 
 """
@@ -84,13 +73,12 @@ end
 
 """
     forward_model(pdf_params, qcdnum_grid, 
-                  splint_params, quark_coeffs)
+                  splint_params, quark_coeffs, SysError_params)
 
 Go from input PDF parameters to the expected number of events in bins.
 """
 function forward_model(pdf_params::AbstractPDFParams, qcdnum_params::QCDNUMParameters,
-    splint_params::SPLINTParameters, quark_coeffs::QuarkCoefficients)
-
+    splint_params::SPLINTParameters, quark_coeffs::QuarkCoefficients, SysError_params::Vector{Float64} = zeros(nsyst))
 
     # Get input PDF function
     my_func = get_input_pdf_func(pdf_params)
@@ -107,7 +95,6 @@ function forward_model(pdf_params::AbstractPDFParams, qcdnum_params::QCDNUMParam
         @warn "QCDNUM.evolfg(): Spline issues detected" eps pdf_params
 
     end
-    push!(qcdnum_evolfg_ϵ_values, ϵ)
 
     # Read spline addresses
     iaF2up = Int64(QCDNUM.dsp_uread(splint_params.spline_addresses.F2up))
@@ -128,26 +115,31 @@ function forward_model(pdf_params::AbstractPDFParams, qcdnum_params::QCDNUMParam
     QCDNUM.ssp_s2f123(iaF3dn, 1, quark_coeffs.valdn, 3, 0.0)
 
     # Get input cross section function
-    my_func = get_input_xsec_func()
-    input_xsec = @cfunction($my_func, Float64, (Ref{Int32}, Ref{Int32}, Ref{UInt8}))
+    my_funcp = get_input_xsec_func(1)
+    input_xsecp = @cfunction($my_funcp, Float64, (Ref{Int32}, Ref{Int32}, Ref{UInt8}))
+
+    my_funcm = get_input_xsec_func(-1)
+    input_xsecm = @cfunction($my_funcm, Float64, (Ref{Int32}, Ref{Int32}, Ref{UInt8}))
 
     # Make two cross section splines
-    set_lepcharge(1)
-    QCDNUM.ssp_s2fill(iaF_eP, input_xsec, splint_params.rscut)
+#    set_lepcharge(1)
+    QCDNUM.ssp_s2fill(iaF_eP, input_xsecp, splint_params.rscut)
 
-    set_lepcharge(-1)
-    QCDNUM.ssp_s2fill(iaF_eM, input_xsec, splint_params.rscut)
+#    set_lepcharge(-1)
+    QCDNUM.ssp_s2fill(iaF_eM, input_xsecm, splint_params.rscut)
 
     # Integrate over cross section
     nbins = size(xbins_M_begin)[1]
-    integ_xsec_ep = zeros(nbins)
-    integ_xsec_em = zeros(nbins)
+    bins_axis = axes(xbins_M_begin, 1)
 
-    for i in 1:nbins
+    integ_xsec_ep = similar(xbins_M_begin)
+    integ_xsec_em = similar(xbins_M_begin)
+    sqrtS::Float64 = 318.0
+    for i in bins_axis
         integ_xsec_ep[i] = QCDNUM.dsp_ints2(iaF_eP, xbins_M_begin[i], xbins_M_end[i],
-            q2bins_M_begin[i], q2bins_M_end[i], 318.0, 4)
+            q2bins_M_begin[i], q2bins_M_end[i], sqrtS, 4)
         integ_xsec_em[i] = QCDNUM.dsp_ints2(iaF_eM, xbins_M_begin[i], xbins_M_end[i],
-            q2bins_M_begin[i], q2bins_M_end[i], 318.0, 4)
+            q2bins_M_begin[i], q2bins_M_end[i], sqrtS, 4)
     end
 
     # Fold through response to get counts
@@ -160,24 +152,43 @@ function forward_model(pdf_params::AbstractPDFParams, qcdnum_params::QCDNUMParam
     K_eP = get_K_elements(ePp)
     K_eM = get_K_elements(eMp)
 
-    nbins_out = size(TM_eP)[2]
+    T = promote_type(map(eltype, (
+        SysError_params, Tnm_sys_ePp, Tnm_sys_eMp,
+        TM_eP, TM_eM, K_eP, K_eM, integ_xsec_ep, integ_xsec_em
+    ))...)
 
-    counts_pred_ep = zeros(nbins_out)
-    counts_pred_em = zeros(nbins_out)
+    counts_pred_ep = similar(TM_eP, T, size(TM_eP, 2))
+    counts_pred_em = similar(TM_eM, T, size(TM_eM, 2))
 
-    for j in 1:nbins_out
+    syserr_axis = axes(SysError_params, 1)
 
-        for i in 1:nbins
+    @argcheck axes(TM_eP, 2) == axes(TM_eM, 2) == axes(Tnm_sys_ePp, 2) == axes(Tnm_sys_eMp, 2)
+    @argcheck axes(TM_eP, 1) == axes(TM_eM, 1) == axes(K_eP, 1) == axes(K_eM, 1)
+    @argcheck axes(SysError_params, 1) == axes(Tnm_sys_ePp, 3) == axes(Tnm_sys_eMp, 3)
 
-            counts_pred_ep[j] += TM_eP[i, j] * (1.0 / K_eP[i]) * integ_xsec_ep[i]
-            counts_pred_em[j] += TM_eM[i, j] * (1.0 / K_eM[i]) * integ_xsec_em[i]
+    bin_out_axis = axes(counts_pred_ep, 1)
+    bin_axis = axes(TM_eP, 1)
 
+    # Calculate TotSys_var_em == SysError_params[k] * Tnm_sys_ePp[i,j,k] up front?
+
+    fill!(counts_pred_ep, 0)
+    fill!(counts_pred_em, 0)
+    
+    for j in bin_out_axis
+        TotSys_var_ep::T = 0 # Move into loop over i?
+        TotSys_var_em::T = 0 # Move into loop over i?
+        for i in bin_axis
+            # Add variation for parameters, will do nothing if no systematic errors are provided:
+            for k in syserr_axis
+                TotSys_var_ep += SysError_params[k] * Tnm_sys_ePp[i,j,k]
+                TotSys_var_em += SysError_params[k] * Tnm_sys_eMp[i,j,k]
+            end
+            counts_pred_ep[j] += (TM_eP[i, j] + TotSys_var_ep) * (1.0 / K_eP[i]) * integ_xsec_ep[i]
+            counts_pred_em[j] += (TM_eM[i, j] + TotSys_var_em) * (1.0 / K_eM[i]) * integ_xsec_em[i]
         end
-
     end
 
     return counts_pred_ep, counts_pred_em
-
 end
 
 """
@@ -206,8 +217,6 @@ function pd_write_sim(file_name::String, pdf_params::Union{ValencePDFParams,Diri
         truth_group["K_g"] = pdf_params.K_g
         truth_group["λ_q"] = pdf_params.λ_q
         truth_group["K_q"] = pdf_params.K_q
-        truth_group["seed"] = pdf_params.seed
-        truth_group["weights"] = pdf_params.weights
         truth_group["θ"] = pdf_params.θ
         truth_group["param_type"] = pdf_params.param_type
 
@@ -240,7 +249,6 @@ function pd_read_sim(file_name::String)
                 λ_d=read(g["λ_d"]), K_d=read(g["K_d"]),
                 λ_g1=read(g["λ_g1"]), λ_g2=read(g["λ_g2"]),
                 K_g=read(g["K_g"]), λ_q=read(g["λ_q"]), K_q=read(g["K_q"]),
-                seed=read(g["seed"]), weights=read(g["weights"]),
                 θ=read(g["θ"]))
 
         elseif read(g["param_type"]) == DIRICHLET_TYPE
@@ -249,7 +257,6 @@ function pd_read_sim(file_name::String)
                 λ_d=read(g["λ_d"]), K_d=read(g["K_d"]),
                 λ_g1=read(g["λ_g1"]), λ_g2=read(g["λ_g2"]),
                 K_g=read(g["K_g"]), λ_q=read(g["λ_q"]), K_q=read(g["K_q"]),
-                seed=read(g["seed"]), weights=read(g["weights"]),
                 θ=read(g["θ"]))
 
         elseif read(g["param_type"]) == BERNSTEIN_TYPE
@@ -258,7 +265,7 @@ function pd_read_sim(file_name::String)
                 D_list=read(g["D_list"]),
                 λ_g1=read(g["λ_g1"]), λ_g2=read(g["λ_g2"]),
                 K_g=read(g["K_g"]), λ_q=read(g["λ_q"]), K_q=read(g["K_q"]),
-                seed=read(g["seed"]), weights=read(g["weights"]),
+                weights=read(g["weights"]),
                 θ=read(g["θ"]))
             
         elseif read(g["param_type"]) == BERNSTEIN_DIRICHLET_TYPE
@@ -267,7 +274,7 @@ function pd_read_sim(file_name::String)
                 D_list=read(g["D_list"]),
                 λ_g1=read(g["λ_g1"]), λ_g2=read(g["λ_g2"]),
                 K_g=read(g["K_g"]), λ_q=read(g["λ_q"]), K_q=read(g["K_q"]),
-                seed=read(g["seed"]), weights=read(g["weights"]), 
+                weights=read(g["weights"]), 
                 θ=read(g["θ"]))
             
         else

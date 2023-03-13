@@ -14,19 +14,19 @@ Struct for holding the QCDNUM grid parameters.
     "x grid weights"
     x_weights::Vector{Int32}
     "number of x grid boundaries"
-    x_num_bounds::Integer = size(x_min)[1]
+    x_num_bounds::Int = size(x_min)[1]
     "number of x grid points"
-    nx::Integer
+    nx::Int
     "qq boundaries of grid"
     qq_bounds::Vector{Float64}
     "qq grid weights"
     qq_weights::Vector{Float64}
     "number of qq grid boundaries"
-    qq_num_bounds::Integer = size(qq_bounds)[1]
+    qq_num_bounds::Int = size(qq_bounds)[1]
     "number of qq grid points"
-    nq::Integer
+    nq::Int
     "degree of spline interpolation used"
-    spline_interp::Integer = 3
+    spline_interp::Int = 3
 end
 
 """
@@ -36,7 +36,7 @@ Struct for holding all QCDNUM Parameters.
 """
 @with_kw struct QCDNUMParameters
     "order of evolution in pQCD"
-    order::Integer
+    order::Int
     "coupling constant at starting scale"
     α_S::Float64
     "starting scale"
@@ -44,15 +44,15 @@ Struct for holding all QCDNUM Parameters.
     "QCDNUMGrid"
     grid::QCDNUMGrid
     "number of fixed flavours in FFNS"
-    n_fixed_flav::Integer = 5
+    n_fixed_flav::Int = 5
     "charm threshold as index of qq grid (VFNS only)"
-    iqc::Integer = 1
+    iqc::Int = 1
     "bottom threshold as index of qq grid (VFNS only)"
-    iqb::Integer = 1
+    iqb::Int = 1
     "top threshold as index of qq grid (VFNS only)"
-    iqt::Integer = 1
+    iqt::Int = 1
     "weight table type (1<=>unpolarised)"
-    weight_type::Integer = 1
+    weight_type::Int = 1
 end
 
 """
@@ -62,14 +62,14 @@ Lookup table for addresses of different
 structure function splines.
 """
 @with_kw struct SplineAddresses
-    F2up::Integer = 1
-    F2dn::Integer = 2
-    F3up::Integer = 3
-    F3dn::Integer = 4
-    FLup::Integer = 5
-    FLdn::Integer = 6
-    F_eP::Integer = 7
-    F_eM::Integer = 8
+    F2up::Int = 1
+    F2dn::Int = 2
+    F3up::Int = 3
+    F3dn::Int = 4
+    FLup::Int = 5
+    FLdn::Int = 6
+    F_eP::Int = 7
+    F_eM::Int = 8
 end
 
 """
@@ -80,15 +80,15 @@ with SPLINT package of QCDNUM.
 """
 @with_kw struct SPLINTParameters
     "number of words in memory for user space"
-    nuser::Integer = 10
+    nuser::Int = 10
     "number of steps in x"
-    nsteps_x::Integer = 5
+    nsteps_x::Int = 5
     "number of steps in qq"
-    nsteps_q::Integer = 10
+    nsteps_q::Int = 10
     "number of nodes in x"
-    nnodes_x::Integer = 100
+    nnodes_x::Int = 100
     "number of nodes in qq"
-    nnodes_q::Integer = 100
+    nnodes_q::Int = 100
     "rs constraint"
     rs::Float64 = 318.0
     "cut on rs"

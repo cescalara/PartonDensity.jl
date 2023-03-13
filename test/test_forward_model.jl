@@ -62,7 +62,7 @@ using CSV
             @test all(counts_pred_em .>= 0.0)
             @test all(counts_pred_em .<= 2.0e3)
 
-        elseif typeof(pdf_params) == DirichletPDFParams
+        elseif typeof(pdf_params) == DirichletPDFParams{Float64,Vector{Float64}}
 
             @test all(counts_pred_ep .>= 0.0)
             @test all(counts_pred_ep .<= 1.0e3)
@@ -73,7 +73,7 @@ using CSV
             @test all(counts_pred_ep .≈ counts_pred.counts_pred_ep_dir)
             @test all(counts_pred_em .≈ counts_pred.counts_pred_em_dir)
 
-        elseif typeof(pdf_params) == ValencePDFParams
+        elseif typeof(pdf_params) == ValencePDFParams{Float64,Vector{Float64}}
 
             @test all(counts_pred_ep .>= 0.0)
             @test all(counts_pred_ep .<= 1.0e3)

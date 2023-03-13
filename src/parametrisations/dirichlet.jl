@@ -14,23 +14,22 @@ Constructors:
 Fields:
 $(TYPEDFIELDS)
 """
-@with_kw struct DirichletPDFParams <: AbstractPDFParams
-    param_type::Integer = DIRICHLET_TYPE
-    seed::Integer = 0
-    weights::Vector{Float64} = ones(9)
-    θ::Vector{Float64} = rand(MersenneTwister(seed), Dirichlet(weights))
-    K_u::Float64
-    λ_u::Float64 = (θ[1] * (K_u + 1)) / (2 - θ[1])
-    K_d::Float64
-    λ_d::Float64 = (θ[2] * (K_d + 1)) / (1 - θ[2])
-    λ_g1::Float64
-    λ_g2::Float64
-    K_g::Float64
-    λ_q::Float64
-    K_q::Float64
+@with_kw struct DirichletPDFParams{T<:Real,TV<:AbstractVector{T}} <: AbstractPDFParams
+    param_type::Int = DIRICHLET_TYPE
+    θ::TV
+    K_u::T
+    λ_u::T = (θ[1] * (K_u + 1)) / (2 - θ[1])
+    K_d::T
+    λ_d::T = (θ[2] * (K_d + 1)) / (1 - θ[2])
+    λ_g1::T
+    λ_g2::T
+    K_g::T
+    λ_q::T
+    K_q::T
 end
 
-function xtotx(x::Float64, pdf_params::DirichletPDFParams)
+
+function xtotx(x::Real, pdf_params::DirichletPDFParams)
 
     pdf = pdf_params
 
@@ -39,9 +38,9 @@ function xtotx(x::Float64, pdf_params::DirichletPDFParams)
 
 end
 
-function xtotx_dirichlet(x::Float64, λ_u::Float64, K_u::Float64, λ_d::Float64,
-    K_d::Float64, λ_g1::Float64, λ_g2::Float64, K_g::Float64, λ_q::Float64,
-    K_q::Float64, θ::Vector{Float64})
+function xtotx_dirichlet(x::Real, λ_u::Real, K_u::Real, λ_d::Real,
+    K_d::Real, λ_g1::Real, λ_g2::Real, K_g::Real, λ_q::Real,
+    K_q::Real, θ::Vector{Real})
 
     xuvx = x_uv_x(x, λ_u, K_u)
 
@@ -73,9 +72,9 @@ function int_xtotx(pdf_params::DirichletPDFParams)
     return result
 end
 
-function int_xtotx_dirichlet(λ_u::Float64, K_u::Float64, λ_d::Float64,
-    K_d::Float64, λ_g1::Float64, λ_g2::Float64, K_g::Float64, λ_q::Float64,
-    K_q::Float64, θ::Array{Float64})
+function int_xtotx_dirichlet(λ_u::Real, K_u::Real, λ_d::Real,
+    K_d::Real, λ_g1::Real, λ_g2::Real, K_g::Real, λ_q::Real,
+    K_q::Real, θ::AbstractArray{<:Real})
 
     A_u = 2 / sf.beta(λ_u, K_u + 1)
     A_d = 1 / sf.beta(λ_d, K_d + 1)
@@ -100,8 +99,8 @@ function int_xtotx_dirichlet(λ_u::Float64, K_u::Float64, λ_d::Float64,
     I_tot
 end
 
-function plot_input_pdfs(pdf_params::DirichletPDFParams; xmin::Float64=1.0e-2,
-    xmax::Float64=1.0, nx::Integer=1000)
+function plot_input_pdfs(pdf_params::DirichletPDFParams; xmin::Real=1.0e-2,
+    xmax::Real=1.0, nx::Integer=1000)
 
     x_grid = range(xmin, stop=xmax, length=nx)
     pdf = pdf_params
@@ -125,57 +124,88 @@ function plot_input_pdfs(pdf_params::DirichletPDFParams; xmin::Float64=1.0e-2,
 end
 
 function get_input_pdf_func(pdf_params::DirichletPDFParams)::Function
-
-    pdf = pdf_params
-
-    func = function _input_pdfs(i, x)::Float64
+    return function _input_pdfs(i::Integer, x::T)::T where {T<:Real}
         i = i[]
         x = x[]
 
-        f = 0.0
+        f::T = 0.0
 
-        # gluon
-        if (i == 0)
-            f = x_g_x(x, pdf.λ_g1, pdf.λ_g2, pdf.K_g, pdf.K_q, pdf.θ[3], pdf.θ[4])
-        end
-
-        # u valence
-        if (i == 1)
-            f = x_uv_x(x, pdf.λ_u, pdf.K_u)
-        end
-
-        # d valence
-        if (i == 2)
-            f = x_dv_x(x, pdf.λ_d, pdf.K_d)
-        end
-
-        # ubar
-        if (i == 3)
-            f = x_q_x(x, pdf.λ_q, pdf.K_q, pdf.θ[5])
-        end
-
-        # dbar
-        if (i == 4)
-            f = x_q_x(x, pdf.λ_q, pdf.K_q, pdf.θ[6])
-        end
-
-        # s and sbar
-        if (i == 5) || (i == 6)
-            f = x_q_x(x, pdf.λ_q, pdf.K_q, pdf.θ[7])
-        end
-
-        # c and cbar
-        if (i == 7) || (i == 8)
-            f = x_q_x(x, pdf.λ_q, pdf.K_q, pdf.θ[8])
-        end
-
-        # d and dbar
-        if (i == 9) || (i == 10)
-            f = x_q_x(x, pdf.λ_q, pdf.K_q, pdf.θ[9])
+        if i == 0
+            f = parton_pdf_func(gluon, pdf_params)(x)
+        elseif i == 1
+            f = parton_pdf_func(u_valence, pdf_params)(x)
+        elseif i == 2
+            f = parton_pdf_func(d_valence, pdf_params)(x)
+        elseif i == 3
+            f = parton_pdf_func(u_bar, pdf_params)(x)
+        elseif i == 4
+            f = parton_pdf_func(d_bar, pdf_params)(x)
+        elseif i == 5
+            f = parton_pdf_func(s_quark, pdf_params)(x)
+        elseif i == 6
+            f = parton_pdf_func(s_bar, pdf_params)(x)
+        elseif i == 7
+            f = parton_pdf_func(c_quark, pdf_params)(x)
+        elseif i == 8
+            f = parton_pdf_func(c_bar, pdf_params)(x)
+        elseif i == 9
+            f = parton_pdf_func(b_quark, pdf_params)(x)
+        elseif i == 10
+            f = parton_pdf_func(b_bar, pdf_params)(x)
         end
 
         return f
     end
+end
 
-    return func
+
+function parton_pdf_func end
+export parton_pdf_func
+
+function parton_pdf_func(::typeof(gluon), p::DirichletPDFParams)
+    let λ_g1 = p.λ_g1, λ_g2 = p.λ_g2, K_g = p.K_g, K_q = p.K_q, w1 = p.θ[3], w2 = p.θ[4]
+        return _gluon_pdf(x::Real) = x_g_x(x, λ_g1, λ_g2, K_g, K_q, w1, w2)
+    end
+end
+
+function parton_pdf_func(::typeof(u_valence), p::DirichletPDFParams)
+    let λ_u = p.λ_u, K_u = p.K_u
+        return _u_valuence_pdf(x::Real) = x_uv_x(x, λ_u, K_u)
+    end
+end
+
+function parton_pdf_func(::typeof(d_valence), p::DirichletPDFParams)
+    let λ_d = p.λ_d, K_d = p.K_d
+        return _d_valence_pdf(x::Real) = x_dv_x(x, λ_d, K_d)
+    end
+end
+
+function parton_pdf_func(::typeof(u_bar), p::DirichletPDFParams)
+    let λ_q = p.λ_q, K_q = p.K_q, θ_5 = p.θ[5]
+        return _u_bar_pdf(x) = x_q_x(x, λ_q, K_q, θ_5)
+    end
+end
+
+function parton_pdf_func(::typeof(d_bar), p::DirichletPDFParams)
+    let λ_q = p.λ_q, K_q = p.K_q, θ_6 = p.θ[6]
+        return _d_bar_pdf(x) = x_q_x(x, λ_q, K_q, θ_6)
+    end
+end
+
+function parton_pdf_func(::Union{typeof(s_quark),typeof(s_bar)}, p::DirichletPDFParams)
+    let λ_q = p.λ_q, K_q = p.K_q, θ_7 = p.θ[7]
+        return _s_bar_pdf(x) = x_q_x(x, λ_q, K_q, θ_7)
+    end
+end
+
+function parton_pdf_func(::Union{typeof(c_quark),typeof(c_bar)}, p::DirichletPDFParams)
+    let λ_q = p.λ_q, K_q = p.K_q, θ_8 = p.θ[8]
+        return _c_bar_pdf(x) = x_q_x(x, λ_q, K_q, θ_8)
+    end
+end
+
+function parton_pdf_func(::Union{typeof(b_quark),typeof(b_bar)}, p::DirichletPDFParams)
+    let λ_q = p.λ_q, K_q = p.K_q, θ_9 = p.θ[9]
+        return _d_bar_pdf(x) = x_q_x(x, λ_q, K_q, θ_9)
+    end
 end
