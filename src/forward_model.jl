@@ -172,6 +172,8 @@ function forward_model(pdf_params::AbstractPDFParams, qcdnum_params::QCDNUMParam
 
     # Calculate TotSys_var_em == SysError_params[k] * Tnm_sys_ePp[i,j,k] up front?
 
+    fill!(counts_pred_ep, 0)
+    fill!(counts_pred_em, 0)
     for j in bin_out_axis
         TotSys_var_ep::T = 0 # Move into loop over i?
         TotSys_var_em::T = 0 # Move into loop over i?
