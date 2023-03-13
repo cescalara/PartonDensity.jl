@@ -37,16 +37,13 @@ include("eMp_jl/SysTnm_AriMepsDown_eMp.jl")
 # include("../../zeus_bin_edges.jl")
 
 
-const NP1 = size(BinQ2low)
-const NP2 = size(Binxlow)
+const NP1 = size(Tnm_Eehigh_ePp, 1)
+const NP2 = size(Tnm_Eehigh_ePp, 2)
 const nsyst = 8
 
 
-const Tnm_sys_ePp = zeros(NP1...,NP1...,nsyst)
-const Tnm_sys_eMp = zeros(NP1...,NP2...,nsyst)
-
-
-
+const Tnm_sys_ePp = zeros(NP1, NP2, nsyst)
+const Tnm_sys_eMp = zeros(NP1, NP2, nsyst)
 
 
 """
