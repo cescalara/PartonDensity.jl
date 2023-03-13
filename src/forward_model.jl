@@ -78,7 +78,7 @@ end
 Go from input PDF parameters to the expected number of events in bins.
 """
 function forward_model(pdf_params::AbstractPDFParams, qcdnum_params::QCDNUMParameters,
-    splint_params::SPLINTParameters, quark_coeffs::QuarkCoefficients, SysError_params::Vector{Float64} = zeros(8))
+    splint_params::SPLINTParameters, quark_coeffs::QuarkCoefficients, SysError_params::Vector{Float64} = zeros(nsyst))
 
     # Get input PDF function
     my_func = get_input_pdf_func(pdf_params)
@@ -152,8 +152,6 @@ function forward_model(pdf_params::AbstractPDFParams, qcdnum_params::QCDNUMParam
     K_eP = get_K_elements(ePp)
     K_eM = get_K_elements(eMp)
 
-    bin_out_axis = axes(TM_eP, 2)
-
     T = promote_type(map(eltype, (
         SysError_params, Tnm_sys_ePp, Tnm_sys_eMp,
         TM_eP, TM_eM, K_eP, K_eM, integ_xsec_ep, integ_xsec_em
@@ -168,17 +166,19 @@ function forward_model(pdf_params::AbstractPDFParams, qcdnum_params::QCDNUMParam
     @argcheck axes(TM_eP, 1) == axes(TM_eM, 1) == axes(K_eP, 1) == axes(K_eM, 1)
     @argcheck axes(SysError_params, 1) == axes(Tnm_sys_ePp, 3) == axes(Tnm_sys_eMp, 3)
 
-    bin_axis = axes(counts_pred_ep, 1)
+    bin_out_axis = axes(counts_pred_ep, 1)
+    bin_axis = axes(TM_eP, 1)
 
     # Calculate TotSys_var_em == SysError_params[k] * Tnm_sys_ePp[i,j,k] up front?
 
     fill!(counts_pred_ep, 0)
     fill!(counts_pred_em, 0)
+    
     for j in bin_out_axis
         TotSys_var_ep::T = 0 # Move into loop over i?
         TotSys_var_em::T = 0 # Move into loop over i?
         for i in bin_axis
-           # Add variation for parameters, will do nothing if no systematic errors are provided:
+            # Add variation for parameters, will do nothing if no systematic errors are provided:
             for k in syserr_axis
                 TotSys_var_ep += SysError_params[k] * Tnm_sys_ePp[i,j,k]
                 TotSys_var_em += SysError_params[k] * Tnm_sys_eMp[i,j,k]
