@@ -46,7 +46,7 @@ using CSV
     splint_params = SPLINTParameters(nuser=1000)
     quark_coeffs = QuarkCoefficients()
 
-    forward_model_init(qcdnum_grid, qcdnum_params, splint_params)
+    forward_model_init(qcdnum_params, splint_params)
 
     # Run forward model
     for pdf_params in pdf_params_list
