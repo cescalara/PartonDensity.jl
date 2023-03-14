@@ -226,9 +226,11 @@ using PartonDensity
 
 # Let's try the Dirichlet specification...
 
+weights_dir = [3.0, 1.0, 5.0, 5.0, 1.0, 1.0, 1.0, 0.5, 0.5]
+θ_dir = rand(Dirichlet(weights_dir))
+
 pdf_params = DirichletPDFParams(K_u=4.0, K_d=6.0, λ_g1=0.7, λ_g2=-0.4,
-    K_g=6.0, λ_q=-0.5, K_q=5, seed=5,
-    weights=[3.0, 1.0, 5.0, 5.0, 1.0, 1.0, 1.0, 0.5, 0.5]);
+    K_g=6.0, λ_q=-0.5, K_q=5.0, θ=θ_dir);
 
 plot_input_pdfs(pdf_params)
 
@@ -238,8 +240,14 @@ int_xtotx(pdf_params) ≈ 1
 
 # And now the valence specification...
 
-pdf_params = ValencePDFParams(λ_u=0.7, K_u=4.0, λ_d=0.5, K_d=6.0, λ_g1=0.7, λ_g2=-0.4,
-    K_g=6.0, λ_q=-0.5, K_q=5, seed=5, weights=[5.0, 5.0, 1.0, 1.0, 1.0, 0.5, 0.5]);
+weights_val = [5.0, 5.0, 1.0, 1.0, 1.0, 0.5, 0.5]
+λ_u = 0.7
+K_u = 4.0
+λ_d = 0.5
+K_d = 6.0
+θ_val = get_θ_val(λ_u, K_u, λ_d, K_d, weights_val)
+pdf_params = ValencePDFParams(λ_u=λ_u, K_u=K_u, λ_d=λ_d, K_d=K_d, λ_g1=0.7, λ_g2=-0.4,
+    K_g=6.0, λ_q=-0.5, K_q=5.0, θ=θ_val);
 
 plot_input_pdfs(pdf_params)
 

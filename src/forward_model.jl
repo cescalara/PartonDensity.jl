@@ -13,7 +13,7 @@ Initialise forward model. Initialises QCDNUM and builds weight tables to
 save time in subsequent iterations. Must be called prior to first instance 
 of `forward_model()`.
 """
-function forward_model_init(qcdnum_grid::QCDNUMGrid, qcdnum_params::QCDNUMParameters,
+function forward_model_init(qcdnum_params::QCDNUMParameters,
     splint_params::SPLINTParameters)
 
     # Set up QCDNUM
@@ -40,6 +40,7 @@ function forward_model_init(qcdnum_grid::QCDNUMGrid, qcdnum_params::QCDNUMParame
     nw = QCDNUM.zmfillw()
 
     # Define splines, nodes and addresses
+    # TODO: Remove once QCDNUM.jl updated
     if !splint_init_complete
         QCDNUM.ssp_spinit(splint_params.nuser)
         global splint_init_complete = true
@@ -73,12 +74,12 @@ end
 
 """
     forward_model(pdf_params, qcdnum_grid, 
-                  splint_params, quark_coeffs, SysError_params)
+                  splint_params, quark_coeffs, sys_err_params)
 
 Go from input PDF parameters to the expected number of events in bins.
 """
 function forward_model(pdf_params::AbstractPDFParams, qcdnum_params::QCDNUMParameters,
-    splint_params::SPLINTParameters, quark_coeffs::QuarkCoefficients, SysError_params::Vector{Float64} = zeros(nsyst))
+    splint_params::SPLINTParameters, quark_coeffs::QuarkCoefficients, sys_err_params::Vector{Float64}=zeros(nsyst))
 
     # Get input PDF function
     my_func = get_input_pdf_func(pdf_params)
@@ -122,10 +123,8 @@ function forward_model(pdf_params::AbstractPDFParams, qcdnum_params::QCDNUMParam
     input_xsecm = @cfunction($my_funcm, Float64, (Ref{Int32}, Ref{Int32}, Ref{UInt8}))
 
     # Make two cross section splines
-#    set_lepcharge(1)
     QCDNUM.ssp_s2fill(iaF_eP, input_xsecp, splint_params.rscut)
 
-#    set_lepcharge(-1)
     QCDNUM.ssp_s2fill(iaF_eM, input_xsecm, splint_params.rscut)
 
     # Integrate over cross section
@@ -153,35 +152,35 @@ function forward_model(pdf_params::AbstractPDFParams, qcdnum_params::QCDNUMParam
     K_eM = get_K_elements(eMp)
 
     T = promote_type(map(eltype, (
-        SysError_params, Tnm_sys_ePp, Tnm_sys_eMp,
+        sys_err_params, Tnm_sys_ePp, Tnm_sys_eMp,
         TM_eP, TM_eM, K_eP, K_eM, integ_xsec_ep, integ_xsec_em
     ))...)
 
     counts_pred_ep = similar(TM_eP, T, size(TM_eP, 2))
     counts_pred_em = similar(TM_eM, T, size(TM_eM, 2))
 
-    syserr_axis = axes(SysError_params, 1)
+    syserr_axis = axes(sys_err_params, 1)
 
     @argcheck axes(TM_eP, 2) == axes(TM_eM, 2) == axes(Tnm_sys_ePp, 2) == axes(Tnm_sys_eMp, 2)
     @argcheck axes(TM_eP, 1) == axes(TM_eM, 1) == axes(K_eP, 1) == axes(K_eM, 1)
-    @argcheck axes(SysError_params, 1) == axes(Tnm_sys_ePp, 3) == axes(Tnm_sys_eMp, 3)
+    @argcheck axes(sys_err_params, 1) == axes(Tnm_sys_ePp, 3) == axes(Tnm_sys_eMp, 3)
 
     bin_out_axis = axes(counts_pred_ep, 1)
     bin_axis = axes(TM_eP, 1)
 
-    # Calculate TotSys_var_em == SysError_params[k] * Tnm_sys_ePp[i,j,k] up front?
+    # Calculate TotSys_var_em == sys_err_params[k] * Tnm_sys_ePp[i,j,k] up front?
 
     fill!(counts_pred_ep, 0)
     fill!(counts_pred_em, 0)
-    
+
     for j in bin_out_axis
-        TotSys_var_ep::T = 0 # Move into loop over i?
-        TotSys_var_em::T = 0 # Move into loop over i?
+        TotSys_var_ep::T = 0
+        TotSys_var_em::T = 0
         for i in bin_axis
             # Add variation for parameters, will do nothing if no systematic errors are provided:
             for k in syserr_axis
-                TotSys_var_ep += SysError_params[k] * Tnm_sys_ePp[i,j,k]
-                TotSys_var_em += SysError_params[k] * Tnm_sys_eMp[i,j,k]
+                TotSys_var_ep += sys_err_params[k] * Tnm_sys_ePp[i, j, k]
+                TotSys_var_em += sys_err_params[k] * Tnm_sys_eMp[i, j, k]
             end
             counts_pred_ep[j] += (TM_eP[i, j] + TotSys_var_ep) * (1.0 / K_eP[i]) * integ_xsec_ep[i]
             counts_pred_em[j] += (TM_eM[i, j] + TotSys_var_em) * (1.0 / K_eM[i]) * integ_xsec_em[i]
@@ -260,23 +259,23 @@ function pd_read_sim(file_name::String)
                 θ=read(g["θ"]))
 
         elseif read(g["param_type"]) == BERNSTEIN_TYPE
-            
-            pdf_params = BernsteinPDFParams(U_list=read(g["U_list"]), 
+
+            pdf_params = BernsteinPDFParams(U_list=read(g["U_list"]),
                 D_list=read(g["D_list"]),
                 λ_g1=read(g["λ_g1"]), λ_g2=read(g["λ_g2"]),
                 K_g=read(g["K_g"]), λ_q=read(g["λ_q"]), K_q=read(g["K_q"]),
                 weights=read(g["weights"]),
                 θ=read(g["θ"]))
-            
+
         elseif read(g["param_type"]) == BERNSTEIN_DIRICHLET_TYPE
-            
-            pdf_params = BernsteinDirichletPDFParams(U_list=read(g["U_list"]), 
+
+            pdf_params = BernsteinDirichletPDFParams(U_list=read(g["U_list"]),
                 D_list=read(g["D_list"]),
                 λ_g1=read(g["λ_g1"]), λ_g2=read(g["λ_g2"]),
                 K_g=read(g["K_g"]), λ_q=read(g["λ_q"]), K_q=read(g["K_q"]),
-                weights=read(g["weights"]), 
+                weights=read(g["weights"]),
                 θ=read(g["θ"]))
-            
+
         else
 
             @error "PDF parametrisation not recognised."

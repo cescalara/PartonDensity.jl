@@ -38,9 +38,9 @@ function xtotx(x::Real, pdf_params::DirichletPDFParams)
 
 end
 
-function xtotx_dirichlet(x::Real, λ_u::Real, K_u::Real, λ_d::Real,
-    K_d::Real, λ_g1::Real, λ_g2::Real, K_g::Real, λ_q::Real,
-    K_q::Real, θ::Vector{Real})
+function xtotx_dirichlet(x::Float64, λ_u::Float64, K_u::Float64, λ_d::Float64,
+    K_d::Float64, λ_g1::Float64, λ_g2::Float64, K_g::Float64, λ_q::Float64,
+    K_q::Float64, θ::Vector{Float64})
 
     xuvx = x_uv_x(x, λ_u, K_u)
 
