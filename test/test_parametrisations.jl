@@ -20,8 +20,7 @@ import BAT
         λ_q = rand(Uniform(-1, 0))
         K_q = rand(Uniform(1, 5))
         weights = ones(7)
-        seed = i
-        θ = get_dirichlet_samples(λ_u, K_u, λ_d, K_d, seed, weights)
+        θ = get_θ_val(λ_u, K_u, λ_d, K_d, weights)
 
         val_pdf_params = ValencePDFParams(λ_u=λ_u, K_u=K_u,
             λ_d=λ_d, K_d=K_d, λ_g1=λ_g2,
@@ -32,7 +31,7 @@ import BAT
 
     end
 
-    @test typeof(val_pdf_params) == ValencePDFParams{Float64, Vector{Float64}}
+    @test typeof(val_pdf_params) == ValencePDFParams{Float64,Vector{Float64}}
 
     p = plot_input_pdfs(val_pdf_params)
 
@@ -68,7 +67,7 @@ end
 
     end
 
-    @test typeof(dir_pdf_params) == DirichletPDFParams{Float64, Vector{Float64}}
+    @test typeof(dir_pdf_params) == DirichletPDFParams{Float64,Vector{Float64}}
 
     p = plot_input_pdfs(dir_pdf_params)
 
