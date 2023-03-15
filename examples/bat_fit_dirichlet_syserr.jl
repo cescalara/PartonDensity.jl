@@ -65,15 +65,14 @@ pd_write_sim("output/simulation.h5", pdf_params, sim_data)
 
 # Here, we include a prior over the 8 systematic error parameters, such that we marginalise over them.
 prior = NamedTupleDist(
-    θ_tmp=Dirichlet(weights),
-    λ_u=Truncated(Normal(pdf_params.λ_u, 1), 0, 1),
-    K_u=Truncated(Normal(pdf_params.K_u, 1), 2, 10),
-    λ_d=Truncated(Normal(pdf_params.λ_d, 1), 0, 1),
-    K_d=Truncated(Normal(pdf_params.K_d, 1), 2, 10),
-    λ_g1=Truncated(Normal(pdf_params.λ_g1, 1), -1, 0),
-    λ_g2=Truncated(Normal(pdf_params.λ_g2, 1), -1, 0),
-    K_g=Truncated(Normal(pdf_params.K_g, 1), 2, 10),
-    λ_q=Truncated(Normal(pdf_params.λ_q, 0.1), -1, 0),
+    θ=Dirichlet(weights),
+    K_u=Uniform(3.0, 7.0),
+    K_d=Uniform(3.0, 7.0),
+    λ_g1=Uniform(1.0, 2.0),
+    λ_g2=Uniform(-0.5, -0.1),
+    K_g=Uniform(3.0, 7.0),
+    λ_q=Uniform(-0.5, -0.1),
+    K_q=Uniform(3.0, 7.0),
     beta0_1=Truncated(Normal(0, 1), -5, 5),
     beta0_2=Truncated(Normal(0, 1), -5, 5),
     beta0_3=Truncated(Normal(0, 1), -5, 5),
@@ -92,12 +91,8 @@ likelihood = let d = sim_data
 
     logfuncdensity(function (params)
 
-        θ = get_scaled_θ(params.λ_u, params.K_u, params.λ_d,
-            params.K_d, Vector(params.θ_tmp))
-
-        pdf_params = ValencePDFParams(λ_u=params.λ_u, K_u=params.K_u, λ_d=params.λ_d,
-            K_d=params.K_d, λ_g1=params.λ_g1, λ_g2=params.λ_g2,
-            K_g=params.K_g, λ_q=params.λ_q, θ=θ)
+        pdf_params = DirichletPDFParams(K_u=params.K_u, K_d=params.K_d, λ_g1=params.λ_g1, λ_g2=params.λ_g2,
+            K_g=params.K_g, λ_q=params.λ_q, K_q=params.K_q, θ=Vector(params.θ))
 
         #The sys_err_params must also be passed to the forward model here.
         sys_err_params = [params.beta0_1, params.beta0_2, params.beta0_3, params.beta0_4,
@@ -116,6 +111,10 @@ likelihood = let d = sim_data
     end)
 end
 
+# Check that we can evaluate the posterior:
+posterior = PosteriorDensity(likelihood, prior)
+BAT.checked_logdensityof(posterior, rand(prior))
+
 # We can now run the MCMC sampler. We will start by using the
 # Metropolis-Hastings algorithm as implemented in `BAT.jl`.
 # To get reasonable results, we need to run the sampler for a
@@ -123,7 +122,6 @@ end
 # simply uncomment the code below. To see how to work with 
 # demo output results, check out the other fit examples.
 
-#posterior = PosteriorDensity(likelihood, prior)
 #samples = bat_sample(posterior, MCMCSampling(mcalg=MetropolisHastings(), nsteps=10^4, nchains=2)).result;
 
 #import HDF5
