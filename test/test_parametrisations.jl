@@ -23,11 +23,14 @@ import BAT
         θ = get_θ_val(λ_u, K_u, λ_d, K_d, weights)
 
         val_pdf_params = ValencePDFParams(λ_u=λ_u, K_u=K_u,
-            λ_d=λ_d, K_d=K_d, λ_g1=λ_g2,
+            λ_d=λ_d, K_d=K_d, λ_g1=λ_g1,
             λ_g2=λ_g2, K_g=K_g, λ_q=λ_q, K_q=K_q,
             θ=θ)
 
         @test int_xtotx(val_pdf_params) ≈ 1.0
+
+        x = 0.5
+        @test xtotx(x, val_pdf_params) == PartonDensity.xtotx_valence(x, λ_u, K_u, λ_d, K_d, λ_g1, λ_g2, K_g, λ_q, K_q, θ)
 
     end
 
@@ -59,11 +62,14 @@ end
         weights = ones(9)
         θ = rand(Dirichlet(weights))
 
-        dir_pdf_params = DirichletPDFParams(K_u=K_u, K_d=K_d, λ_g1=λ_g2,
+        dir_pdf_params = DirichletPDFParams(K_u=K_u, K_d=K_d, λ_g1=λ_g1,
             λ_g2=λ_g2, K_g=K_g, λ_q=λ_q, K_q=K_q,
             θ=θ)
 
         @test int_xtotx(dir_pdf_params) ≈ 1.0
+
+        x = 0.5
+        @test xtotx(x, dir_pdf_params) == PartonDensity.xtotx_dirichlet(x, dir_pdf_params.λ_u, K_u, dir_pdf_params.λ_d, K_d, λ_g1, λ_g2, K_g, λ_q, K_q, θ)
 
     end
 

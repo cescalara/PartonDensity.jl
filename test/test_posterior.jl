@@ -2,7 +2,6 @@ using PartonDensity
 using BAT, DensityInterface, ParallelProcessingTools
 using Random, Distributions, ValueShapes
 using Test
-using StatsBase, LinearAlgebra
 
 @testset "DirichletPDFParams simulation + posterior check" begin
 
