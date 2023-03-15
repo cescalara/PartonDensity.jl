@@ -235,12 +235,12 @@ function plot_data_space end
 
 
 function plot_data_space(pdf_params::AbstractPDFParams, sim_data::Dict{String,Any}, samples,
-    qcdnum_grid::QCDNUMGrid, qcdnum_params::QCDNUMParameters,
+    qcdnum_params::QCDNUMParameters,
     splint_params::SPLINTParameters, quark_coeffs::QuarkCoefficients;
     ep_color=:firebrick, em_color=:teal, nsamples::Integer=100, plot_size=(1000, 500),
     args...)
 
-    forward_model_init(qcdnum_grid, qcdnum_params, splint_params)
+    forward_model_init(qcdnum_params, splint_params)
 
     nbins = sim_data["nbins"]
 

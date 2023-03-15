@@ -14,7 +14,7 @@ using CSV
         weights=[5.0, 5.0, 1.0, 1.0, 1.0, 0.5, 0.5])
 
     θ_val = [0.3027113383772114, 0.21562307667168612, 0.037706327593135316, 0.014630127386380845,
-        0.03372023967525289, 0.03878412120839827, 0.007449769087935228]
+        0.03372023967525289, 0.03878412120839827, 0.007449769087935228] # Already scaled according to valence
     val_pdf_params = ValencePDFParams(λ_u=0.6, K_u=3.4,
         λ_d=0.7, K_d=4.7,
         λ_g1=0.4, λ_g2=-0.6,
@@ -46,7 +46,7 @@ using CSV
     splint_params = SPLINTParameters(nuser=1000)
     quark_coeffs = QuarkCoefficients()
 
-    forward_model_init(qcdnum_grid, qcdnum_params, splint_params)
+    forward_model_init(qcdnum_params, splint_params)
 
     # Run forward model
     for pdf_params in pdf_params_list

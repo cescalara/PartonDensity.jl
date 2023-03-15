@@ -12,11 +12,9 @@ using Plots, Random, Distributions, ValueShapes, ParallelProcessingTools
 using StatsBase, LinearAlgebra
 
 gr(fmt=:png);
+rng = MersenneTwister(42)
 
 # ## Simulate some data
-
-seed = 42
-Random.seed!(seed) # for reproducibility
 
 # We can start off by simulating some fake data for us to fit. This way,
 # we know exactly what initial conditions we have specified and can check
@@ -29,8 +27,10 @@ Random.seed!(seed) # for reproducibility
 # See the *Input PDF parametrisation and priors* example for more information on the
 # definition of the input PDFs. Here, we use the Dirichlet parametrisation.
 
+weights = [30.0, 15.0, 12.0, 6.0, 3.6, 0.85, 0.85, 0.85, 0.85]
+θ = rand(rng, Dirichlet(weights))
 pdf_params = DirichletPDFParams(K_u=4.0, K_d=4.0, λ_g1=1.5, λ_g2=-0.4, K_g=6.0,
-    λ_q=-0.25, K_q=5, weights=[30.0, 15.0, 12.0, 6.0, 3.6, 0.85, 0.85, 0.85, 0.85]);
+    λ_q=-0.25, K_q=5.0, θ=θ);
 
 @info "Valence λ:" pdf_params.λ_u pdf_params.λ_d
 
@@ -53,7 +53,7 @@ splint_params = SPLINTParameters();
 quark_coeffs = QuarkCoefficients();
 
 # initialise QCDNUM
-forward_model_init(qcdnum_grid, qcdnum_params, splint_params)
+forward_model_init(qcdnum_params, splint_params)
 
 # run forward model 
 counts_pred_ep, counts_pred_em = forward_model(pdf_params, qcdnum_params,
@@ -94,7 +94,7 @@ pd_write_sim("output/simulation.h5", pdf_params, sim_data)
 # For now, let's try relatively narrow priors centred on the true values.
 
 prior = NamedTupleDist(
-    θ=Dirichlet(pdf_params.weights),
+    θ=Dirichlet(weights),
     K_u=Uniform(3.0, 7.0),
     K_d=Uniform(3.0, 7.0),
     λ_g1=Uniform(1.0, 2.0),
@@ -121,31 +121,13 @@ likelihood = let d = sim_data
     logfuncdensity(function (params)
 
         pdf_params = DirichletPDFParams(K_u=params.K_u, K_d=params.K_d, λ_g1=params.λ_g1, λ_g2=params.λ_g2,
-            K_g=params.K_g, λ_q=params.λ_q, K_q=params.K_q, θ=params.θ)
-
-        #Ensure u-valence weight > d-valence weight
-        if params.θ[2] > params.θ[1]
-
-            return -Inf
-
-        end
+            K_g=params.K_g, λ_q=params.λ_q, K_q=params.K_q, θ=Vector(params.θ))
 
         counts_pred_ep, counts_pred_em = @critical forward_model(pdf_params,
             qcdnum_params, splint_params, quark_coeffs)
 
         ll_value = 0.0
         for i in 1:nbins
-
-            if counts_pred_ep[i] < 0
-                @debug "counts_pred_ep[i] < 0, setting to 0" i counts_pred_ep[i]
-                counts_pred_ep[i] = 0
-            end
-
-            if counts_pred_em[i] < 0
-                @debug "counts_pred_em[i] < 0, setting to 0" i counts_pred_em[i]
-                counts_pred_em[i] = 0
-            end
-
             ll_value += logpdf(Poisson(counts_pred_ep[i]), counts_obs_ep[i])
             ll_value += logpdf(Poisson(counts_pred_em[i]), counts_obs_em[i])
         end
@@ -162,11 +144,8 @@ end
 # simply uncomment the code below.
 
 #posterior = PosteriorDensity(likelihood, prior);
-#mcalg = MetropolisHastings(proposal=BAT.MvTDistProposal(10.0))
-#convergence = BrooksGelmanConvergence(threshold=1.3);
-#burnin = MCMCMultiCycleBurnin(max_ncycles=50);
+#samples = bat_sample(posterior, MCMCSampling(mcalg=MetropolisHastings(), nsteps=10^4, nchains=2)).result;
 
-#samples = bat_sample(posterior, MCMCSampling(mcalg=mcalg, nsteps=10^4, nchains=2)).result;
 # Alternatively, we could also try a nested sampling approach
 # here for comparison. This is easily done thanks to the
 # interface of `BAT.jl`, you will just need to add the
@@ -241,7 +220,7 @@ hline!([pdf_params.θ[2]], color="black", label="true θ[2]", lw=3)
 # Using BAT recipe
 function wrap_xtotx(p::NamedTuple, x::Real)
     pdf_params = DirichletPDFParams(K_u=p.K_u, K_d=p.K_d, λ_g1=p.λ_g1,
-        λ_g2=p.λ_g2, K_g=p.K_g, λ_q=p.λ_q, K_q=p.K_q, θ=p.θ)
+        λ_g2=p.λ_g2, K_g=p.K_g, λ_q=p.λ_q, K_q=p.K_q, θ=Vector(p.θ))
     return log(xtotx(x, pdf_params))
 end
 
@@ -258,7 +237,7 @@ plot_model_space(pdf_params, samples, nsamples=500)
 # Alternatively, we can also visualise the implications of the fit
 # in the *data space*, as shown below. 
 
-plot_data_space(pdf_params, sim_data, samples, qcdnum_grid, qcdnum_params,
+plot_data_space(pdf_params, sim_data, samples, qcdnum_params,
     splint_params, quark_coeffs, nsamples=500)
 
 # The first results seem promising, but these are really just first checks

@@ -5,15 +5,17 @@
 # bins of the detector response.
 
 using QCDNUM, PartonDensity
-using Plots, Printf, NaNMath, Parameters
+using Plots, Printf, NaNMath, Parameters, Random, Distributions
 
 # ## Define input PDFs
 # We can use `DirichletPDFParams` or `ValencePDFParams`, as long
 # as we do so according to the *PDF parametrisation and priors* docs.
+random_seed = 42
 
 weights = [3.0, 1.0, 5.0, 5.0, 1.0, 1.0, 1.0, 0.5, 0.5]
+θ = rand(MersenneTwister(random_seed), Dirichlet(weights))
 pdf_params = DirichletPDFParams(K_u=4.0, K_d=6.0, λ_g1=0.7, λ_g2=-0.4,
-    K_g=6.0, λ_q=-0.5, K_q=5, seed=5, weights=weights);
+    K_g=6.0, λ_q=-0.5, K_q=5.0, θ=θ);
 
 # Plot the input PDFs
 
@@ -123,10 +125,10 @@ QCDNUM.ssp_uwrite(splint_params.spline_addresses.F3dn, Float64(iaF3dn));
 QCDNUM.ssp_uwrite(splint_params.spline_addresses.FLup, Float64(iaFLup));
 QCDNUM.ssp_uwrite(splint_params.spline_addresses.FLdn, Float64(iaFLdn));
 
-my_funcp = get_input_xsec_func(1)
+my_funcp = get_input_xsec_func(1) # charge = 1
 input_xsecp = @cfunction(my_funcp, Float64, (Ref{Int32}, Ref{Int32}, Ref{UInt8}))
 
-my_funcm = get_input_xsec_func(-1)
+my_funcm = get_input_xsec_func(-1) # charge = -1
 input_xsecm = @cfunction(my_funcm, Float64, (Ref{Int32}, Ref{Int32}, Ref{UInt8}))
 
 # plot
@@ -135,7 +137,7 @@ xsec_on_grid = zeros(g.nx, g.nq);
 
 for ix = 1:g.nx
     for iq = 1:g.nq
-        xsec_on_grid[ix, iq] = _fun_xsec_i(ix, iq)
+        xsec_on_grid[ix, iq] = _fun_xsec_i(1, ix, iq) # charge = 1
     end
 end
 
@@ -157,12 +159,10 @@ plot!(xaxis=:log, legend=:bottomleft, xlabel="x",
 
 #
 
-#set_lepcharge(1)
 iaF_eP = QCDNUM.isp_s2make(1, 2);
 QCDNUM.ssp_uwrite(splint_params.spline_addresses.F_eP, Float64(iaF_eP));
 QCDNUM.ssp_s2fill(iaF_eP, input_xsecp, splint_params.rscut);
 
-#set_lepcharge(-1)
 iaF_eM = QCDNUM.isp_s2make(1, 2);
 QCDNUM.ssp_uwrite(splint_params.spline_addresses.F_eM, Float64(iaF_eM));
 QCDNUM.ssp_s2fill(iaF_eM, input_xsecm, splint_params.rscut);
@@ -183,6 +183,8 @@ plot(p1, xlabel="x", ylabel="q2",
     xaxis=:log, yaxis=:log)
 
 # ## Integrate over the cross section spline and find expected events numbers
+#
+# Here, we neglect any possible contribution from systematic errors
 
 nbins = size(xbins_M_begin)[1]
 IntXsec_eP = zeros(nbins);
@@ -207,18 +209,18 @@ K_eM = get_K_elements(eMp);
 
 nbins_out = size(TM_eP)[2];
 
-xsec_pred_eP = zeros(nbins_out);
-xsec_pred_eM = zeros(nbins_out);
+counts_pred_eP = zeros(nbins_out);
+counts_pred_eM = zeros(nbins_out);
 
 for j in 1:nbins_out
 
     for i in 1:nbins
 
-        xsec_pred_eP[j] += TM_eP[i, j] * (1.0 / K_eP[i]) * IntXsec_eP[i]
-        xsec_pred_eM[j] += TM_eM[i, j] * (1.0 / K_eM[i]) * IntXsec_eM[i]
+        counts_pred_eP[j] += TM_eP[i, j] * (1.0 / K_eP[i]) * IntXsec_eP[i]
+        counts_pred_eM[j] += TM_eM[i, j] * (1.0 / K_eM[i]) * IntXsec_eM[i]
 
     end
 
 end
 
-xsec_pred_eM
+counts_pred_eM

@@ -12,11 +12,9 @@ using Plots, Random, Distributions, ValueShapes, ParallelProcessingTools
 using StatsBase, LinearAlgebra
 
 gr(fmt=:png);
+rng = MersenneTwister(42)
 
 # ## Simulate some data
-
-seed = 42
-Random.seed!(seed) # for reproducibility
 
 # We can start off by simulating some fake data for us to fit. This way,
 # we know exactly what initial conditions we have specified and can check
@@ -29,8 +27,14 @@ Random.seed!(seed) # for reproducibility
 # See the *Input PDF parametrisation and priors* example for more information on the
 # definition of the input PDFs. Here, we use the valence parametrisation.
 
-pdf_params = ValencePDFParams(λ_u=0.64, K_u=3.38, λ_d=0.67, K_d=4.73,
-    λ_g1=0.50, λ_g2=-0.63, K_g=4.23, λ_q=-0.23, K_q=5.0, weights=[5.0, 5.0, 1.0, 1.0, 1.0, 0.5, 0.5]);
+weights = [5.0, 5.0, 1.0, 1.0, 1.0, 0.5, 0.5]
+λ_u = 0.64;
+K_u = 3.38;
+λ_d = 0.67;
+K_d = 4.73;
+θ = get_θ_val(rng, λ_u, K_u, λ_d, K_d, weights)
+pdf_params = ValencePDFParams(λ_u=λ_u, K_u=K_u, λ_d=λ_d, K_d=K_d,
+    λ_g1=0.50, λ_g2=-0.63, K_g=4.23, λ_q=-0.23, K_q=5.0, θ=θ);
 
 plot_input_pdfs(pdf_params)
 
@@ -51,7 +55,7 @@ splint_params = SPLINTParameters();
 quark_coeffs = QuarkCoefficients();
 
 # initialise QCDNUM
-forward_model_init(qcdnum_grid, qcdnum_params, splint_params)
+forward_model_init(qcdnum_params, splint_params)
 
 # run forward model 
 counts_pred_ep, counts_pred_em = forward_model(pdf_params, qcdnum_params,
@@ -64,8 +68,8 @@ counts_obs_ep = zeros(UInt64, nbins)
 counts_obs_em = zeros(UInt64, nbins)
 
 for i in 1:nbins
-    counts_obs_ep[i] = rand(Poisson(counts_pred_ep[i]))
-    counts_obs_em[i] = rand(Poisson(counts_pred_em[i]))
+    counts_obs_ep[i] = rand(rng, Poisson(counts_pred_ep[i]))
+    counts_obs_em[i] = rand(rng, Poisson(counts_pred_em[i]))
 end
 
 #
@@ -92,7 +96,7 @@ pd_write_sim("output/simulation.h5", pdf_params, sim_data)
 # For now, let's try relatively narrow priors centred on the true values.
 
 prior = NamedTupleDist(
-    θ_tmp=Dirichlet(pdf_params.weights),
+    θ_tmp=Dirichlet(weights),
     λ_u=Truncated(Normal(pdf_params.λ_u, 1), 0, 1),
     K_u=Truncated(Normal(pdf_params.K_u, 1), 2, 10),
     λ_d=Truncated(Normal(pdf_params.λ_d, 1), 0, 1),
@@ -132,17 +136,6 @@ likelihood = let d = sim_data
 
         ll_value = 0.0
         for i in 1:nbins
-
-            if counts_pred_ep[i] < 0
-                #@warn "counts_pred_ep[i] < 0, setting to 0" i counts_pred_ep[i]
-                counts_pred_ep[i] = 0
-            end
-
-            if counts_pred_em[i] < 0
-                #@warn "counts_pred_em[i] < 0, setting to 0" i counts_pred_em[i]
-                counts_pred_em[i] = 0
-            end
-
             ll_value += logpdf(Poisson(counts_pred_ep[i]), counts_obs_ep[i])
             ll_value += logpdf(Poisson(counts_pred_em[i]), counts_obs_em[i])
         end
@@ -159,8 +152,6 @@ end
 # simply uncomment the code below.
 
 #posterior = PosteriorDensity(likelihood, prior);
-#convergence = BrooksGelmanConvergence(threshold=1.3);
-#burnin = MCMCMultiCycleBurnin(max_ncycles=100);
 
 #samples = bat_sample(posterior, MCMCSampling(mcalg=MetropolisHastings(), nsteps=10^5, nchains=2)).result;
 
@@ -259,7 +250,7 @@ plot_model_space(pdf_params, samples, nsamples=500)
 # Alternatively, we can also visualise the implications of the fit
 # in the *data space*, as shown below. 
 
-plot_data_space(pdf_params, sim_data, samples, qcdnum_grid, qcdnum_params,
+plot_data_space(pdf_params, sim_data, samples, qcdnum_params,
     splint_params, quark_coeffs, nsamples=500)
 
 # The first results seem promising, but these are really just first checks

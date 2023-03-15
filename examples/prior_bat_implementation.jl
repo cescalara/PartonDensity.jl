@@ -9,6 +9,7 @@ using BAT, DensityInterface
 const sf = SpecialFunctions;
 
 gr(fmt=:png);
+rng = MersenneTwister(42)
 
 # ## Simple two-component model: gluons 
 #
@@ -51,9 +52,9 @@ end
 # Choose true values for the high-level parameters and show what the resulting model looks like.
 
 θ = [0.5, 0.5]
-λ_g1 = 0.5 # rand(Uniform(0, 1))
-λ_g2 = -0.7 # rand(Uniform(-1, 0))
-K_g = 3 # rand(Uniform(2, 10))
+λ_g1 = 0.5 # rand(rng, Uniform(0, 1))
+λ_g2 = -0.7 # rand(rng, Uniform(-1, 0))
+K_g = 3 # rand(rng, Uniform(2, 10))
 K_q = 5
 truths = (θ=θ, λ_g1=λ_g1, λ_g2=λ_g2, K_g=K_g, K_q=K_q);
 
@@ -84,9 +85,6 @@ plot!(xlabel="x")
 # and multiplying by some factor.
 # Then, plot the model and data to compare.
 
-seed = 42
-Random.seed!(seed) # for reproducibility
-
 bins = 0.0:0.05:1.0
 bin_widths = bins[2:end] - bins[1:end-1]
 bin_centers = (bins[1:end-1] + bins[2:end]) / 2
@@ -99,7 +97,7 @@ observed_counts = zeros(Integer, nbins)
 for i in 1:nbins
     xg = xgx(bin_centers[i], λ_g1, λ_g2, K_g, K_q, θ) * N
     expected_counts[i] = bin_widths[i] * xg
-    observed_counts[i] = rand(Poisson(expected_counts[i]))
+    observed_counts[i] = rand(rng, Poisson(expected_counts[i]))
 end
 
 plot(bin_centers, [xgx(x, λ_g1, λ_g2, K_g, K_q, θ) for x in bin_centers] .* bin_widths * N,
@@ -122,7 +120,7 @@ data["bin_widths"] = bin_widths;
 # some samples to help understand what this means.
 
 dirichlet = Dirichlet([1, 1])
-test = rand(dirichlet, 1000)
+test = rand(rng, dirichlet, 1000)
 plot(append!(Histogram(0:0.1:1), test[1, :]))
 plot!(append!(Histogram(0:0.1:1), test[2, :]))
 
@@ -230,9 +228,15 @@ using PartonDensity
 
 #
 
-pdf_params = ValencePDFParams(λ_u=0.7, K_u=4.0, λ_d=0.5, K_d=6.0,
-    λ_g1=0.7, λ_g2=-0.4, K_g=6.0, λ_q=-0.5, K_q=5,
-    weights=[1, 0.5, 0.3, 0.2, 0.1, 0.1, 0.1])
+weights = [1, 0.5, 0.3, 0.2, 0.1, 0.1, 0.1]
+λ_u = 0.7;
+K_u = 4.0;
+λ_d = 0.5;
+K_d = 6.0;
+θ = get_θ_val(rng, λ_u, K_u, λ_d, K_d, weights)
+pdf_params = ValencePDFParams(λ_u=λ_u, K_u=K_u, λ_d=λ_d, K_d=K_d,
+    λ_g1=0.7, λ_g2=-0.4, K_g=6.0, λ_q=-0.5, K_q=5.0,
+    θ=θ)
 
 # Sanity check
 
@@ -256,7 +260,7 @@ observed_counts = zeros(Integer, nbins)
 for i in 1:nbins
     xt = xtotx(bin_centers[i], pdf_params) * N
     expected_counts[i] = bin_widths[i] * xt
-    observed_counts[i] = rand(Poisson(expected_counts[i]))
+    observed_counts[i] = rand(rng, Poisson(expected_counts[i]))
 end
 
 # Plot data and expectation
@@ -278,7 +282,7 @@ data["bin_widths"] = bin_widths;
 # Prior
 
 prior = NamedTupleDist(
-    θ=Dirichlet(pdf_params.weights),
+    θ=Dirichlet(weights),
     λ_u=Truncated(Normal(pdf_params.λ_u, 0.5), 0, 1), #  Uniform(0, 1),
     K_u=Truncated(Normal(pdf_params.K_u, 1), 2, 10),
     λ_d=Truncated(Normal(pdf_params.λ_d, 0.5), 0, 1), # Uniform(0, 1),
@@ -292,7 +296,7 @@ prior = NamedTupleDist(
 
 # Likelihood
 
-likelihood = let d = data, f = xtotx
+likelihood = let d = data, f = PartonDensity.xtotx_valence
 
     observed_counts = d["observed_counts"]
     bin_centers = d["bin_centers"]
@@ -334,7 +338,7 @@ sub_samples = bat_sample(samples, OrderedResampling(nsamples=200)).result
 plot()
 for i in eachindex(sub_samples)
     s = sub_samples[i].v
-    xt = [xtotx(x, s.λ_u, s.K_u, s.λ_d, s.K_d,
+    xt = [PartonDensity.xtotx_valence(x, s.λ_u, s.K_u, s.λ_d, s.K_d,
         s.λ_g1, s.λ_g2, s.K_g, s.λ_q, s.K_q, Vector(s.θ)) for x in bin_centers]
     plot!(bin_centers, xt .* bin_widths * N, alpha=0.1, lw=3,
         color="darkorange", label="")
