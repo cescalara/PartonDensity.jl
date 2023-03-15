@@ -69,15 +69,14 @@ pd_write_sim(&quot;output/simulation.h5&quot;, pdf_params, sim_data)</code></pre
 
  ZMFILLW: start weight calculations   4  38   0   0
  ZMFILLW: calculations completed</code></pre><p>Here, we include a prior over the 8 systematic error parameters, such that we marginalise over them.</p><pre><code class="language-julia hljs">prior = NamedTupleDist(
-    θ_tmp=Dirichlet(weights),
-    λ_u=Truncated(Normal(pdf_params.λ_u, 1), 0, 1),
-    K_u=Truncated(Normal(pdf_params.K_u, 1), 2, 10),
-    λ_d=Truncated(Normal(pdf_params.λ_d, 1), 0, 1),
-    K_d=Truncated(Normal(pdf_params.K_d, 1), 2, 10),
-    λ_g1=Truncated(Normal(pdf_params.λ_g1, 1), -1, 0),
-    λ_g2=Truncated(Normal(pdf_params.λ_g2, 1), -1, 0),
-    K_g=Truncated(Normal(pdf_params.K_g, 1), 2, 10),
-    λ_q=Truncated(Normal(pdf_params.λ_q, 0.1), -1, 0),
+    θ=Dirichlet(weights),
+    K_u=Uniform(3.0, 7.0),
+    K_d=Uniform(3.0, 7.0),
+    λ_g1=Uniform(1.0, 2.0),
+    λ_g2=Uniform(-0.5, -0.1),
+    K_g=Uniform(3.0, 7.0),
+    λ_q=Uniform(-0.5, -0.1),
+    K_q=Uniform(3.0, 7.0),
     beta0_1=Truncated(Normal(0, 1), -5, 5),
     beta0_2=Truncated(Normal(0, 1), -5, 5),
     beta0_3=Truncated(Normal(0, 1), -5, 5),
@@ -96,12 +95,8 @@ likelihood = let d = sim_data
 
     logfuncdensity(function (params)
 
-        θ = get_scaled_θ(params.λ_u, params.K_u, params.λ_d,
-            params.K_d, Vector(params.θ_tmp))
-
-        pdf_params = ValencePDFParams(λ_u=params.λ_u, K_u=params.K_u, λ_d=params.λ_d,
-            K_d=params.K_d, λ_g1=params.λ_g1, λ_g2=params.λ_g2,
-            K_g=params.K_g, λ_q=params.λ_q, θ=θ)
+        pdf_params = DirichletPDFParams(K_u=params.K_u, K_d=params.K_d, λ_g1=params.λ_g1, λ_g2=params.λ_g2,
+            K_g=params.K_g, λ_q=params.λ_q, K_q=params.K_q, θ=Vector(params.θ))
 
         #The sys_err_params must also be passed to the forward model here.
         sys_err_params = [params.beta0_1, params.beta0_2, params.beta0_3, params.beta0_4,
@@ -118,8 +113,8 @@ likelihood = let d = sim_data
 
         return ll_value
     end)
-end</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">LogFuncDensity(Main.var&quot;#1#2&quot;{Int64, Vector{UInt64}, Vector{UInt64}}(153, UInt64[0x0000000000000207, 0x00000000000001b9, 0x000000000000017f, 0x000000000000019c, 0x0000000000000170, 0x000000000000019e, 0x000000000000016b, 0x0000000000000507, 0x00000000000001d5, 0x00000000000001ce  …  0x000000000000005d, 0x000000000000004d, 0x000000000000002a, 0x000000000000002a, 0x0000000000000012, 0x0000000000000015, 0x0000000000000007, 0x0000000000000000, 0x00000000000000fe, 0x0000000000000016], UInt64[0x0000000000000180, 0x000000000000013b, 0x0000000000000125, 0x0000000000000126, 0x000000000000011d, 0x000000000000010c, 0x0000000000000120, 0x00000000000003c0, 0x0000000000000138, 0x000000000000014e  …  0x0000000000000023, 0x000000000000001f, 0x0000000000000021, 0x0000000000000015, 0x0000000000000007, 0x000000000000000a, 0x0000000000000009, 0x0000000000000001, 0x0000000000000071, 0x000000000000000e]))</code></pre><p>We can now run the MCMC sampler. We will start by using the Metropolis-Hastings algorithm as implemented in <code>BAT.jl</code>. To get reasonable results, we need to run the sampler for a long time (several hours). To actually run the sampler, simply uncomment the code below. To see how to work with demo output results, check out the other fit examples.</p><pre><code class="language-julia hljs">#posterior = PosteriorDensity(likelihood, prior)
-#samples = bat_sample(posterior, MCMCSampling(mcalg=MetropolisHastings(), nsteps=10^4, nchains=2)).result;
+end</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">LogFuncDensity(Main.var&quot;#1#2&quot;{Int64, Vector{UInt64}, Vector{UInt64}}(153, UInt64[0x0000000000000204, 0x00000000000001af, 0x0000000000000196, 0x00000000000001be, 0x0000000000000177, 0x000000000000017f, 0x000000000000017a, 0x0000000000000529, 0x00000000000001e5, 0x00000000000001d1  …  0x000000000000004b, 0x000000000000004d, 0x0000000000000032, 0x000000000000001e, 0x0000000000000019, 0x000000000000000d, 0x000000000000000f, 0x0000000000000002, 0x0000000000000113, 0x0000000000000017], UInt64[0x000000000000017a, 0x000000000000014d, 0x000000000000011c, 0x0000000000000152, 0x0000000000000131, 0x0000000000000128, 0x0000000000000122, 0x000000000000039d, 0x000000000000015d, 0x0000000000000173  …  0x0000000000000023, 0x000000000000002d, 0x0000000000000026, 0x0000000000000010, 0x0000000000000010, 0x0000000000000009, 0x0000000000000007, 0x0000000000000001, 0x0000000000000065, 0x000000000000000a]))</code></pre><p>Check that we can evaluate the posterior:</p><pre><code class="language-julia hljs">posterior = PosteriorDensity(likelihood, prior)
+BAT.checked_logdensityof(posterior, rand(prior))</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">-1783.597814665238</code></pre><p>We can now run the MCMC sampler. We will start by using the Metropolis-Hastings algorithm as implemented in <code>BAT.jl</code>. To get reasonable results, we need to run the sampler for a long time (several hours). To actually run the sampler, simply uncomment the code below. To see how to work with demo output results, check out the other fit examples.</p><pre><code class="language-julia hljs">#samples = bat_sample(posterior, MCMCSampling(mcalg=MetropolisHastings(), nsteps=10^4, nchains=2)).result;
 
 #import HDF5
-#bat_write(&quot;output/results.h5&quot;, samples)</code></pre><hr/><p><em>This page was generated using <a href="https://github.com/fredrikekre/Literate.jl">Literate.jl</a>.</em></p></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="../bat_fit_dirichlet/">« Fit with Dirichlet parametrisation</a><a class="docs-footer-nextpage" href="../api/">API »</a><div class="flexbox-break"></div><p class="footer-message">Powered by <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> and the <a href="https://julialang.org/">Julia Programming Language</a>.</p></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> version 0.27.24 on <span class="colophon-date" title="Wednesday 15 March 2023 12:38">Wednesday 15 March 2023</span>. Using Julia version 1.7.3.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>
+#bat_write(&quot;output/results.h5&quot;, samples)</code></pre><hr/><p><em>This page was generated using <a href="https://github.com/fredrikekre/Literate.jl">Literate.jl</a>.</em></p></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="../bat_fit_dirichlet/">« Fit with Dirichlet parametrisation</a><a class="docs-footer-nextpage" href="../api/">API »</a><div class="flexbox-break"></div><p class="footer-message">Powered by <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> and the <a href="https://julialang.org/">Julia Programming Language</a>.</p></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> version 0.27.24 on <span class="colophon-date" title="Wednesday 15 March 2023 15:16">Wednesday 15 March 2023</span>. Using Julia version 1.7.3.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>
