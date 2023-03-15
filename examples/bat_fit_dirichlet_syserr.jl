@@ -1,5 +1,13 @@
-using BAT, DensityInterface
+# # Fit with Dirichlet parametrisation and systematic errors
+#
+# In this example we show how to bring the PDF parametrisation and
+# forward model together with `BAT.jl` to perform a fit of simulated data.
+#
+# This time, we also include the effect of systematic uncertainties. 
+# This is done as described in [arXiv:2209.06571](https://arxiv.org/abs/2209.06571).
+
 using PartonDensity
+using BAT, DensityInterface
 using QCDNUM
 using Plots, Random, Distributions, ValueShapes, ParallelProcessingTools
 using StatsBase, LinearAlgebra
@@ -23,10 +31,15 @@ qcdnum_params = QCDNUMParameters(order=2, α_S=0.118, q0=100.0, grid=qcdnum_grid
 splint_params = SPLINTParameters();
 quark_coeffs = QuarkCoefficients();
 
+# We include the effects of systematic errors into the simulation, by sampling 
+# from a multivariate normal with mean 0 and standard deviation 1.
+#
+# These factors are then applied to a precomputed matrix in order to scale the 
+# expected counts accordingly.
 forward_model_init(qcdnum_params, splint_params)
 sys_err_params = rand(rng, MvNormal(zeros(PartonDensity.nsyst), ones(PartonDensity.nsyst)))
 counts_pred_ep, counts_pred_em = forward_model(pdf_params, qcdnum_params,
-    splint_params, quark_coeffs);
+    splint_params, quark_coeffs, sys_err_params);
 
 nbins = size(counts_pred_ep)[1]
 counts_obs_ep = zeros(UInt64, nbins)
@@ -50,6 +63,7 @@ sim_data["counts_obs_em"] = counts_obs_em;
 
 pd_write_sim("output/simulation.h5", pdf_params, sim_data)
 
+# Here, we include a prior over the 8 systematic error parameters, such that we marginalise over them.
 prior = NamedTupleDist(
     θ_tmp=Dirichlet(weights),
     λ_u=Truncated(Normal(pdf_params.λ_u, 1), 0, 1),
@@ -85,6 +99,7 @@ likelihood = let d = sim_data
             K_d=params.K_d, λ_g1=params.λ_g1, λ_g2=params.λ_g2,
             K_g=params.K_g, λ_q=params.λ_q, θ=θ)
 
+        #The sys_err_params must also be passed to the forward model here.
         sys_err_params = [params.beta0_1, params.beta0_2, params.beta0_3, params.beta0_4,
             params.beta0_5, params.beta0_6, params.beta0_7, params.beta0_8]
 
