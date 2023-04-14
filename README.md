@@ -17,6 +17,10 @@ To install PartonDensity.jl and its dependencies, start Julia and run
 julia> using Pkg
 julia> Pkg.add(url="https://github.com/cescalara/PartonDensity.jl.git")
 ```
+To install a specific version (git tag) of PartonDensity.jl, e.g. "v0.1.0", run
+```
+julia> Pkg.add(url="https://github.com/cescalara/PartonDensity.jl.git", rev="v0.1.0")
+```
 
 To run the examples scripts, you can follow the steps used in the GitHub workflow. In particular, we need to remember to use the latest versions of ``QCDNUM.jl`` and ``BAT.jl`` from GitHub. 
 
