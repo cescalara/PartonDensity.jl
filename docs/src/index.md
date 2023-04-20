@@ -22,12 +22,11 @@ julia> Pkg.add(url="https://github.com/cescalara/PartonDensity.jl.git")
 
 Check out the examples listed in these docs! The scripts can be found in the [examples](https://github.com/cescalara/PartonDensity.jl/tree/main/examples) directory of the GitHub repository. 
 
-To run these docs, you can follow the steps used in the GitHub workflow. In particular, we need to remember to use the latest versions of `QCDNUM.jl` and `BAT.jl` from GitHub. 
+To run these docs, you can follow the steps used in the GitHub workflow. In particular, we need to remember to use the latest versions of `BAT.jl` from GitHub. 
 
 ```julia
 using Pkg
 Pkg.add(url="https://github.com/bat/BAT.jl.git")
-Pkg.add(url="https://github.com/cescalara/QCDNUM.jl.git")
 ```
 
 If you want to convert the example scripts to notebooks, use `Literate.jl`.
