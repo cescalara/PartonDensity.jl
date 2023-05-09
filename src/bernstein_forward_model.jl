@@ -3,8 +3,6 @@ using HDF5
 export forward_model, forward_model_init
 export pd_write_sim, pd_read_sim
 
-splint_init_complete = false
-
 
 function forward_model(pdf_params::Union{BernsteinPDFParams,BernsteinDirichletPDFParams}, qcdnum_params::QCDNUM.EvolutionParams,
     splint_params::QCDNUM.SPLINTParams, quark_coeffs::QuarkCoefficients)

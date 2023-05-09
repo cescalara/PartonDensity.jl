@@ -3,8 +3,6 @@ using HDF5
 export forward_model, forward_model_init
 export pd_write_sim, pd_read_sim
 
-splint_init_complete = false
-
 
 """
     forward_model_init(qcdnum_grid, qcdnum_params)
@@ -40,11 +38,7 @@ function forward_model_init(qcdnum_params::QCDNUM.EvolutionParams,
     nw = QCDNUM.zmfillw()
 
     # Define splines, nodes and addresses
-    # TODO: Remove once QCDNUM.jl updated
-    if !splint_init_complete
-        QCDNUM.ssp_spinit(splint_params.nuser)
-        global splint_init_complete = true
-    end
+    QCDNUM.ssp_spinit(splint_params.nuser)
     ia = QCDNUM.isp_s2make(splint_params.nsteps_x, splint_params.nsteps_q)
     xnd = QCDNUM.ssp_unodes(ia, splint_params.nnodes_x, 0)
     qnd = QCDNUM.ssp_vnodes(ia, splint_params.nnodes_q, 0)
