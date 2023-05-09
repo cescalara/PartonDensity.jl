@@ -3,21 +3,17 @@ using HDF5
 export forward_model, forward_model_init
 export pd_write_sim, pd_read_sim
 
-splint_init_complete = false
 
-
-function forward_model(pdf_params::Union{BernsteinPDFParams, BernsteinDirichletPDFParams}, qcdnum_params::QCDNUMParameters,
-                       splint_params::SPLINTParameters, quark_coeffs::QuarkCoefficients)
-
+function forward_model(pdf_params::Union{BernsteinPDFParams,BernsteinDirichletPDFParams}, qcdnum_params::QCDNUM.EvolutionParams,
+    splint_params::QCDNUM.SPLINTParams, quark_coeffs::QuarkCoefficients)
 
     # Get input PDF function
     my_func = get_input_pdf_func(pdf_params)
-    input_pdf = @cfunction($my_func, Float64, (Ref{Int32}, Ref{Float64}))
+    input_pdf = QCDNUM.InputPDF(func=my_func, map=input_pdf_map)
 
     # Evolve PDFs
     iq0 = QCDNUM.iqfrmq(qcdnum_params.q0)
-    pdf_loc = 1
-    ϵ = QCDNUM.evolfg(pdf_loc, input_pdf, input_pdf_map, iq0)
+    ϵ = QCDNUM.evolfg(qcdnum_params.output_pdf_loc, input_pdf.cfunc, input_pdf.map, iq0)
 
     # Debugging
     if ϵ > 0.05
@@ -37,12 +33,12 @@ function forward_model(pdf_params::Union{BernsteinPDFParams, BernsteinDirichletP
     iaF_eM = Int64(QCDNUM.dsp_uread(splint_params.spline_addresses.F_eM))
 
     # Splines for structure functions
-    QCDNUM.ssp_s2f123(iaFLup, pdf_loc, quark_coeffs.proup, 1, 0.0)
-    QCDNUM.ssp_s2f123(iaF2up, pdf_loc, quark_coeffs.proup, 2, 0.0)
-    QCDNUM.ssp_s2f123(iaF3up, pdf_loc, quark_coeffs.valup, 3, 0.0)
-    QCDNUM.ssp_s2f123(iaFLdn, pdf_loc, quark_coeffs.prodn, 1, 0.0)
-    QCDNUM.ssp_s2f123(iaF2dn, pdf_loc, quark_coeffs.prodn, 2, 0.0)
-    QCDNUM.ssp_s2f123(iaF3dn, 1, quark_coeffs.valdn, 3, 0.0)
+    QCDNUM.ssp_s2f123(iaFLup, qcdnum_params.output_pdf_loc, quark_coeffs.proup, 1, 0.0)
+    QCDNUM.ssp_s2f123(iaF2up, qcdnum_params.output_pdf_loc, quark_coeffs.proup, 2, 0.0)
+    QCDNUM.ssp_s2f123(iaF3up, qcdnum_params.output_pdf_loc, quark_coeffs.valup, 3, 0.0)
+    QCDNUM.ssp_s2f123(iaFLdn, qcdnum_params.output_pdf_loc, quark_coeffs.prodn, 1, 0.0)
+    QCDNUM.ssp_s2f123(iaF2dn, qcdnum_params.output_pdf_loc, quark_coeffs.prodn, 2, 0.0)
+    QCDNUM.ssp_s2f123(iaF3dn, qcdnum_params.output_pdf_loc, quark_coeffs.valdn, 3, 0.0)
 
     # Get input cross section function
     my_funcp = get_input_xsec_func(1)
@@ -101,8 +97,8 @@ function forward_model(pdf_params::Union{BernsteinPDFParams, BernsteinDirichletP
 
 end
 
-      
-function pd_write_sim(file_name::String, pdf_params::Union{BernsteinPDFParams, BernsteinDirichletPDFParams}, sim_data::Dict{String, Any})
+
+function pd_write_sim(file_name::String, pdf_params::Union{BernsteinPDFParams,BernsteinDirichletPDFParams}, sim_data::Dict{String,Any})
 
     h5open(file_name, "w") do fid
 

@@ -3,8 +3,6 @@ using HDF5
 export forward_model, forward_model_init
 export pd_write_sim, pd_read_sim
 
-splint_init_complete = false
-
 
 """
     forward_model_init(qcdnum_grid, qcdnum_params)
@@ -13,38 +11,27 @@ Initialise forward model. Initialises QCDNUM and builds weight tables to
 save time in subsequent iterations. Must be called prior to first instance 
 of `forward_model()`.
 """
-function forward_model_init(qcdnum_params::QCDNUMParameters,
-    splint_params::SPLINTParameters)
+function forward_model_init(qcdnum_params::QCDNUM.EvolutionParams,
+    splint_params::QCDNUM.SPLINTParams)
 
     # Set up QCDNUM
-    QCDNUM.qcinit(-6, "")
+    QCDNUM.init()
     QCDNUM.setord(qcdnum_params.order)
     QCDNUM.setalf(qcdnum_params.α_S, qcdnum_params.q0)
 
-    # Debugging
-    QCDNUM.setval("elim", -1.0)
-
     # QCDNUM Grids
-    g = qcdnum_params.grid
-    QCDNUM.gxmake(g.x_min, g.x_weights, g.x_num_bounds, g.nx,
-        g.spline_interp)
-    QCDNUM.gqmake(g.qq_bounds, g.qq_weights, g.qq_num_bounds, g.nq)
+    nx, nq = QCDNUM.make_grid(qcdnum_params.grid_params)
 
-    # Define FFNS/VFNS
+    # Define FFNS/VFNS  
     QCDNUM.setcbt(qcdnum_params.n_fixed_flav, qcdnum_params.iqc,
         qcdnum_params.iqb, qcdnum_params.iqt)
 
     # Build weight tables
-    # TODO: Use saved weights file once QCDNUM fixed
     nw = QCDNUM.fillwt(qcdnum_params.weight_type)
     nw = QCDNUM.zmfillw()
 
     # Define splines, nodes and addresses
-    # TODO: Remove once QCDNUM.jl updated
-    if !splint_init_complete
-        QCDNUM.ssp_spinit(splint_params.nuser)
-        global splint_init_complete = true
-    end
+    QCDNUM.ssp_spinit(splint_params.nuser)
     ia = QCDNUM.isp_s2make(splint_params.nsteps_x, splint_params.nsteps_q)
     xnd = QCDNUM.ssp_unodes(ia, splint_params.nnodes_x, 0)
     qnd = QCDNUM.ssp_vnodes(ia, splint_params.nnodes_q, 0)
@@ -78,17 +65,17 @@ end
 
 Go from input PDF parameters to the expected number of events in bins.
 """
-function forward_model(pdf_params::AbstractPDFParams, qcdnum_params::QCDNUMParameters,
-    splint_params::SPLINTParameters, quark_coeffs::QuarkCoefficients, sys_err_params::Vector{Float64}=zeros(nsyst))
+function forward_model(pdf_params::AbstractPDFParams, qcdnum_params::QCDNUM.EvolutionParams,
+    splint_params::QCDNUM.SPLINTParams, quark_coeffs::QuarkCoefficients, sys_err_params::Vector{Float64}=zeros(nsyst))
 
     # Get input PDF function
     my_func = get_input_pdf_func(pdf_params)
-    input_pdf = @cfunction($my_func, Float64, (Ref{Int32}, Ref{Float64}))
+    input_pdf = QCDNUM.InputPDF(func=my_func, map=input_pdf_map)
 
     # Evolve PDFs
     iq0 = QCDNUM.iqfrmq(qcdnum_params.q0)
-    pdf_loc = 1
-    ϵ = QCDNUM.evolfg(pdf_loc, input_pdf, input_pdf_map, iq0)
+
+    ϵ = QCDNUM.evolfg(qcdnum_params.output_pdf_loc, input_pdf.cfunc, input_pdf.map, iq0)
 
     # Debugging
     if ϵ > 0.05
@@ -108,12 +95,12 @@ function forward_model(pdf_params::AbstractPDFParams, qcdnum_params::QCDNUMParam
     iaF_eM = Int64(QCDNUM.dsp_uread(splint_params.spline_addresses.F_eM))
 
     # Splines for structure functions
-    QCDNUM.ssp_s2f123(iaFLup, pdf_loc, quark_coeffs.proup, 1, 0.0)
-    QCDNUM.ssp_s2f123(iaF2up, pdf_loc, quark_coeffs.proup, 2, 0.0)
-    QCDNUM.ssp_s2f123(iaF3up, pdf_loc, quark_coeffs.valup, 3, 0.0)
-    QCDNUM.ssp_s2f123(iaFLdn, pdf_loc, quark_coeffs.prodn, 1, 0.0)
-    QCDNUM.ssp_s2f123(iaF2dn, pdf_loc, quark_coeffs.prodn, 2, 0.0)
-    QCDNUM.ssp_s2f123(iaF3dn, 1, quark_coeffs.valdn, 3, 0.0)
+    QCDNUM.ssp_s2f123(iaFLup, qcdnum_params.output_pdf_loc, quark_coeffs.proup, 1, 0.0)
+    QCDNUM.ssp_s2f123(iaF2up, qcdnum_params.output_pdf_loc, quark_coeffs.proup, 2, 0.0)
+    QCDNUM.ssp_s2f123(iaF3up, qcdnum_params.output_pdf_loc, quark_coeffs.valup, 3, 0.0)
+    QCDNUM.ssp_s2f123(iaFLdn, qcdnum_params.output_pdf_loc, quark_coeffs.prodn, 1, 0.0)
+    QCDNUM.ssp_s2f123(iaF2dn, qcdnum_params.output_pdf_loc, quark_coeffs.prodn, 2, 0.0)
+    QCDNUM.ssp_s2f123(iaF3dn, qcdnum_params.output_pdf_loc, quark_coeffs.valdn, 3, 0.0)
 
     # Get input cross section function
     my_funcp = get_input_xsec_func(1)

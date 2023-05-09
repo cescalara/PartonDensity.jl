@@ -27,67 +27,43 @@ int_xtotx(pdf_params) ≈ 1
 
 # ## Define QCDNUM grids, weights and settings
 
-grid = QCDNUMGrid(x_min=[1.0e-3], x_weights=[1], nx=100,
+grid = QCDNUM.GridParams(x_min=[1.0e-3], x_weights=[1], nx=100,
     qq_bounds=[1.0e2, 3.0e4], qq_weights=[1.0, 1.0], nq=50, spline_interp=3)
 
-qcdnum_params = QCDNUMParameters(order=2, α_S=0.118, q0=100.0, grid=grid,
+qcdnum_params = QCDNUM.EvolutionParams(order=2, α_S=0.118, q0=100.0, grid_params=grid,
     n_fixed_flav=5, iqc=1, iqb=1, iqt=1, weight_type=1);
 
-# Initialise and set key parameters
+# Initialise
 
-QCDNUM.qcinit(-6, "")
-QCDNUM.setord(qcdnum_params.order)
-QCDNUM.setalf(qcdnum_params.α_S, qcdnum_params.q0)
-
-# Build grids
-
-g = qcdnum_params.grid
-QCDNUM.gxmake(g.x_min, g.x_weights, g.x_num_bounds, g.nx,
-    g.spline_interp);
-QCDNUM.gqmake(g.qq_bounds, g.qq_weights, g.qq_num_bounds, g.nq);
-
-# Define FFNS/VFNS
-
-QCDNUM.setcbt(qcdnum_params.n_fixed_flav, qcdnum_params.iqc,
-    qcdnum_params.iqb, qcdnum_params.iqt);
-
-# Build weight tables
-
-nw = QCDNUM.fillwt(qcdnum_params.weight_type)
-nw = QCDNUM.zmfillw()
+QCDNUM.init()
 
 # ## Evolve the PDFs using QCDNUM
 #
 # Define input PDF function
-# * See https://www.nikhef.nl/~h24/qcdnum-files/doc/qcdnum170115.pdf under `evolfg`
+# * See QCDNUM docs under `evolfg`
 #
 # There are functions available to generate the necessary input PDF function in
 # the correct format for `QCDNUM.jl` (see `get_input_pdf_func()`), along with
 # the mapping between this input function and quark species (see `input_pdf_map`).
 
-# Get function and wrap with c-style pointer
+# Get function and PDF input map to fully describe the `QCDNUM.InputPDF`
 
 my_func = get_input_pdf_func(pdf_params)
-input_pdf = @cfunction(my_func, Float64, (Ref{Int32}, Ref{Float64}))
+input_pdf = QCDNUM.InputPDF(func=my_func, map=input_pdf_map)
 
-# Find index of starting scale and evolve
+# Evolve the PDF over the specified grid
 
-iq0 = QCDNUM.iqfrmq(qcdnum_params.q0)
-pdf_loc = 1
-eps = QCDNUM.evolfg(pdf_loc, input_pdf, input_pdf_map, iq0)
-
-# ## Define necessary splines for cross section calculation
+ϵ = QCDNUM.evolve(input_pdf, qcdnum_params)
 
 # For splines
-
-splint_params = SPLINTParameters();
+nw = QCDNUM.zmfillw()
+splint_params = QCDNUM.SPLINTParams();
 quark_coeffs = QuarkCoefficients();
 
 # Define initial spline
 
-if !PartonDensity.splint_init_complete
-    QCDNUM.ssp_spinit(splint_params.nuser)
-end
+QCDNUM.ssp_spinit(splint_params.nuser)
+
 ia = QCDNUM.isp_s2make(splint_params.nsteps_x, splint_params.nsteps_q);
 xnd = QCDNUM.ssp_unodes(ia, splint_params.nnodes_x, 0);
 qnd = QCDNUM.ssp_vnodes(ia, splint_params.nnodes_q, 0);
@@ -100,22 +76,22 @@ QCDNUM.ssp_erase(ia);
 # Set nodes and fill spline with structure function
 
 iaFLup = QCDNUM.isp_s2user(xnd, splint_params.nnodes_x, qnd, splint_params.nnodes_q);
-QCDNUM.ssp_s2f123(iaFLup, pdf_loc, quark_coeffs.proup, 1, 0.0);
+QCDNUM.ssp_s2f123(iaFLup, qcdnum_params.output_pdf_loc, quark_coeffs.proup, 1, 0.0);
 
 iaF2up = QCDNUM.isp_s2user(xnd, splint_params.nnodes_x, qnd, splint_params.nnodes_q);
-QCDNUM.ssp_s2f123(iaF2up, pdf_loc, quark_coeffs.proup, 2, 0.0);
+QCDNUM.ssp_s2f123(iaF2up, qcdnum_params.output_pdf_loc, quark_coeffs.proup, 2, 0.0);
 
 iaF3up = QCDNUM.isp_s2user(xnd, splint_params.nnodes_x, qnd, splint_params.nnodes_q);
-QCDNUM.ssp_s2f123(iaF3up, pdf_loc, quark_coeffs.valup, 3, 0.0);
+QCDNUM.ssp_s2f123(iaF3up, qcdnum_params.output_pdf_loc, quark_coeffs.valup, 3, 0.0);
 
 iaFLdn = QCDNUM.isp_s2user(xnd, splint_params.nnodes_x, qnd, splint_params.nnodes_q);
-QCDNUM.ssp_s2f123(iaFLdn, pdf_loc, quark_coeffs.prodn, 1, 0.0);
+QCDNUM.ssp_s2f123(iaFLdn, qcdnum_params.output_pdf_loc, quark_coeffs.prodn, 1, 0.0);
 
 iaF2dn = QCDNUM.isp_s2user(xnd, splint_params.nnodes_x, qnd, splint_params.nnodes_q);
-QCDNUM.ssp_s2f123(iaF2dn, pdf_loc, quark_coeffs.prodn, 2, 0.0);
+QCDNUM.ssp_s2f123(iaF2dn, qcdnum_params.output_pdf_loc, quark_coeffs.prodn, 2, 0.0);
 
 iaF3dn = QCDNUM.isp_s2user(xnd, splint_params.nnodes_x, qnd, splint_params.nnodes_q);
-QCDNUM.ssp_s2f123(iaF3dn, 1, quark_coeffs.valdn, 3, 0.0);
+QCDNUM.ssp_s2f123(iaF3dn, qcdnum_params.output_pdf_loc, quark_coeffs.valdn, 3, 0.0);
 
 # store spline addresses
 QCDNUM.ssp_uwrite(splint_params.spline_addresses.F2up, Float64(iaF2up));
@@ -132,7 +108,7 @@ my_funcm = get_input_xsec_func(-1) # charge = -1
 input_xsecm = @cfunction(my_funcm, Float64, (Ref{Int32}, Ref{Int32}, Ref{UInt8}))
 
 # plot
-
+g = qcdnum_params.grid_params
 xsec_on_grid = zeros(g.nx, g.nq);
 
 for ix = 1:g.nx

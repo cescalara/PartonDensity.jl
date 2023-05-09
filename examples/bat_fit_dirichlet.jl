@@ -43,13 +43,13 @@ plot_input_pdfs(pdf_params)
 # functions to do so. For more details, see the *Forward model* example.
 
 # first specify QCDNUM inputs
-qcdnum_grid = QCDNUMGrid(x_min=[1.0e-3, 1.0e-1, 5.0e-1], x_weights=[1, 2, 2], nx=100,
+qcdnum_grid = QCDNUM.GridParams(x_min=[1.0e-3, 1.0e-1, 5.0e-1], x_weights=[1, 2, 2], nx=100,
     qq_bounds=[1.0e2, 3.0e4], qq_weights=[1.0, 1.0], nq=50, spline_interp=3)
-qcdnum_params = QCDNUMParameters(order=2, α_S=0.118, q0=100.0, grid=qcdnum_grid,
+qcdnum_params = QCDNUM.EvolutionParams(order=2, α_S=0.118, q0=100.0, grid_params=qcdnum_grid,
     n_fixed_flav=5, iqc=1, iqb=1, iqt=1, weight_type=1);
 
 # now SPLINT and quark coefficients
-splint_params = SPLINTParameters();
+splint_params = QCDNUM.SPLINTParams();
 quark_coeffs = QuarkCoefficients();
 
 # initialise QCDNUM
@@ -86,6 +86,8 @@ sim_data["counts_obs_em"] = counts_obs_em;
 
 # write to file
 pd_write_sim("output/simulation.h5", pdf_params, sim_data)
+QCDNUM.save_params("output/params_dir.h5", qcdnum_params)
+QCDNUM.save_params("output/params_dir.h5", splint_params)
 
 # ## Fit the simulated data
 #
@@ -166,6 +168,11 @@ end
 
 pdf_params, sim_data = pd_read_sim("output/demo_simulation_dirichlet.h5");
 samples = bat_read("output/demo_results_dirichlet.h5").result;
+
+# We can use the same QCDNUM params as above
+loaded_params = QCDNUM.load_params("output/params_dir.h5")
+qcdnum_params = loaded_params["evolution_params"]
+splint_params = loaded_params["splint_params"]
 
 # We can check some diagnostics using built in `BAT.jl`, such as the
 # effective sample size shown below
