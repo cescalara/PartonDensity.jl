@@ -33,28 +33,9 @@ grid = QCDNUM.GridParams(x_min=[1.0e-3], x_weights=[1], nx=100,
 qcdnum_params = QCDNUM.EvolutionParams(order=2, α_S=0.118, q0=100.0, grid=grid,
     n_fixed_flav=5, iqc=1, iqb=1, iqt=1, weight_type=1);
 
-# Initialise and set key parameters
+# Initialise
 
-QCDNUM.qcinit(-6, "")
-QCDNUM.setord(qcdnum_params.order)
-QCDNUM.setalf(qcdnum_params.α_S, qcdnum_params.q0)
-
-# Build grids
-
-g = qcdnum_params.grid
-QCDNUM.gxmake(g.x_min, g.x_weights, g.x_num_bounds, g.nx,
-    g.spline_interp);
-QCDNUM.gqmake(g.qq_bounds, g.qq_weights, g.qq_num_bounds, g.nq);
-
-# Define FFNS/VFNS
-
-QCDNUM.setcbt(qcdnum_params.n_fixed_flav, qcdnum_params.iqc,
-    qcdnum_params.iqb, qcdnum_params.iqt);
-
-# Build weight tables
-
-nw = QCDNUM.fillwt(qcdnum_params.weight_type)
-nw = QCDNUM.zmfillw()
+QCDNUM.init()
 
 # ## Evolve the PDFs using QCDNUM
 #
@@ -65,21 +46,17 @@ nw = QCDNUM.zmfillw()
 # the correct format for `QCDNUM.jl` (see `get_input_pdf_func()`), along with
 # the mapping between this input function and quark species (see `input_pdf_map`).
 
-# Get function and wrap with c-style pointer
+# Get function and PDF input map to fully describe the `QCDNUM.InputPDF`
 
 my_func = get_input_pdf_func(pdf_params)
-input_pdf = @cfunction(my_func, Float64, (Ref{Int32}, Ref{Float64}))
+input_pdf = QCDNUM.InputPDF(my_func, input_pdf_map)
 
-# Find index of starting scale and evolve
+# Evolve the PDF over the specified grid
 
-iq0 = QCDNUM.iqfrmq(qcdnum_params.q0)
-pdf_loc = 1
-eps = QCDNUM.evolfg(pdf_loc, input_pdf, input_pdf_map, iq0)
-
-# ## Define necessary splines for cross section calculation
+ϵ = QCDNUM.evolve(input_pdf, evolution_params)
 
 # For splines
-
+nw = QCDNUM.zmfillw()
 splint_params = QCDNUM.SPLINTParams();
 quark_coeffs = QuarkCoefficients();
 
