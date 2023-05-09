@@ -23,12 +23,12 @@ pdf_params = DirichletPDFParams(K_u=4.0, K_d=4.0, λ_g1=1.5, λ_g2=-0.4, K_g=6.0
 @info "Valence λ:" pdf_params.λ_u pdf_params.λ_d
 
 # first specify QCDNUM inputs
-qcdnum_grid = QCDNUMGrid(x_min=[1.0e-3, 1.0e-1, 5.0e-1], x_weights=[1, 2, 2], nx=100,
+qcdnum_grid = QCDNUM.GridParams(x_min=[1.0e-3, 1.0e-1, 5.0e-1], x_weights=[1, 2, 2], nx=100,
     qq_bounds=[1.0e2, 3.0e4], qq_weights=[1.0, 1.0], nq=50, spline_interp=3)
-qcdnum_params = QCDNUMParameters(order=2, α_S=0.118, q0=100.0, grid=qcdnum_grid,
+qcdnum_params = QCDNUM.EvolutionParams(order=2, α_S=0.118, q0=100.0, grid=qcdnum_grid,
     n_fixed_flav=5, iqc=1, iqb=1, iqt=1, weight_type=1);
 
-splint_params = SPLINTParameters();
+splint_params = QCDNUM.SPLINTParams();
 quark_coeffs = QuarkCoefficients();
 
 # We include the effects of systematic errors into the simulation, by sampling 

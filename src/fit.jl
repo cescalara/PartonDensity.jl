@@ -59,7 +59,7 @@ function get_likelihood end
 
 
 function get_likelihood(pdf_params::ValencePDFParams, sim_data::Dict{String,Any},
-    qcdnum_params::QCDNUMParameters, splint_params::SPLINTParameters,
+    qcdnum_params::QCDNUM.EvolutionParams, splint_params::QCDNUM.SPLINTParams,
     quark_coeffs::QuarkCoefficients)
 
     likelihood = let d = sim_data
@@ -107,7 +107,7 @@ end
 
 
 function get_likelihood(pdf_params::DirichletPDFParams, sim_data::Dict{String,Any},
-    qcdnum_params::QCDNUMParameters, splint_params::SPLINTParameters,
+    qcdnum_params::QCDNUM.EvolutionParams, splint_params::QCDNUM.SPLINTParams,
     quark_coeffs::QuarkCoefficients)
 
     likelihood = let d = sim_data
@@ -235,8 +235,8 @@ function plot_data_space end
 
 
 function plot_data_space(pdf_params::AbstractPDFParams, sim_data::Dict{String,Any}, samples,
-    qcdnum_params::QCDNUMParameters,
-    splint_params::SPLINTParameters, quark_coeffs::QuarkCoefficients;
+    qcdnum_params::QCDNUM.EvolutionParams,
+    splint_params::QCDNUM.SPLINTParams, quark_coeffs::QuarkCoefficients;
     ep_color=:firebrick, em_color=:teal, nsamples::Integer=100, plot_size=(1000, 500),
     args...)
 
@@ -258,8 +258,8 @@ function plot_data_space(pdf_params::AbstractPDFParams, sim_data::Dict{String,An
 end
 
 
-function plot_data_space_impl(pdf_params::ValencePDFParams, samples, qcdnum_params::QCDNUMParameters,
-    splint_params::SPLINTParameters, quark_coeffs::QuarkCoefficients,
+function plot_data_space_impl(pdf_params::ValencePDFParams, samples, qcdnum_params::QCDNUM.EvolutionParams,
+    splint_params::QCDNUM.SPLINTParams, quark_coeffs::QuarkCoefficients,
     p1, p2, nbins::Integer; ep_color=:firebrick, em_color=:teal)
 
     for i in eachindex(samples)
@@ -312,8 +312,8 @@ function plot_data_space_impl(pdf_params::ValencePDFParams, samples, qcdnum_para
 end
 
 
-function plot_data_space_impl(pdf_params::DirichletPDFParams, samples, qcdnum_params::QCDNUMParameters,
-    splint_params::SPLINTParameters, quark_coeffs::QuarkCoefficients,
+function plot_data_space_impl(pdf_params::DirichletPDFParams, samples, qcdnum_params::QCDNUM.EvolutionParams,
+    splint_params::QCDNUM.SPLINTParams, quark_coeffs::QuarkCoefficients,
     p1, p2, nbins::Integer; ep_color=:firebrick, em_color=:teal)
 
     for i in eachindex(samples)
@@ -371,8 +371,8 @@ function plot_data_space_sysErr end
 
 
 function plot_data_space_sysErr(pdf_params::AbstractPDFParams, sim_data::Dict{String,Any}, samples,
-    qcdnum_grid::QCDNUMGrid, qcdnum_params::QCDNUMParameters,
-    splint_params::SPLINTParameters, quark_coeffs::QuarkCoefficients;
+    qcdnum_grid::QCDNUM.GridParams, qcdnum_params::QCDNUM.EvolutionParams,
+    splint_params::QCDNUM.SPLINTParams, quark_coeffs::QuarkCoefficients;
     ep_color=:firebrick, em_color=:teal, nsamples::Integer=100, plot_size=(1000, 500))
 
     forward_model_init_sysErr(qcdnum_grid, qcdnum_params, splint_params)
@@ -393,8 +393,8 @@ function plot_data_space_sysErr(pdf_params::AbstractPDFParams, sim_data::Dict{St
 end
 
 
-function plot_data_space_impl_sysErr(pdf_params::ValencePDFParams, samples, qcdnum_params::QCDNUMParameters,
-    splint_params::SPLINTParameters, quark_coeffs::QuarkCoefficients,
+function plot_data_space_impl_sysErr(pdf_params::ValencePDFParams, samples, qcdnum_params::QCDNUM.EvolutionParams,
+    splint_params::QCDNUM.SPLINTParams, quark_coeffs::QuarkCoefficients,
     p1, p2, nbins::Integer; ep_color=:firebrick, em_color=:teal)
 
     for i in eachindex(samples)
@@ -455,8 +455,8 @@ function plot_data_space_impl_sysErr(pdf_params::ValencePDFParams, samples, qcdn
 end
 
 
-function plot_data_space_impl_sysErr(pdf_params::DirichletPDFParams, samples, qcdnum_params::QCDNUMParameters,
-    splint_params::SPLINTParameters, quark_coeffs::QuarkCoefficients,
+function plot_data_space_impl_sysErr(pdf_params::DirichletPDFParams, samples, qcdnum_params::QCDNUM.EvolutionParams,
+    splint_params::QCDNUM.SPLINTParams, quark_coeffs::QuarkCoefficients,
     p1, p2, nbins::Integer; ep_color=:firebrick, em_color=:teal)
 
     for i in eachindex(samples)

@@ -6,8 +6,8 @@ export pd_write_sim, pd_read_sim
 splint_init_complete = false
 
 
-function forward_model(pdf_params::Union{BernsteinPDFParams, BernsteinDirichletPDFParams}, qcdnum_params::QCDNUMParameters,
-                       splint_params::SPLINTParameters, quark_coeffs::QuarkCoefficients)
+function forward_model(pdf_params::Union{BernsteinPDFParams,BernsteinDirichletPDFParams}, qcdnum_params::QCDNUM.EvolutionParams,
+    splint_params::QCDNUM.SPLINTParams, quark_coeffs::QuarkCoefficients)
 
 
     # Get input PDF function
@@ -101,8 +101,8 @@ function forward_model(pdf_params::Union{BernsteinPDFParams, BernsteinDirichletP
 
 end
 
-      
-function pd_write_sim(file_name::String, pdf_params::Union{BernsteinPDFParams, BernsteinDirichletPDFParams}, sim_data::Dict{String, Any})
+
+function pd_write_sim(file_name::String, pdf_params::Union{BernsteinPDFParams,BernsteinDirichletPDFParams}, sim_data::Dict{String,Any})
 
     h5open(file_name, "w") do fid
 

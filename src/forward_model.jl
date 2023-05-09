@@ -13,8 +13,8 @@ Initialise forward model. Initialises QCDNUM and builds weight tables to
 save time in subsequent iterations. Must be called prior to first instance 
 of `forward_model()`.
 """
-function forward_model_init(qcdnum_params::QCDNUMParameters,
-    splint_params::SPLINTParameters)
+function forward_model_init(qcdnum_params::QCDNUM.EvolutionParams,
+    splint_params::QCDNUM.SPLINTParams)
 
     # Set up QCDNUM
     QCDNUM.qcinit(-6, "")
@@ -78,8 +78,8 @@ end
 
 Go from input PDF parameters to the expected number of events in bins.
 """
-function forward_model(pdf_params::AbstractPDFParams, qcdnum_params::QCDNUMParameters,
-    splint_params::SPLINTParameters, quark_coeffs::QuarkCoefficients, sys_err_params::Vector{Float64}=zeros(nsyst))
+function forward_model(pdf_params::AbstractPDFParams, qcdnum_params::QCDNUM.EvolutionParams,
+    splint_params::QCDNUM.SPLINTParams, quark_coeffs::QuarkCoefficients, sys_err_params::Vector{Float64}=zeros(nsyst))
 
     # Get input PDF function
     my_func = get_input_pdf_func(pdf_params)
