@@ -53,7 +53,7 @@ input_pdf = QCDNUM.InputPDF(func=my_func, map=input_pdf_map)
 
 # Evolve the PDF over the specified grid
 
-ϵ = QCDNUM.evolve(input_pdf, evolution_params)
+ϵ = QCDNUM.evolve(input_pdf, qcdnum_params)
 
 # For splines
 nw = QCDNUM.zmfillw()
@@ -108,7 +108,7 @@ my_funcm = get_input_xsec_func(-1) # charge = -1
 input_xsecm = @cfunction(my_funcm, Float64, (Ref{Int32}, Ref{Int32}, Ref{UInt8}))
 
 # plot
-
+g = qcdnum_params.grid_params
 xsec_on_grid = zeros(g.nx, g.nq);
 
 for ix = 1:g.nx

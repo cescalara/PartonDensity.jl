@@ -62,6 +62,8 @@ sim_data["counts_obs_ep"] = counts_obs_ep;
 sim_data["counts_obs_em"] = counts_obs_em;
 
 pd_write_sim("output/simulation.h5", pdf_params, sim_data)
+QCDNUM.save_params("output/params_dir_sys.h5", qcdnum_params)
+QCDNUM.save_params("output/params_dir_sys.h5", splint_params)
 
 # Here, we include a prior over the 8 systematic error parameters, such that we marginalise over them.
 prior = NamedTupleDist(

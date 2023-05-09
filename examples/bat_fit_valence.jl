@@ -88,6 +88,8 @@ sim_data["counts_obs_em"] = counts_obs_em;
 
 # write to file
 pd_write_sim("output/simulation.h5", pdf_params, sim_data)
+QCDNUM.save_params("output/params_val.h5", qcdnum_params)
+QCDNUM.save_params("output/params_val.h5", splint_params)
 
 # ## Fit the simulated data
 #
@@ -175,6 +177,11 @@ end
 
 pdf_params, sim_data = pd_read_sim("output/demo_simulation_valence.h5");
 samples = bat_read("output/demo_results_valence.h5").result;
+
+# We can use the same QCDNUM params as above
+loaded_params = QCDNUM.load_params("output/params_val.h5")
+qcdnum_params = loaded_params["evolution_params"]
+splint_params = loaded_params["splint_params"]
 
 # We can check some diagnostics using built in `BAT.jl`, such as the
 # effective sample size shown below
