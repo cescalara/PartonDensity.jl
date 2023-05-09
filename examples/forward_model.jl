@@ -30,7 +30,7 @@ int_xtotx(pdf_params) ≈ 1
 grid = QCDNUM.GridParams(x_min=[1.0e-3], x_weights=[1], nx=100,
     qq_bounds=[1.0e2, 3.0e4], qq_weights=[1.0, 1.0], nq=50, spline_interp=3)
 
-qcdnum_params = QCDNUM.EvolutionParams(order=2, α_S=0.118, q0=100.0, grid=grid,
+qcdnum_params = QCDNUM.EvolutionParams(order=2, α_S=0.118, q0=100.0, grid_params=grid,
     n_fixed_flav=5, iqc=1, iqb=1, iqt=1, weight_type=1);
 
 # Initialise
@@ -40,7 +40,7 @@ QCDNUM.init()
 # ## Evolve the PDFs using QCDNUM
 #
 # Define input PDF function
-# * See https://www.nikhef.nl/~h24/qcdnum-files/doc/qcdnum170115.pdf under `evolfg`
+# * See QCDNUM docs under `evolfg`
 #
 # There are functions available to generate the necessary input PDF function in
 # the correct format for `QCDNUM.jl` (see `get_input_pdf_func()`), along with
@@ -49,7 +49,7 @@ QCDNUM.init()
 # Get function and PDF input map to fully describe the `QCDNUM.InputPDF`
 
 my_func = get_input_pdf_func(pdf_params)
-input_pdf = QCDNUM.InputPDF(my_func, input_pdf_map)
+input_pdf = QCDNUM.InputPDF(func=my_func, map=input_pdf_map)
 
 # Evolve the PDF over the specified grid
 
@@ -76,22 +76,22 @@ QCDNUM.ssp_erase(ia);
 # Set nodes and fill spline with structure function
 
 iaFLup = QCDNUM.isp_s2user(xnd, splint_params.nnodes_x, qnd, splint_params.nnodes_q);
-QCDNUM.ssp_s2f123(iaFLup, pdf_loc, quark_coeffs.proup, 1, 0.0);
+QCDNUM.ssp_s2f123(iaFLup, qcdnum_params.output_pdf_loc, quark_coeffs.proup, 1, 0.0);
 
 iaF2up = QCDNUM.isp_s2user(xnd, splint_params.nnodes_x, qnd, splint_params.nnodes_q);
-QCDNUM.ssp_s2f123(iaF2up, pdf_loc, quark_coeffs.proup, 2, 0.0);
+QCDNUM.ssp_s2f123(iaF2up, qcdnum_params.output_pdf_loc, quark_coeffs.proup, 2, 0.0);
 
 iaF3up = QCDNUM.isp_s2user(xnd, splint_params.nnodes_x, qnd, splint_params.nnodes_q);
-QCDNUM.ssp_s2f123(iaF3up, pdf_loc, quark_coeffs.valup, 3, 0.0);
+QCDNUM.ssp_s2f123(iaF3up, qcdnum_params.output_pdf_loc, quark_coeffs.valup, 3, 0.0);
 
 iaFLdn = QCDNUM.isp_s2user(xnd, splint_params.nnodes_x, qnd, splint_params.nnodes_q);
-QCDNUM.ssp_s2f123(iaFLdn, pdf_loc, quark_coeffs.prodn, 1, 0.0);
+QCDNUM.ssp_s2f123(iaFLdn, qcdnum_params.output_pdf_loc, quark_coeffs.prodn, 1, 0.0);
 
 iaF2dn = QCDNUM.isp_s2user(xnd, splint_params.nnodes_x, qnd, splint_params.nnodes_q);
-QCDNUM.ssp_s2f123(iaF2dn, pdf_loc, quark_coeffs.prodn, 2, 0.0);
+QCDNUM.ssp_s2f123(iaF2dn, qcdnum_params.output_pdf_loc, quark_coeffs.prodn, 2, 0.0);
 
 iaF3dn = QCDNUM.isp_s2user(xnd, splint_params.nnodes_x, qnd, splint_params.nnodes_q);
-QCDNUM.ssp_s2f123(iaF3dn, 1, quark_coeffs.valdn, 3, 0.0);
+QCDNUM.ssp_s2f123(iaF3dn, qcdnum_params.output_pdf_loc, quark_coeffs.valdn, 3, 0.0);
 
 # store spline addresses
 QCDNUM.ssp_uwrite(splint_params.spline_addresses.F2up, Float64(iaF2up));

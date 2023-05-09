@@ -20,7 +20,7 @@ function forward_model_init(qcdnum_params::QCDNUM.EvolutionParams,
     QCDNUM.setalf(qcdnum_params.α_S, qcdnum_params.q0)
 
     # QCDNUM Grids
-    nx, nq = QCDNUM.make_grid(qcdnum_params.grid)
+    nx, nq = QCDNUM.make_grid(qcdnum_params.grid_params)
 
     # Define FFNS/VFNS  
     QCDNUM.setcbt(qcdnum_params.n_fixed_flav, qcdnum_params.iqc,
@@ -70,12 +70,12 @@ function forward_model(pdf_params::AbstractPDFParams, qcdnum_params::QCDNUM.Evol
 
     # Get input PDF function
     my_func = get_input_pdf_func(pdf_params)
-    input_pdf = QCDNUM.InputPDF(my_func, input_pdf_map)
+    input_pdf = QCDNUM.InputPDF(func=my_func, map=input_pdf_map)
 
     # Evolve PDFs
     iq0 = QCDNUM.iqfrmq(qcdnum_params.q0)
 
-    ϵ = QCDNUM.evolfg(qcdnum_params.output_pdf_loc, input_pdf, input_pdf_map, iq0)
+    ϵ = QCDNUM.evolfg(qcdnum_params.output_pdf_loc, input_pdf.cfunc, input_pdf.map, iq0)
 
     # Debugging
     if ϵ > 0.05
@@ -95,12 +95,12 @@ function forward_model(pdf_params::AbstractPDFParams, qcdnum_params::QCDNUM.Evol
     iaF_eM = Int64(QCDNUM.dsp_uread(splint_params.spline_addresses.F_eM))
 
     # Splines for structure functions
-    QCDNUM.ssp_s2f123(iaFLup, pdf_loc, quark_coeffs.proup, 1, 0.0)
-    QCDNUM.ssp_s2f123(iaF2up, pdf_loc, quark_coeffs.proup, 2, 0.0)
-    QCDNUM.ssp_s2f123(iaF3up, pdf_loc, quark_coeffs.valup, 3, 0.0)
-    QCDNUM.ssp_s2f123(iaFLdn, pdf_loc, quark_coeffs.prodn, 1, 0.0)
-    QCDNUM.ssp_s2f123(iaF2dn, pdf_loc, quark_coeffs.prodn, 2, 0.0)
-    QCDNUM.ssp_s2f123(iaF3dn, 1, quark_coeffs.valdn, 3, 0.0)
+    QCDNUM.ssp_s2f123(iaFLup, qcdnum_params.output_pdf_loc, quark_coeffs.proup, 1, 0.0)
+    QCDNUM.ssp_s2f123(iaF2up, qcdnum_params.output_pdf_loc, quark_coeffs.proup, 2, 0.0)
+    QCDNUM.ssp_s2f123(iaF3up, qcdnum_params.output_pdf_loc, quark_coeffs.valup, 3, 0.0)
+    QCDNUM.ssp_s2f123(iaFLdn, qcdnum_params.output_pdf_loc, quark_coeffs.prodn, 1, 0.0)
+    QCDNUM.ssp_s2f123(iaF2dn, qcdnum_params.output_pdf_loc, quark_coeffs.prodn, 2, 0.0)
+    QCDNUM.ssp_s2f123(iaF3dn, qcdnum_params.output_pdf_loc, quark_coeffs.valdn, 3, 0.0)
 
     # Get input cross section function
     my_funcp = get_input_xsec_func(1)

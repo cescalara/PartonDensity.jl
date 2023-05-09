@@ -2,6 +2,7 @@ using PartonDensity
 using Test
 using Distributions, Random
 using CSV
+using QCDNUM
 
 @testset "Forward model" begin
 
@@ -40,7 +41,7 @@ using CSV
         nq=50, spline_interp=3)
 
     qcdnum_params = QCDNUM.EvolutionParams(order=2, α_S=0.118, q0=100.0,
-        grid=qcdnum_grid, n_fixed_flav=5,
+        grid_params=qcdnum_grid, n_fixed_flav=5,
         iqc=1, iqb=1, iqt=1, weight_type=1)
 
     splint_params = QCDNUM.SPLINTParams(nuser=1000)

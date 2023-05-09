@@ -2,6 +2,7 @@ using PartonDensity
 using BAT, DensityInterface, ParallelProcessingTools
 using Random, Distributions, ValueShapes
 using Test
+using QCDNUM
 
 @testset "DirichletPDFParams simulation + posterior check" begin
 
@@ -16,7 +17,7 @@ using Test
     # first specify QCDNUM inputs
     qcdnum_grid = QCDNUM.GridParams(x_min=[1.0e-3, 1.0e-1, 5.0e-1], x_weights=[1, 2, 2], nx=100,
         qq_bounds=[1.0e2, 3.0e4], qq_weights=[1.0, 1.0], nq=50, spline_interp=3)
-    qcdnum_params = QCDNUM.EvolutionParams(order=2, α_S=0.118, q0=100.0, grid=qcdnum_grid,
+    qcdnum_params = QCDNUM.EvolutionParams(order=2, α_S=0.118, q0=100.0, grid_params=qcdnum_grid,
         n_fixed_flav=5, iqc=1, iqb=1, iqt=1, weight_type=1)
 
     # now SPLINT and quark coefficients
@@ -122,7 +123,7 @@ end
     # first specify QCDNUM inputs
     qcdnum_grid = QCDNUM.GridParams(x_min=[1.0e-3, 1.0e-1, 5.0e-1], x_weights=[1, 2, 2], nx=100,
         qq_bounds=[1.0e2, 3.0e4], qq_weights=[1.0, 1.0], nq=50, spline_interp=3)
-    qcdnum_params = QCDNUM.EvolutionParams(order=2, α_S=0.118, q0=100.0, grid=qcdnum_grid,
+    qcdnum_params = QCDNUM.EvolutionParams(order=2, α_S=0.118, q0=100.0, grid_params=qcdnum_grid,
         n_fixed_flav=5, iqc=1, iqb=1, iqt=1, weight_type=1)
 
     # now SPLINT and quark coefficients
