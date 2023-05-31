@@ -1,7 +1,7 @@
 name = "PartonDensity"
 uuid = "2526459f-0e84-440c-98d6-63172703d9a4"
 authors = ["Francesca Capel <capel.francesca@gmail.com> and contributors"]
-version = "0.1.0"
+version = "0.2.0"
 
 [deps]
 ArgCheck = "dce04be8-c92d-5529-be00-80e4d2c0e197"
