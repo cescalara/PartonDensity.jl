@@ -18,7 +18,7 @@ function forward_model(pdf_params::Union{BernsteinPDFParams,BernsteinDirichletPD
     # Debugging
     if ϵ > 0.05
 
-        @warn "QCDNUM.evolfg(): Spline issues detected" eps pdf_params
+        @warn "QCDNUM.evolfg(): Spline issues detected" ϵ pdf_params
 
     end
 
