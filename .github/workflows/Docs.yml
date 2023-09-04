@@ -23,4 +23,7 @@ jobs:
           PLOTS_TEST: "true"
           GKSwstype: "100"
           # JULIA_DEBUG: "all"
-        run: julia --project=docs/ docs/make.jl
+        run : |
+         export JULIA_PKGDIR=/opt/julia
+         export JULIA_DEPOT_PATH=/opt/myjulia          
+         julia --project=docs/ docs/make.jl
