@@ -21,7 +21,7 @@ jobs:
         password: ${{ secrets.GITHUB_TOKEN }}
     - name: Build the PartonDensity Docker image
       run: |
-         git diff --name-only HEAD HEAD~1 | grep .github/workflows/Dockerfile | head -n 1 >> todo.txt || touch todo.txt
+         git diff --name-only HEAD HEAD~1 | grep .github/workflows/Dockerfile | head -n 1 > todo.txt || touch todo.txt
          if [ -s todo.txt ]; then
            cd .github/workflows
            docker build . --tag ghcr.io/cescalara/partondensity.jl:latest
