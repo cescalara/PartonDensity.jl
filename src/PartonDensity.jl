@@ -10,7 +10,7 @@ using Plots
 include("parton.jl")
 include("parametrisations/parametrisations.jl")
 include("cross_section.jl")
-include("MataData.jl")
+include("MetaData.jl")
 include("zeus.jl")
 include("../examples/data/zeus_high_x.jl")
 include("forward_model.jl")

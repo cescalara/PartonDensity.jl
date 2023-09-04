@@ -1,4 +1,4 @@
-export MataData
+export MetaData
 
 struct MetaData
  name::String
