@@ -31,6 +31,13 @@ Pkg.add("LaTeXStrings"); \
 Pkg.add("HypothesisTests"); \
 Pkg.add("Statistics"); \
 Pkg.add("Measures"); \
+Pkg.add("WorkerUtilities"); \
+Pkg.add("PooledArrays");   \
+Pkg.add("FilePathsBase");  \
+Pkg.add("SentinelArrays"); \
+Pkg.add("WeakRefStrings"); \
+Pkg.add("InlineStrings");  \
+Pkg.add("CSV");            \
 Pkg.add("ArgParse");'
 
 

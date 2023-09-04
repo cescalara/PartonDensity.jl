@@ -45,4 +45,4 @@ jobs:
       run : |
          export JULIA_PKGDIR=/opt/julia
          export JULIA_DEPOT_PATH=/opt/myjulia
-         julia --project=. -e 'import Pkg; Pkg.Pkg.instantiate(); include("test/runtests.jl")'
+         julia --project=. -e 'import Pkg; Pkg.instantiate(); include("test/runtests.jl")'
