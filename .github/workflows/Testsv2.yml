@@ -1,7 +1,6 @@
 name: CIv2
 on: 
-  push:
-  pull_request:  
+  push: 
   schedule:
     - cron: "0 7 * * 2"
 jobs:
