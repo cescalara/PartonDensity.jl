@@ -26,7 +26,8 @@ jobs:
         username: ${{ github.actor }}
         password: ${{ secrets.GITHUB_TOKEN }}
     - name: Build the PartonDensity Docker image
-      if: steps.changed-docker-files.outputs.any_changed == 'true' || ${{ github.event_name == 'schedule' }}
+      if: steps.changed-docker-files.outputs.any_changed == 'true' 
+      #|| ${{ github.event_name == 'schedule' }}
       run: |
          cd .github/workflows
          docker build . --tag ghcr.io/cescalara/partondensity.jl:latest
