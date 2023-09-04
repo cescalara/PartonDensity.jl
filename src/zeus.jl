@@ -17,7 +17,6 @@ export get_pred_N
 export get_data_events
 export get_TM_elements
 export get_K_elements
-export get_L_data
 export get_bin_info
 
 export q2bins_M_begin
@@ -43,23 +42,14 @@ function get_K_elements(eMPp)
     end
 end
 
-
-function get_L_data(eMPp)
-    if eMPp == 0
-        return Ld_ePp
-    else
-        return Ld_eMp
-    end
-end
-
-function get_TM_elements(eMPp)
+function get_TM_elements(eMPp,md)
     
-    lumi_data = get_L_data(eMPp)
-
     if eMPp == 1
         TM_elements = copy(TM_Elements_eMp)
+        lumi_data = md.Ld_eMp    
     elseif eMPp == 0
         TM_elements = copy(TM_Elements_ePp)
+        lumi_data = md.Ld_ePp
     end
     
     for i in 1:429

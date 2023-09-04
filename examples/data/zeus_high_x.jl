@@ -46,6 +46,17 @@ const Tnm_sys_ePp = zeros(NP1, NP2, nsyst)
 const Tnm_sys_eMp = zeros(NP1, NP2, nsyst)
 
 
+struct MetaData
+ name::String
+ Ld_ePp :: Float64
+ Ld_eMp :: Float64
+ sqrtS::Float64
+end
+
+
+const ZEUS_MD = MetaData ["ZEUS", 141.44, 185.018, 318.0 ];
+
+
 """
     SysPenality(x)
 
@@ -70,8 +81,8 @@ function Init_sys()
 TM_Elements_ePp  = zeros(NP1,NP2)
 TM_Elements_eMp  = zeros(NP1,NP2)
     
- TM_Elements_ePp = get_TM_elements(0);
- TM_Elements_eMp = get_TM_elements(1);
+ TM_Elements_ePp = get_TM_elements(0,MD_ZEUS);
+ TM_Elements_eMp = get_TM_elements(1,MD_ZEUS);
 
 
  Tnm_Ee_sys_ePp = zeros(NP1,NP2)
@@ -82,8 +93,8 @@ TM_Elements_eMp  = zeros(NP1,NP2)
 
 
     
-    TM_Elements_ePp = TM_Elements_ePp / get_L_data(0)
-    TM_Elements_eMp = TM_Elements_eMp / get_L_data(1)
+    TM_Elements_ePp = TM_Elements_ePp / MD_ZEUS.Ld_ePp
+    TM_Elements_eMp = TM_Elements_eMp / MD_ZEUS.Ld_eMp
     
 
  for i in 1:NP1
@@ -161,8 +172,8 @@ TM_Elements_eMp  = zeros(NP1,NP2)
      println(Tnm_Ee_sys_ePp[NP1,NP2])
      println(Tnm_sys_ePp[NP1,NP2,1])
     
-     Tnm_sys_ePp = Tnm_sys_ePp * get_L_data(0)
-     Tnm_sys_eMp = Tnm_sys_eMp * get_L_data(1)
+     Tnm_sys_ePp = Tnm_sys_ePp * MD_ZEUS.Ld_ePp
+     Tnm_sys_eMp = Tnm_sys_eMp * MD_ZEUS.Ld_eMp
     
      println(Tnm_Ee_sys_ePp[NP1,NP2])
      println(Tnm_sys_ePp[NP1,NP2,1])

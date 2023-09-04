@@ -11,8 +11,7 @@ Initialise forward model. Initialises QCDNUM and builds weight tables to
 save time in subsequent iterations. Must be called prior to first instance 
 of `forward_model()`.
 """
-function forward_model_init(qcdnum_params::QCDNUM.EvolutionParams,
-    splint_params::QCDNUM.SPLINTParams)
+function forward_model_init(qcdnum_params::QCDNUM.EvolutionParams, splint_params::QCDNUM.SPLINTParams)
 
     # Set up QCDNUM
     QCDNUM.init()
@@ -65,8 +64,12 @@ end
 
 Go from input PDF parameters to the expected number of events in bins.
 """
-function forward_model(pdf_params::AbstractPDFParams, qcdnum_params::QCDNUM.EvolutionParams,
-    splint_params::QCDNUM.SPLINTParams, quark_coeffs::QuarkCoefficients, sys_err_params::Vector{Float64}=zeros(nsyst))
+function forward_model(pdf_params::AbstractPDFParams, 
+                       qcdnum_params::QCDNUM.EvolutionParams,
+                       splint_params::QCDNUM.SPLINTParams, 
+                       quark_coeffs::QuarkCoefficients,
+                       md::MetaData = MD_ZEUS,
+                       sys_err_params::Vector{Float64}=zeros(nsyst))
 
     # Get input PDF function
     my_func = get_input_pdf_func(pdf_params)
@@ -100,7 +103,7 @@ function forward_model(pdf_params::AbstractPDFParams, qcdnum_params::QCDNUM.Evol
     QCDNUM.ssp_s2f123(iaF3up, qcdnum_params.output_pdf_loc, quark_coeffs.valup, 3, 0.0)
     QCDNUM.ssp_s2f123(iaFLdn, qcdnum_params.output_pdf_loc, quark_coeffs.prodn, 1, 0.0)
     QCDNUM.ssp_s2f123(iaF2dn, qcdnum_params.output_pdf_loc, quark_coeffs.prodn, 2, 0.0)
-    QCDNUM.ssp_s2f123(iaF3dn, qcdnum_params.output_pdf_loc, quark_coeffs.valdn, 3, 0.0)
+    QCDNUM.ssp_s2f123(iaF3dn, qcdnum_params.output_pdf a dozen of trivial MRs_loc, quark_coeffs.valdn, 3, 0.0)
 
     # Get input cross section function
     my_funcp = get_input_xsec_func(1)
@@ -120,28 +123,23 @@ function forward_model(pdf_params::AbstractPDFParams, qcdnum_params::QCDNUM.Evol
 
     integ_xsec_ep = similar(xbins_M_begin)
     integ_xsec_em = similar(xbins_M_begin)
-    sqrtS::Float64 = 318.0
     for i in bins_axis
-        integ_xsec_ep[i] = QCDNUM.dsp_ints2(iaF_eP, xbins_M_begin[i], xbins_M_end[i],
-            q2bins_M_begin[i], q2bins_M_end[i], sqrtS, 4)
-        integ_xsec_em[i] = QCDNUM.dsp_ints2(iaF_eM, xbins_M_begin[i], xbins_M_end[i],
-            q2bins_M_begin[i], q2bins_M_end[i], sqrtS, 4)
+        integ_xsec_ep[i] = QCDNUM.dsp_ints2(iaF_eP, xbins_M_begin[i], xbins_M_end[i], q2bins_M_begin[i], q2bins_M_end[i], md.sqrtS, 4)
+        integ_xsec_em[i] = QCDNUM.dsp_ints2(iaF_eM, xbins_M_begin[i], xbins_M_end[i], q2bins_M_begin[i], q2bins_M_end[i], md.sqrtS, 4)
     end
 
     # Fold through response to get counts
     ePp = 0
     eMp = 1
 
-    TM_eP = get_TM_elements(ePp)
-    TM_eM = get_TM_elements(eMp)
+    TM_eP = get_TM_elements(ePp,md)
+    TM_eM = get_TM_elements(eMp,md)
+
 
     K_eP = get_K_elements(ePp)
     K_eM = get_K_elements(eMp)
 
-    T = promote_type(map(eltype, (
-        sys_err_params, Tnm_sys_ePp, Tnm_sys_eMp,
-        TM_eP, TM_eM, K_eP, K_eM, integ_xsec_ep, integ_xsec_em
-    ))...)
+    T = promote_type(map(eltype, (sys_err_params, Tnm_sys_ePp, Tnm_sys_eMp,TM_eP, TM_eM, K_eP, K_eM, integ_xsec_ep, integ_xsec_em))...)
 
     counts_pred_ep = similar(TM_eP, T, size(TM_eP, 2))
     counts_pred_em = similar(TM_eM, T, size(TM_eM, 2))

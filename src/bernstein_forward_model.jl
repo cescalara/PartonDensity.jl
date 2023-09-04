@@ -4,8 +4,12 @@ export forward_model, forward_model_init
 export pd_write_sim, pd_read_sim
 
 
-function forward_model(pdf_params::Union{BernsteinPDFParams,BernsteinDirichletPDFParams}, qcdnum_params::QCDNUM.EvolutionParams,
-    splint_params::QCDNUM.SPLINTParams, quark_coeffs::QuarkCoefficients)
+function forward_model(pdf_params::Union{BernsteinPDFParams,BernsteinDirichletPDFParams}, 
+                       qcdnum_params::QCDNUM.EvolutionParams,
+                       splint_params::QCDNUM.SPLINTParams, 
+                       quark_coeffs::QuarkCoefficients,
+                       md::MetaData = MD_ZEUS
+                       )
 
     # Get input PDF function
     my_func = get_input_pdf_func(pdf_params)
@@ -59,20 +63,16 @@ function forward_model(pdf_params::Union{BernsteinPDFParams,BernsteinDirichletPD
     nbins = size(xbins_M_begin)[1]
     integ_xsec_ep = zeros(nbins)
     integ_xsec_em = zeros(nbins)
-
     for i in 1:nbins
-        integ_xsec_ep[i] = QCDNUM.dsp_ints2(iaF_eP, xbins_M_begin[i], xbins_M_end[i],
-            q2bins_M_begin[i], q2bins_M_end[i], 318.0, 4)
-        integ_xsec_em[i] = QCDNUM.dsp_ints2(iaF_eM, xbins_M_begin[i], xbins_M_end[i],
-            q2bins_M_begin[i], q2bins_M_end[i], 318.0, 4)
+        integ_xsec_ep[i] = QCDNUM.dsp_ints2(iaF_eP, xbins_M_begin[i], xbins_M_end[i], q2bins_M_begin[i], q2bins_M_end[i], md.sqrtS, 4)
+        integ_xsec_em[i] = QCDNUM.dsp_ints2(iaF_eM, xbins_M_begin[i], xbins_M_end[i], q2bins_M_begin[i], q2bins_M_end[i], md.sqrtS, 4)
     end
 
     # Fold through response to get counts
     ePp = 0
     eMp = 1
-
-    TM_eP = get_TM_elements(ePp)
-    TM_eM = get_TM_elements(eMp)
+    TM_eP = get_TM_elements(ePp,md)
+    TM_eM = get_TM_elements(eMp,md)
 
     K_eP = get_K_elements(ePp)
     K_eM = get_K_elements(eMp)
