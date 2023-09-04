@@ -37,6 +37,7 @@ Pkg.add("FilePathsBase");  \
 Pkg.add("SentinelArrays"); \
 Pkg.add("WeakRefStrings"); \
 Pkg.add("InlineStrings");  \
+Pkg.add("Documenter");  \
 Pkg.add("CSV");            \
 Pkg.add("ArgParse");'
 
