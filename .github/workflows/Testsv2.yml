@@ -1,0 +1,50 @@
+name: CIv2
+on: 
+  push:
+  pull_request:  
+  schedule:
+    - cron: "0 7 * * 2"
+jobs:
+  build-partondensity-docker-image:
+    runs-on: ubuntu-latest
+    name: Build PartonDensity Docker image
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v3
+      with:
+          fetch-depth: 2 
+    - name: Check if the Docker file was changed
+      id: changed-docker-files
+      uses: tj-actions/changed-files@v38
+      with:
+          files: .github/workflows/Dockerfile
+
+    - name: Login to GitHub Container Registry
+      uses: docker/login-action@v2
+      with:
+        registry: ghcr.io
+        username: ${{ github.actor }}
+        password: ${{ secrets.GITHUB_TOKEN }}
+    - name: Build the PartonDensity Docker image
+      if: steps.changed-docker-files.outputs.any_changed == 'true' || ${{ github.event_name == 'schedule' }}
+      run: |
+         cd .github/workflows
+         docker build . --tag ghcr.io/cescalara/partondensity.jl:latest
+         docker run ghcr.io/cescalara/partondensity.jl:latest
+         docker push ghcr.io/cescalara/partondensity.jl
+
+  run-in-partondensity-docker-image:
+    name: Run in PartonDensity Docker image
+    runs-on: ubuntu-latest
+    needs: build-partondensity-docker-image
+    container:
+            image: ghcr.io/cescalara/partondensity.jl:latest
+            credentials:
+               username: ${{ github.actor }}
+               password: ${{ secrets.GITHUB_TOKEN }}
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v2
+    - name: Run
+      run : |
+         echo "Hello world"
