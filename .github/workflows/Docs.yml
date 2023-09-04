@@ -25,5 +25,5 @@ jobs:
           # JULIA_DEBUG: "all"
         run : |
          export JULIA_PKGDIR=/opt/julia
-         export JULIA_DEPOT_PATH=/opt/myjulia          
+         export JULIA_DEPOT_PATH=/opt/myjulia 
          julia --project=docs/ docs/make.jl
