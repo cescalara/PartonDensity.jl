@@ -16,7 +16,7 @@ jobs:
                username: ${{ github.actor }}
                password: ${{ secrets.GITHUB_TOKEN }}    
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v2
       - name: Build and deploy
         env: 
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # If authenticating with GitHub Actions token
