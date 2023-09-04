@@ -101,10 +101,10 @@ QCDNUM.ssp_uwrite(splint_params.spline_addresses.F3dn, Float64(iaF3dn));
 QCDNUM.ssp_uwrite(splint_params.spline_addresses.FLup, Float64(iaFLup));
 QCDNUM.ssp_uwrite(splint_params.spline_addresses.FLdn, Float64(iaFLdn));
 
-my_funcp = get_input_xsec_func(1) # charge = 1
+my_funcp = get_input_xsec_func(1, MD_ZEUS) # charge = 1
 input_xsecp = @cfunction(my_funcp, Float64, (Ref{Int32}, Ref{Int32}, Ref{UInt8}))
 
-my_funcm = get_input_xsec_func(-1) # charge = -1
+my_funcm = get_input_xsec_func(-1, MD_ZEUS) # charge = -1
 input_xsecm = @cfunction(my_funcm, Float64, (Ref{Int32}, Ref{Int32}, Ref{UInt8}))
 
 # plot
@@ -113,7 +113,7 @@ xsec_on_grid = zeros(g.nx, g.nq);
 
 for ix = 1:g.nx
     for iq = 1:g.nq
-        xsec_on_grid[ix, iq] = _fun_xsec_i(1, ix, iq) # charge = 1
+        xsec_on_grid[ix, iq] = _fun_xsec_i(1, MD_ZEUS, ix, iq) # charge = 1
     end
 end
 

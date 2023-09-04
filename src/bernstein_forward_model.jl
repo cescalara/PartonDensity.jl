@@ -45,10 +45,10 @@ function forward_model(pdf_params::Union{BernsteinPDFParams,BernsteinDirichletPD
     QCDNUM.ssp_s2f123(iaF3dn, qcdnum_params.output_pdf_loc, quark_coeffs.valdn, 3, 0.0)
 
     # Get input cross section function
-    my_funcp = get_input_xsec_func(1)
+    my_funcp = get_input_xsec_func(1,md)
     input_xsecp = @cfunction($my_funcp, Float64, (Ref{Int32}, Ref{Int32}, Ref{UInt8}))
 
-    my_funcm = get_input_xsec_func(-1)
+    my_funcm = get_input_xsec_func(-1,md)
     input_xsecm = @cfunction($my_funcm, Float64, (Ref{Int32}, Ref{Int32}, Ref{UInt8}))
 
 

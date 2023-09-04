@@ -22,8 +22,7 @@ function forward_model_init(qcdnum_params::QCDNUM.EvolutionParams, splint_params
     nx, nq = QCDNUM.make_grid(qcdnum_params.grid_params)
 
     # Define FFNS/VFNS  
-    QCDNUM.setcbt(qcdnum_params.n_fixed_flav, qcdnum_params.iqc,
-        qcdnum_params.iqb, qcdnum_params.iqt)
+    QCDNUM.setcbt(qcdnum_params.n_fixed_flav, qcdnum_params.iqc, qcdnum_params.iqb, qcdnum_params.iqt)
 
     # Build weight tables
     nw = QCDNUM.fillwt(qcdnum_params.weight_type)
@@ -106,10 +105,10 @@ function forward_model(pdf_params::AbstractPDFParams,
     QCDNUM.ssp_s2f123(iaF3dn, qcdnum_params.output_pdf_loc, quark_coeffs.valdn, 3, 0.0)
 
     # Get input cross section function
-    my_funcp = get_input_xsec_func(1)
+    my_funcp = get_input_xsec_func(1, md)
     input_xsecp = @cfunction($my_funcp, Float64, (Ref{Int32}, Ref{Int32}, Ref{UInt8}))
 
-    my_funcm = get_input_xsec_func(-1)
+    my_funcm = get_input_xsec_func(-1, md)
     input_xsecm = @cfunction($my_funcm, Float64, (Ref{Int32}, Ref{Int32}, Ref{UInt8}))
 
     # Make two cross section splines
