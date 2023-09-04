@@ -1,7 +1,6 @@
 name: CIv2
 on: 
-  push:
-  pull_request:  
+  push: 
   schedule:
     - cron: "0 7 * * 2"
 jobs:
@@ -12,27 +11,27 @@ jobs:
     - name: Checkout
       uses: actions/checkout@v3
       with:
-          fetch-depth: 2 
-    - name: Check if the Docker file was changed
-      id: changed-docker-files
-      uses: tj-actions/changed-files@v38
-      with:
-          files: .github/workflows/Dockerfile
-
+          fetch-depth: 2
     - name: Login to GitHub Container Registry
       uses: docker/login-action@v2
       with:
         registry: ghcr.io
         username: ${{ github.actor }}
         password: ${{ secrets.GITHUB_TOKEN }}
-    - name: Build the PartonDensity Docker image
-      if: steps.changed-docker-files.outputs.any_changed == 'true' || ${{ github.event_name == 'schedule' }}
+    - name: Check if the build is scheduled
+      if: github.event_name == 'schedule'
       run: |
-         cd .github/workflows
-         docker build . --tag ghcr.io/cescalara/partondensity.jl:latest
-         docker run ghcr.io/cescalara/partondensity.jl:latest
-         docker push ghcr.io/cescalara/partondensity.jl
-
+         echo "Scheduled" > .github/workflows/todo.txt    
+    - name: Build the PartonDensity Docker image
+      run: |
+         touch todo.txt
+         git diff --name-only HEAD HEAD~1 | grep .github/workflows/Dockerfile | head -n 1 >> todo.txt || touch todo.txt
+         if [ -s todo.txt ]; then
+           cd .github/workflows
+           docker build . --tag ghcr.io/cescalara/partondensity.jl:latest
+           docker run ghcr.io/cescalara/partondensity.jl:latest
+           docker push ghcr.io/cescalara/partondensity.jl
+         fi
 
   run-in-partondensity-docker-image:
     name: Run in PartonDensity Docker image
@@ -48,4 +47,8 @@ jobs:
       uses: actions/checkout@v2
     - name: Run
       run : |
-         echo "Hello world"
+         export JULIA_PKGDIR=/opt/julia
+         export JULIA_DEPOT_PATH=/opt/myjulia
+         julia --project=. -e 'import Pkg; Pkg.instantiate(); include("test/runtests.jl")'
+         
+
