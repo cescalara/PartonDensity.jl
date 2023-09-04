@@ -47,14 +47,8 @@ const Tnm_sys_ePp = zeros(NP1, NP2, nsyst)
 const Tnm_sys_eMp = zeros(NP1, NP2, nsyst)
 
 
-struct MetaData
- name::String
- Ld_ePp :: Float64
- Ld_eMp :: Float64
- sqrtS::Float64
-end
 
-
+include("../../src/MetaData.jl")
 const MD_ZEUS = MetaData("ZEUS", 141.44, 185.018, 318.0);
 
 

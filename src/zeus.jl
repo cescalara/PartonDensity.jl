@@ -61,9 +61,9 @@ function get_TM_elements(eMPp,md)
     return TM_elements
 end
 
-function get_pred_N(Integ_xsec, eMPp)
+function get_pred_N(Integ_xsec, eMPp, md)
 
-    TM = get_TM_elements(eMPp);
+    TM = get_TM_elements(eMPp, md);
     K = get_K_elements(eMPp)
 
     xsec_pred = zeros(153)
