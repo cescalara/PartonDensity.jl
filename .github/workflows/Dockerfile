@@ -2,12 +2,13 @@ FROM fedora:38
 ENV LC_ALL=C
 ENV JULIA_PKGDIR=/opt/julia
 ENV JULIA_DEPOT_PATH=/opt/myjulia
-RUN  yum -y  install  bc make cmake binutils git wget diffutils file sed gawk grep which autoconf automake libtool \
-                      gcc-gfortran gcc-c++ clang bzip2   openssl-devel openssl \
+RUN  yum -y  install  bc make cmake binutils git wget diffutils file sed gawk grep which \
+                      gcc-gfortran gcc-c++  bzip2   openssl-devel openssl \
                       julia python  && yum -y clean all && \
 julia  -e 'import Pkg;                                 \
 Pkg.add("SpecialFunctions");                           \
 Pkg.add(url="https://github.com/bat/BAT.jl.git");      \
+Pkg.add("ArgCheck");                                     \
 Pkg.add("Colors");                                     \
 Pkg.add("Plots");                                      \
 Pkg.add("HDF5"); \
