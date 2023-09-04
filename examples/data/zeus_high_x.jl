@@ -54,7 +54,7 @@ struct MetaData
 end
 
 
-const ZEUS_MD = MetaData ["ZEUS", 141.44, 185.018, 318.0 ];
+const ZEUS_MD = MetaData("ZEUS", 141.44, 185.018, 318.0);
 
 
 """
