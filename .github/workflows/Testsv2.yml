@@ -48,4 +48,4 @@ jobs:
       uses: actions/checkout@v2
     - name: Run
       run : |
-         echo "Hello world"
+         julia test/runtests.jl
