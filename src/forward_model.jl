@@ -103,7 +103,7 @@ function forward_model(pdf_params::AbstractPDFParams,
     QCDNUM.ssp_s2f123(iaF3up, qcdnum_params.output_pdf_loc, quark_coeffs.valup, 3, 0.0)
     QCDNUM.ssp_s2f123(iaFLdn, qcdnum_params.output_pdf_loc, quark_coeffs.prodn, 1, 0.0)
     QCDNUM.ssp_s2f123(iaF2dn, qcdnum_params.output_pdf_loc, quark_coeffs.prodn, 2, 0.0)
-    QCDNUM.ssp_s2f123(iaF3dn, qcdnum_params.output_pdf a dozen of trivial MRs_loc, quark_coeffs.valdn, 3, 0.0)
+    QCDNUM.ssp_s2f123(iaF3dn, qcdnum_params.output_pdf_loc, quark_coeffs.valdn, 3, 0.0)
 
     # Get input cross section function
     my_funcp = get_input_xsec_func(1)
