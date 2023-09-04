@@ -11,6 +11,7 @@ include("parton.jl")
 include("parametrisations/parametrisations.jl")
 include("cross_section.jl")
 include("../data/ZEUS_I1787035/ZEUS_I1787035.jl")
+include("MetaData.jl")
 include("forward_model.jl")
 include("bernstein_forward_model.jl")
 
