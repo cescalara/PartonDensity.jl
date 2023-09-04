@@ -18,9 +18,14 @@ jobs:
         registry: ghcr.io
         username: ${{ github.actor }}
         password: ${{ secrets.GITHUB_TOKEN }}
+    - name: Check if the build is scheduled
+      if: github.event_name == 'schedule'
+      run: |
+         echo "Scheduled" > .github/workflows/todo.txt    
     - name: Build the PartonDensity Docker image
       run: |
-         git diff --name-only HEAD HEAD~1 | grep .github/workflows/Dockerfile | head -n 1 > todo.txt || touch todo.txt
+         touch todo.txt
+         git diff --name-only HEAD HEAD~1 | grep .github/workflows/Dockerfile | head -n 1 >> todo.txt || touch todo.txt
          if [ -s todo.txt ]; then
            cd .github/workflows
            docker build . --tag ghcr.io/cescalara/partondensity.jl:latest
