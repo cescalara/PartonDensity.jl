@@ -21,7 +21,7 @@ qcdnum_params = QCDNUM.EvolutionParams(order=2, α_S=0.118, q0=100.0, grid_param
     n_fixed_flav=5, iqc=1, iqb=1, iqt=1, weight_type=1);
 
 splint_params = QCDNUM.SPLINTParams();
-quark_coeffs = QuarkCoefficients();</code></pre><p>We include the effects of systematic errors into the simulation, by sampling from a multivariate normal with mean 0 and standard deviation 1.</p><p>These factors are then applied to a precomputed matrix in order to scale the expected counts accordingly.</p><pre><code class="language-julia hljs">forward_model_init(qcdnum_params, splint_params)
+quark_coeffs = QuarkCoefficients();</code></pre><p>We include the effects of systematic errors into the simulation, by sampling from a multivariate normal with mean 0 and standard deviation 1.</p><p>These factors are then applied to a precomputed matrix in order to scale the expected counts accordingly.</p><pre><code class="language- hljs">forward_model_init(qcdnum_params, splint_params)
 sys_err_params = rand(rng, MvNormal(zeros(PartonDensity.nsyst), ones(PartonDensity.nsyst)))
 counts_pred_ep, counts_pred_em = forward_model(pdf_params, qcdnum_params,
     splint_params, quark_coeffs, sys_err_params);
@@ -48,31 +48,7 @@ sim_data[&quot;counts_obs_em&quot;] = counts_obs_em;
 
 pd_write_sim(&quot;output/simulation.h5&quot;, pdf_params, sim_data)
 QCDNUM.save_params(&quot;output/params_dir_sys.h5&quot;, qcdnum_params)
-QCDNUM.save_params(&quot;output/params_dir_sys.h5&quot;, splint_params)</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">  +---------------------------------------------------------------------+
-  |                                                                     |
-  |    If you use QCDNUM, please refer to:                              |
-  |                                                                     |
-  |    M. Botje, Comput. Phys. Commun. 182(2011)490, arXiV:1005.1481    |
-  |                                                                     |
-  +---------------------------------------------------------------------+
-
-
-
- FILLWT: start unpolarised weight calculations
- Subgrids    3 Subgrid points   15   50   75
- Pij LO
- Pij NLO
- Pij NNLO
- Aij LO
- Aij NLO
- Aij NNLO
- FILLWT: weight calculations completed
-
-
- ZMFILLW: start weight calculations   4  38   0   0
- ZMFILLW: calculations completed
-┌ Warning: SPLINT is already initialised, skipping call to QCDNUM.ssp_spinit()
-└ @ QCDNUM ~/.julia/packages/QCDNUM/gx4Mo/src/splint/initialisation.jl:36</code></pre><p>Here, we include a prior over the 8 systematic error parameters, such that we marginalise over them.</p><pre><code class="language-julia hljs">prior = NamedTupleDist(
+QCDNUM.save_params(&quot;output/params_dir_sys.h5&quot;, splint_params)</code></pre><p>Here, we include a prior over the 8 systematic error parameters, such that we marginalise over them.</p><pre><code class="language- hljs">prior = NamedTupleDist(
     θ=Dirichlet(weights),
     K_u=Uniform(3.0, 7.0),
     K_d=Uniform(3.0, 7.0),
@@ -117,8 +93,8 @@ likelihood = let d = sim_data
 
         return ll_value
     end)
-end</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">LogFuncDensity(Main.var&quot;#1#2&quot;{Int64, Vector{UInt64}, Vector{UInt64}}(153, UInt64[0x00000000000001d8, 0x00000000000001a7, 0x000000000000018b, 0x00000000000001b0, 0x000000000000012d, 0x000000000000016d, 0x0000000000000136, 0x0000000000000426, 0x00000000000001cb, 0x00000000000001d3  …  0x000000000000004c, 0x0000000000000039, 0x0000000000000026, 0x0000000000000017, 0x000000000000000e, 0x000000000000000c, 0x000000000000000c, 0x0000000000000000, 0x00000000000000ea, 0x0000000000000011], UInt64[0x0000000000000166, 0x0000000000000130, 0x0000000000000110, 0x0000000000000138, 0x00000000000000fa, 0x00000000000000f7, 0x00000000000000d1, 0x0000000000000353, 0x0000000000000154, 0x0000000000000160  …  0x0000000000000020, 0x0000000000000021, 0x0000000000000018, 0x000000000000000f, 0x0000000000000010, 0x0000000000000005, 0x000000000000000a, 0x0000000000000001, 0x000000000000004b, 0x0000000000000004]))</code></pre><p>Check that we can evaluate the posterior:</p><pre><code class="language-julia hljs">posterior = PosteriorDensity(likelihood, prior)
-BAT.checked_logdensityof(posterior, rand(prior))</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">-2563.966583433194</code></pre><p>We can now run the MCMC sampler. We will start by using the Metropolis-Hastings algorithm as implemented in <code>BAT.jl</code>. To get reasonable results, we need to run the sampler for a long time (several hours). To actually run the sampler, simply uncomment the code below. To see how to work with demo output results, check out the other fit examples.</p><pre><code class="language-julia hljs">#samples = bat_sample(posterior, MCMCSampling(mcalg=MetropolisHastings(), nsteps=10^4, nchains=2)).result;
+end</code></pre><p>Check that we can evaluate the posterior:</p><pre><code class="language- hljs">posterior = PosteriorDensity(likelihood, prior)
+BAT.checked_logdensityof(posterior, rand(prior))</code></pre><p>We can now run the MCMC sampler. We will start by using the Metropolis-Hastings algorithm as implemented in <code>BAT.jl</code>. To get reasonable results, we need to run the sampler for a long time (several hours). To actually run the sampler, simply uncomment the code below. To see how to work with demo output results, check out the other fit examples.</p><pre><code class="language-julia hljs">#samples = bat_sample(posterior, MCMCSampling(mcalg=MetropolisHastings(), nsteps=10^4, nchains=2)).result;
 
 #import HDF5
-#bat_write(&quot;output/results.h5&quot;, samples)</code></pre><hr/><p><em>This page was generated using <a href="https://github.com/fredrikekre/Literate.jl">Literate.jl</a>.</em></p></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="../bat_fit_dirichlet/">« Fit with Dirichlet parametrisation</a><a class="docs-footer-nextpage" href="../api/">API »</a><div class="flexbox-break"></div><p class="footer-message">Powered by <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> and the <a href="https://julialang.org/">Julia Programming Language</a>.</p></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> version 0.27.25 on <span class="colophon-date" title="Monday 4 September 2023 16:21">Monday 4 September 2023</span>. Using Julia version 1.9.3.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>
+#bat_write(&quot;output/results.h5&quot;, samples)</code></pre><hr/><p><em>This page was generated using <a href="https://github.com/fredrikekre/Literate.jl">Literate.jl</a>.</em></p></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="../bat_fit_dirichlet/">« Fit with Dirichlet parametrisation</a><a class="docs-footer-nextpage" href="../api/">API »</a><div class="flexbox-break"></div><p class="footer-message">Powered by <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> and the <a href="https://julialang.org/">Julia Programming Language</a>.</p></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> version 0.27.25 on <span class="colophon-date" title="Monday 4 September 2023 16:53">Monday 4 September 2023</span>. Using Julia version 1.9.3.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>
