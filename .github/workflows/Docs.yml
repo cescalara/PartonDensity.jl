@@ -10,20 +10,19 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
-    container:
-            image: ghcr.io/cescalara/partondensity.jl:latest
-            credentials:
-               username: ${{ github.actor }}
-               password: ${{ secrets.GITHUB_TOKEN }}    
     steps:
       - uses: actions/checkout@v2
+      - uses: julia-actions/setup-julia@latest
+        with:
+          version: '1.9'
+      - name: Install dependencies
+        run: |
+          julia --project=docs/ -e 'using Pkg; Pkg.add(url="https://github.com/bat/BAT.jl.git")'
+          julia --project=docs/ -e 'using Pkg; Pkg.develop(PackageSpec(path=pwd())); Pkg.instantiate()'
       - name: Build and deploy
         env: 
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # If authenticating with GitHub Actions token
           PLOTS_TEST: "true"
           GKSwstype: "100"
           # JULIA_DEBUG: "all"
-        run : |
-         export JULIA_PKGDIR=/opt/julia
-         export JULIA_DEPOT_PATH=/opt/myjulia 
-         julia --project=docs/ docs/make.jl
+        run: julia --project=docs/ docs/make.jl
