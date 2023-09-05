@@ -63,7 +63,7 @@ function forward_model(pdf_params::AbstractPDFParams,
                        qcdnum_params::QCDNUM.EvolutionParams,
                        splint_params::QCDNUM.SPLINTParams, 
                        quark_coeffs::QuarkCoefficients,
-                       md::MetaData = MetaData("ZEUS", 141.44, 185.018, 318.1),
+                       md::MetaData = MD_ZEUS_I1787035,
                        sys_err_params::Vector{Float64}=zeros(nsyst))
 
     # Get input PDF function

@@ -117,9 +117,9 @@ using QCDNUM
 
             output_file = joinpath(tmp_dir, "test_sim.h5")
 
-            pd_write_sim(output_file, pdf_params, sim_data)
+            pd_write_sim(output_file, pdf_params, sim_data, MD_ZEUS_I1787035)
 
-            new_pdf_params, new_sim_data = pd_read_sim(output_file)
+            new_pdf_params, new_sim_data, md = pd_read_sim(output_file)
 
             @test typeof(new_pdf_params) == typeof(pdf_params)
 

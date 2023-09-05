@@ -73,7 +73,7 @@ const Tnm_sys_ePp = zeros(NP1, NP2, nsyst)
 const Tnm_sys_eMp = zeros(NP1, NP2, nsyst)
 
 
-const MD_ZEUS_I1787035 = MetaData("ZEUS_I1787035", 141.44, 185.018, 318.0);
+const MD_ZEUS_I1787035 = MetaData("ZEUS_I1787035", 141.44, 185.018, 0.018,0.018, 318.0);
 
 const MD_G = MD_ZEUS_I1787035
 

@@ -1,13 +1,12 @@
 using HDF5
 
 export forward_model, forward_model_init
-export pd_write_sim, pd_read_sim
 
 function forward_model(pdf_params::Union{BernsteinPDFParams,BernsteinDirichletPDFParams}, 
                        qcdnum_params::QCDNUM.EvolutionParams,
                        splint_params::QCDNUM.SPLINTParams, 
                        quark_coeffs::QuarkCoefficients,
-                       md::MetaData = MetaData("ZEUS", 141.44, 185.018, 318.1)
+                       md::MetaData = MD_ZEUS_I1787035
                        )
 
     # Get input PDF function
@@ -97,31 +96,3 @@ function forward_model(pdf_params::Union{BernsteinPDFParams,BernsteinDirichletPD
 end
 
 
-function pd_write_sim(file_name::String, pdf_params::Union{BernsteinPDFParams,BernsteinDirichletPDFParams}, sim_data::Dict{String,Any})
-
-    h5open(file_name, "w") do fid
-
-        # store sim_data
-        sim_data_group = create_group(fid, "data")
-        for (key, value) in sim_data
-            sim_data_group[key] = value
-        end
-
-        # store pdf_params
-        truth_group = create_group(fid, "truth")
-        truth_group["U_list"] = pdf_params.U_list
-        truth_group["D_list"] = pdf_params.D_list
-        truth_group["λ_g1"] = pdf_params.λ_g1
-        truth_group["λ_g2"] = pdf_params.λ_g2
-        truth_group["K_g"] = pdf_params.K_g
-        truth_group["λ_q"] = pdf_params.λ_q
-        truth_group["K_q"] = pdf_params.K_q
-        truth_group["seed"] = pdf_params.seed
-        truth_group["weights"] = pdf_params.weights
-        truth_group["θ"] = pdf_params.θ
-        truth_group["param_type"] = pdf_params.param_type
-
-    end
-
-    return nothing
-end
