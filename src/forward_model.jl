@@ -63,8 +63,8 @@ function forward_model(pdf_params::AbstractPDFParams,
                        qcdnum_params::QCDNUM.EvolutionParams,
                        splint_params::QCDNUM.SPLINTParams, 
                        quark_coeffs::QuarkCoefficients,
-                       md::MetaData = MD_ZEUS_I1787035,
-                       sys_err_params::Vector{Float64}=zeros(nsyst))
+                       md::MetaData = MD_DUMMY,
+                       sys_err_params::Vector{Float64}=zeros(MD_DUMMY.nsyst))
 
     # Get input PDF function
     my_func = get_input_pdf_func(pdf_params)
@@ -113,14 +113,14 @@ function forward_model(pdf_params::AbstractPDFParams,
     QCDNUM.ssp_s2fill(iaF_eM, input_xsecm, splint_params.rscut)
 
     # Integrate over cross section
-    nbins = size(xbins_M_begin)[1]
-    bins_axis = axes(xbins_M_begin, 1)
+    nbins = size(md.D.xbins_M_begin)[1]
+    bins_axis = axes(md.D.xbins_M_begin, 1)
 
-    integ_xsec_ep = similar(xbins_M_begin)
-    integ_xsec_em = similar(xbins_M_begin)
+    integ_xsec_ep = similar(md.D.xbins_M_begin)
+    integ_xsec_em = similar(md.D.xbins_M_begin)
     for i in bins_axis
-        integ_xsec_ep[i] = QCDNUM.dsp_ints2(iaF_eP, xbins_M_begin[i], xbins_M_end[i], q2bins_M_begin[i], q2bins_M_end[i], md.sqrtS, 4)
-        integ_xsec_em[i] = QCDNUM.dsp_ints2(iaF_eM, xbins_M_begin[i], xbins_M_end[i], q2bins_M_begin[i], q2bins_M_end[i], md.sqrtS, 4)
+        integ_xsec_ep[i] = QCDNUM.dsp_ints2(iaF_eP, md.D.xbins_M_begin[i], md.D.xbins_M_end[i], md.D.q2bins_M_begin[i], md.D.q2bins_M_end[i], md.sqrtS, 4)
+        integ_xsec_em[i] = QCDNUM.dsp_ints2(iaF_eM, md.D.xbins_M_begin[i], md.D.xbins_M_end[i], md.D.q2bins_M_begin[i], md.D.q2bins_M_end[i], md.sqrtS, 4)
     end
 
     # Fold through response to get counts

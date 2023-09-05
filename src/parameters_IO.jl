@@ -38,6 +38,7 @@ function pd_write_sim(file_name::String, pdf_params::Union{ValencePDFParams,Diri
         meta_data_group["Ld_ePp_uncertainty"] = meta_data.Ld_ePp_uncertainty
         meta_data_group["Ld_eMp_uncertainty"] = meta_data.Ld_eMp_uncertainty
         meta_data_group["sqrtS"] = meta_data.sqrtS
+        meta_data_group["nsyst"] = meta_data.nsyst
 
 
     end
@@ -54,7 +55,7 @@ function pd_read_sim(file_name::String)
 
     local pdf_params
     sim_data = Dict{String,Any}()
-    meta_data::MetaData = MetaData("",0.0,0.0,0.0,0.0,0.0)
+    meta_data::MetaData = MetaData("",0.0,0.0,0.0,0.0,0.0,0,PD_DUMMY)
 
     h5open(file_name, "r") do fid
 
@@ -70,7 +71,10 @@ function pd_read_sim(file_name::String)
         read(gg["Ld_eMp"]),
         read(gg["Ld_ePp_uncertainty"]),
         read(gg["Ld_eMp_uncertainty"]),
-        read(gg["sqrtS"]))
+        read(gg["sqrtS"]),
+        read(gg["nsyst"]),
+        PD_DUMMY
+        )
 
 
         g = fid["truth"]
@@ -155,6 +159,7 @@ function pd_write_sim(file_name::String, pdf_params::Union{BernsteinPDFParams,Be
         meta_data_group["Ld_ePp_uncertainty"] = meta_data.Ld_ePp_uncertainty
         meta_data_group["Ld_eMp_uncertainty"] = meta_data.Ld_eMp_uncertainty
         meta_data_group["sqrtS"] = meta_data.sqrtS
+        meta_data_group["nsyst"] = meta_data.nsyst
 
     end
 

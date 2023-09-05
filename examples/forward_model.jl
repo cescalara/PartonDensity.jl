@@ -6,7 +6,6 @@
 
 using QCDNUM, PartonDensity
 using Plots, Printf, NaNMath, Parameters, Random, Distributions
-const MD_DUMMY = MD_ZEUS_I1787035
 
 # ## Define input PDFs
 # We can use `DirichletPDFParams` or `ValencePDFParams`, as long

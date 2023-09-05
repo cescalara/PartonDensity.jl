@@ -106,7 +106,14 @@ quark_coeffs = QuarkCoefficients();
 
 
 include(parsed_args["dataset"])
-MD_LOCAL::MetaData =  MetaData(MD_G.name, MD_G.Ld_ePp*parsed_args["lumifactor"] , MD_G.Ld_eMp*parsed_args["lumifactor"], MD_G.Ld_ePp_uncertainty,MD_G.Ld_eMp_uncertainty, MD_G.sqrtS)
+MD_LOCAL::MetaData =  MetaData(MD_G.name, 
+                               MD_G.Ld_ePp*parsed_args["lumifactor"] , 
+                               MD_G.Ld_eMp*parsed_args["lumifactor"], 
+                               MD_G.Ld_ePp_uncertainty,
+                               MD_G.Ld_eMp_uncertainty, 
+                               MD_G.sqrtS,
+                               MD_G.nsyst,
+                               PD_DUMMY)
 
 
 forward_model_init(qcdnum_params, splint_params)
