@@ -9,7 +9,11 @@ using Plots
 
 include("parton.jl")
 include("parametrisations/parametrisations.jl")
+<<<<<<< HEAD
 include("MetaData.jl")
+=======
+include("parameters_IO.jl")
+>>>>>>> origin/main
 include("cross_section.jl")
 include("../data/ZEUS_I1787035/ZEUS_I1787035.jl")
 include("forward_model.jl")
