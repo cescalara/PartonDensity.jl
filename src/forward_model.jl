@@ -2,7 +2,7 @@ using HDF5
 
 export forward_model, forward_model_init
 export pd_write_sim, pd_read_sim
-
+include("MetaData.jl")
 
 """
     forward_model_init(qcdnum_grid, qcdnum_params)

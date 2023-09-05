@@ -2,7 +2,7 @@ using HDF5
 
 export forward_model, forward_model_init
 export pd_write_sim, pd_read_sim
-
+include("MetaData.jl")
 
 function forward_model(pdf_params::Union{BernsteinPDFParams,BernsteinDirichletPDFParams}, 
                        qcdnum_params::QCDNUM.EvolutionParams,
