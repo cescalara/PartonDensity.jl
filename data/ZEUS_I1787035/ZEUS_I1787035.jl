@@ -60,7 +60,7 @@ function get_K_elements(eMPp)
     end
 end
 
-function get_TM_elements(eMPp,MetaData::md)
+function get_TM_elements(eMPp,md::MetaData)
     
     if eMPp == 1
         TM_elements = copy(TM_Elements_eMp)
@@ -79,7 +79,7 @@ function get_TM_elements(eMPp,MetaData::md)
     return TM_elements
 end
 
-function get_pred_N(Integ_xsec, eMPp, MetaData::md)
+function get_pred_N(Integ_xsec, eMPp, md::MetaData)
 
     TM = get_TM_elements(eMPp, md);
     K = get_K_elements(eMPp)
