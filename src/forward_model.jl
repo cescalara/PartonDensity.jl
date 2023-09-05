@@ -1,8 +1,4 @@
 export forward_model, forward_model_init
-<<<<<<< HEAD
-export pd_write_sim, pd_read_sim
-=======
->>>>>>> origin/main
 
 """
     forward_model_init(qcdnum_grid, qcdnum_params)
@@ -67,7 +63,7 @@ function forward_model(pdf_params::AbstractPDFParams,
                        qcdnum_params::QCDNUM.EvolutionParams,
                        splint_params::QCDNUM.SPLINTParams, 
                        quark_coeffs::QuarkCoefficients,
-                       md::MetaData = MetaData("ZEUS", 141.44, 185.018, 318.0),
+                       md::MetaData = MetaData("ZEUS", 141.44, 185.018, 318.1),
                        sys_err_params::Vector{Float64}=zeros(nsyst))
 
     # Get input PDF function

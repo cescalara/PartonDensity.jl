@@ -7,7 +7,7 @@ function forward_model(pdf_params::Union{BernsteinPDFParams,BernsteinDirichletPD
                        qcdnum_params::QCDNUM.EvolutionParams,
                        splint_params::QCDNUM.SPLINTParams, 
                        quark_coeffs::QuarkCoefficients,
-                       md::MetaData = MetaData("ZEUS", 141.44, 185.018, 318.0)
+                       md::MetaData = MetaData("ZEUS", 141.44, 185.018, 318.1)
                        )
 
     # Get input PDF function

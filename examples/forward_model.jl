@@ -6,7 +6,7 @@
 
 using QCDNUM, PartonDensity
 using Plots, Printf, NaNMath, Parameters, Random, Distributions
-const MD_DUMMY = MetaData("DUMMY", 141.44, 185.018, 318.0);
+const MD_DUMMY = MetaData("DUMMY", 141.44, 185.018, 318.1);
 
 # ## Define input PDFs
 # We can use `DirichletPDFParams` or `ValencePDFParams`, as long
@@ -167,10 +167,8 @@ nbins = size(xbins_M_begin)[1]
 IntXsec_eP = zeros(nbins);
 IntXsec_eM = zeros(nbins);
 for i in 1:nbins
-    IntXsec_eP[i] = QCDNUM.dsp_ints2(iaF_eP, xbins_M_begin[i], xbins_M_end[i],
-        q2bins_M_begin[i], q2bins_M_end[i], 318.0, 4)
-    IntXsec_eM[i] = QCDNUM.dsp_ints2(iaF_eM, xbins_M_begin[i], xbins_M_end[i],
-        q2bins_M_begin[i], q2bins_M_end[i], 318.0, 4)
+    IntXsec_eP[i] = QCDNUM.dsp_ints2(iaF_eP, xbins_M_begin[i], xbins_M_end[i], q2bins_M_begin[i], q2bins_M_end[i], MD_DUMMY.sqrtS, 4)
+    IntXsec_eM[i] = QCDNUM.dsp_ints2(iaF_eM, xbins_M_begin[i], xbins_M_end[i], q2bins_M_begin[i], q2bins_M_end[i], MD_DUMMY.sqrtS, 4)
 end
 
 # 1 for e-p and 0 for e+p
