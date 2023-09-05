@@ -72,6 +72,8 @@ jobs:
           GKSwstype: "100"
           # JULIA_DEBUG: "all"
       run: |
+           export JULIA_PKGDIR=/opt/julia
+           export JULIA_DEPOT_PATH=/opt/myjulia
            julia --project=docs/ -e 'using Pkg; Pkg.develop(PackageSpec(path=pwd())); Pkg.instantiate()'
            julia --project=docs/ docs/make.jl
 
