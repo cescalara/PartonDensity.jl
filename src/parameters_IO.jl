@@ -54,7 +54,7 @@ function pd_read_sim(file_name::String)
 
     local pdf_params
     sim_data = Dict{String,Any}()
-    meta_data::MetaData = MetaData()
+    meta_data::MetaData = MetaData("",0.0,0.0,0.0,0.0,0.0)
 
     h5open(file_name, "r") do fid
 
