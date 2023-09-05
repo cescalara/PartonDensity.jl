@@ -89,9 +89,7 @@ sim_data["counts_obs_em"]=get_data_events(1)
 somepdf_params = DirichletPDFParams(K_u=3.7, K_d=3.7, λ_g1=0.5, λ_g2=-0.5, K_g=5.0,λ_q=-0.5, K_q=6.0, θ=θ);
 MD_TEMP::MetaData = MD_G
 if parsed_args["pseudodata"] != "data"
-  somepdf_params, sim_data = pd_read_sim(string("pseudodata/",parsed_args["pseudodata"],".h5"));
-#FIXME!!!  
-  MD_TEMP = MD_G 
+  somepdf_params, sim_data, MD_TEMP = pd_read_sim(string("pseudodata/",parsed_args["pseudodata"],".h5"));
 end
 MD_LOCAL::MetaData = MD_TEMP
 
