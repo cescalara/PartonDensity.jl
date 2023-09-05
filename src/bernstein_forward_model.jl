@@ -17,6 +17,7 @@ function forward_model(pdf_params::Union{BernsteinPDFParams,BernsteinDirichletPD
 
     # Evolve PDFs
     iq0 = QCDNUM.iqfrmq(qcdnum_params.q0)
+
     ϵ = QCDNUM.evolfg(qcdnum_params.output_pdf_loc, input_pdf.cfunc, input_pdf.map, iq0)
 
     # Debugging
@@ -51,12 +52,9 @@ function forward_model(pdf_params::Union{BernsteinPDFParams,BernsteinDirichletPD
     my_funcm = get_input_xsec_func(-1)
     input_xsecm = @cfunction($my_funcm, Float64, (Ref{Int32}, Ref{Int32}, Ref{UInt8}))
 
-
     # Make two cross section splines
-    #set_lepcharge(1)
     QCDNUM.ssp_s2fill(iaF_eP, input_xsecp, splint_params.rscut)
 
-    #set_lepcharge(-1)
     QCDNUM.ssp_s2fill(iaF_eM, input_xsecm, splint_params.rscut)
 
     # Integrate over cross section
@@ -71,8 +69,10 @@ function forward_model(pdf_params::Union{BernsteinPDFParams,BernsteinDirichletPD
     # Fold through response to get counts
     ePp = 0
     eMp = 1
+
     TM_eP = get_TM_elements(ePp,md)
     TM_eM = get_TM_elements(eMp,md)
+
 
     K_eP = get_K_elements(ePp)
     K_eM = get_K_elements(eMp)
@@ -94,7 +94,6 @@ function forward_model(pdf_params::Union{BernsteinPDFParams,BernsteinDirichletPD
     end
 
     return counts_pred_ep, counts_pred_em
-
 end
 
 

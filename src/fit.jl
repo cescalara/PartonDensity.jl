@@ -30,7 +30,9 @@ function get_prior(pdf_params::ValencePDFParams)
 
     return prior
 end
-
+"""
+Placeholder function for priors.
+"""
 
 function get_prior(pdf_params::DirichletPDFParams)
 
@@ -69,12 +71,12 @@ function get_likelihood(pdf_params::ValencePDFParams, sim_data::Dict{String,Any}
 
         logfuncdensity(function (params)
 
-            θ = get_scaled_θ(params.λ_u, params.K_u, params.λ_d,
-                params.K_d, Vector(params.θ_tmp))
+            θ = get_scaled_θ(params.λ_u, params.K_u, params.λ_d,params.K_d, Vector(params.θ_tmp))
 
-            pdf_params = ValencePDFParams(λ_u=params.λ_u, K_u=params.K_u, λ_d=params.λ_d,
-                K_d=params.K_d, λ_g1=params.λ_g1, λ_g2=params.λ_g2,
-                K_g=params.K_g, λ_q=params.λ_q, K_q=params.K_q, θ=θ)
+            pdf_params = ValencePDFParams(λ_u=params.λ_u, K_u=params.K_u, λ_d=params.λ_d,K_d=params.K_d, 
+                λ_g1=params.λ_g1, λ_g2=params.λ_g2,
+                K_g=params.K_g, λ_q=params.λ_q, K_q=params.K_q, θ=θ
+            )
 
             counts_pred_ep, counts_pred_em = @critical forward_model(pdf_params, qcdnum_params,
                 splint_params, quark_coeffs)
@@ -106,8 +108,8 @@ end
 
 
 function get_likelihood(pdf_params::DirichletPDFParams, sim_data::Dict{String,Any},
-    qcdnum_params::QCDNUM.EvolutionParams, splint_params::QCDNUM.SPLINTParams,
-    quark_coeffs::QuarkCoefficients)
+    qcdnum_params::QCDNUM.EvolutionParams, splint_params::QCDNUM.SPLINTParams,quark_coeffs::QuarkCoefficients
+    )
 
     likelihood = let d = sim_data
 
@@ -117,17 +119,13 @@ function get_likelihood(pdf_params::DirichletPDFParams, sim_data::Dict{String,An
 
         logfuncdensity(function (params)
 
-            pdf_params = DirichletPDFParams(K_u=params.K_u, K_d=params.K_d,
-                λ_g1=params.λ_g1, λ_g2=params.λ_g2,
-                K_g=params.K_g, λ_q=params.λ_q, K_q=params.K_q,
-                θ=Vector(params.θ))
-
             # Ensure u-valence weight > d-valence weight
             if params.θ[2] > params.θ[1]
-
                 return -Inf
-
             end
+            pdf_params = DirichletPDFParams(K_u=params.K_u, K_d=params.K_d,
+                λ_g1=params.λ_g1, λ_g2=params.λ_g2,
+                K_g=params.K_g, λ_q=params.λ_q, K_q=params.K_q,θ=Vector(params.θ))
 
             counts_pred_ep, counts_pred_em = @critical forward_model(pdf_params, qcdnum_params,
                 splint_params, quark_coeffs)
@@ -196,8 +194,8 @@ function plot_model_space_impl(x_grid::StepRangeLen{Float64}, pdf_params::Valenc
         pdf_params_i = ValencePDFParams(λ_u=samples.v.λ_u[i], K_u=samples.v.K_u[i],
             λ_d=samples.v.λ_d[i], K_d=samples.v.K_d[i],
             λ_g1=samples.v.λ_g1[i], λ_g2=samples.v.λ_g2[i],
-            K_g=samples.v.K_g[i], λ_q=samples.v.λ_q[i], K_q=samples.v.K_q[i],
-            θ=θ_i)
+            K_g=samples.v.K_g[i], λ_q=samples.v.λ_q[i], K_q=samples.v.K_q[i],θ=θ_i
+            )
         p = plot!(x_grid, [xtotx(x, pdf_params_i) for x in x_grid], color=color, lw=3,
             alpha=0.01, label="")
 
@@ -213,8 +211,8 @@ function plot_model_space_impl(x_grid::StepRangeLen{Float64}, pdf_params::Dirich
 
         pdf_params_i = DirichletPDFParams(K_u=samples.v.K_u[i], K_d=samples.v.K_d[i],
             λ_g1=samples.v.λ_g1[i], λ_g2=samples.v.λ_g2[i],
-            K_g=samples.v.K_g[i], λ_q=samples.v.λ_q[i], K_q=samples.v.K_q[i],
-            θ=Vector(samples.v.θ[i]))
+            K_g=samples.v.K_g[i], λ_q=samples.v.λ_q[i],θ=Vector(samples.v.θ[i])
+            , K_q=samples.v.K_q[i])
         p = plot!(x_grid, [xtotx(x, pdf_params_i) for x in x_grid], color=color, lw=3,
             alpha=0.01, label="")
 
@@ -236,8 +234,7 @@ function plot_data_space end
 function plot_data_space(pdf_params::AbstractPDFParams, sim_data::Dict{String,Any}, samples,
     qcdnum_params::QCDNUM.EvolutionParams,
     splint_params::QCDNUM.SPLINTParams, quark_coeffs::QuarkCoefficients;
-    ep_color=:firebrick, em_color=:teal, nsamples::Integer=100, plot_size=(1000, 500),
-    args...)
+    ep_color=:firebrick, em_color=:teal, nsamples::Integer=100, plot_size=(1000, 500))
 
     forward_model_init(qcdnum_params, splint_params)
 
@@ -253,7 +250,7 @@ function plot_data_space(pdf_params::AbstractPDFParams, sim_data::Dict{String,An
     p1, p2 = plot_data_space_impl(pdf_params, sub_samples, qcdnum_params,
         splint_params, quark_coeffs, p1, p2, nbins)
 
-    plot(p1, p2, size=plot_size, xlabel="Bin number", bottom_margin=10Plots.mm, markerstrokewidth=0; args...)
+    plot(p1, p2, size=plot_size, xlabel="Bin number")
 end
 
 
@@ -266,15 +263,14 @@ function plot_data_space_impl(pdf_params::ValencePDFParams, samples, qcdnum_para
         counts_obs_ep_i = zeros(UInt64, nbins)
         counts_obs_em_i = zeros(UInt64, nbins)
 
-        θ_i = get_scaled_θ(samples.v.λ_u[i], samples.v.K_u[i], samples.v.λ_d[i],
-            samples.v.K_d[i], Vector(samples.v.θ_tmp[i]))
+        θ_i = get_scaled_θ(samples.v.λ_u[i], samples.v.K_u[i], samples.v.λ_d[i],samples.v.K_d[i], Vector(samples.v.θ_tmp[i]))
 
 
         pdf_params_i = ValencePDFParams(λ_u=samples.v.λ_u[i], K_u=samples.v.K_u[i],
             λ_d=samples.v.λ_d[i], K_d=samples.v.K_d[i],
             λ_g1=samples.v.λ_g1[i], λ_g2=samples.v.λ_g2[i],
-            K_g=samples.v.K_g[i], λ_q=samples.v.λ_q[i], K_q=samples.v.K_q[i],
-            θ=θ_i)
+            K_g=samples.v.K_g[i], λ_q=samples.v.λ_q[i], K_q=samples.v.K_q[i],θ=θ_i
+)
 
         counts_pred_ep_i, counts_pred_em_i = forward_model(pdf_params_i, qcdnum_params,
             splint_params, quark_coeffs)
@@ -322,8 +318,10 @@ function plot_data_space_impl(pdf_params::DirichletPDFParams, samples, qcdnum_pa
 
         pdf_params_i = DirichletPDFParams(K_u=samples.v.K_u[i], K_d=samples.v.K_d[i],
             λ_g1=samples.v.λ_g1[i], λ_g2=samples.v.λ_g2[i],
-            K_g=samples.v.K_g[i], λ_q=samples.v.λ_q[i], K_q=samples.v.K_q[i],
-            θ=Vector(samples.v.θ[i]))
+            K_g=samples.v.K_g[i], λ_q=samples.v.λ_q[i],
+            θ=Vector(samples.v.θ[i]),
+            K_q=samples.v.K_q[i]
+            )
 
         counts_pred_ep_i, counts_pred_em_i = forward_model(pdf_params_i, qcdnum_params,
             splint_params, quark_coeffs)
