@@ -6,7 +6,6 @@
 
 using QCDNUM, PartonDensity
 using Plots, Printf, NaNMath, Parameters, Random, Distributions
-include("../src/MetaData.jl")
 const MD_DUMMY = MetaData("DUMMY", 141.44, 185.018, 318.0);
 
 # ## Define input PDFs

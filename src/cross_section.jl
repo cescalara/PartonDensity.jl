@@ -23,8 +23,6 @@ calculations.
     valdn::Vector{Float64} = [0.,-1., 0.,-1., 0.,-1., 0., 1., 0., 1., 0., 1., 0.]
 end
 
-include("MetaData.jl")
-
 # These globals will later be set by user
 const ZMass = 91.1876
 const WMass = 80.398 
