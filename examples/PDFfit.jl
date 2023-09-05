@@ -87,10 +87,11 @@ sim_data["counts_obs_em"]=get_data_events(1)
 θ_sum=sum(θ[1:9])
 θ=θ/θ_sum  
 somepdf_params = DirichletPDFParams(K_u=3.7, K_d=3.7, λ_g1=0.5, λ_g2=-0.5, K_g=5.0,λ_q=-0.5, K_q=6.0, θ=θ);
-
+MD_TEMP::MetaData = MD_G
 if parsed_args["pseudodata"] != "data"
-  somepdf_params, sim_data = pd_read_sim(string("pseudodata/",parsed_args["pseudodata"],".h5"));
+  somepdf_params, sim_data, MD_TEMP = pd_read_sim(string("pseudodata/",parsed_args["pseudodata"],".h5"));
 end
+MD_LOCAL::MetaData = MD_TEMP
 
 prior=get_priors(parsed_args)
 
@@ -118,20 +119,20 @@ logfuncdensity(function (params)
          pdf_params = BernsteinDirichletPDFParams(initial_U=initU,initial_D=initD, λ_g1=params.λ_g1, λ_g2=params.λ_g2,
                     K_g=params.K_g, λ_q=params.λ_q, K_q=params.K_q,bspoly_params=bspoly_params,bspoly_params_d=bspoly_params_d,θ=Vector(params.θ))
          ParErrs = [params.beta0_1,params.beta0_2,params.beta0_3,params.beta0_4, params.beta0_5,params.beta0_6,params.beta0_7,params.beta0_8]
-         counts_pred_ep, counts_pred_em = @critical  forward_model(pdf_params, qcdnum_params, splint_params, quark_coeffs,ParErrs );
+         counts_pred_ep, counts_pred_em = @critical  forward_model(pdf_params, qcdnum_params, splint_params, quark_coeffs,MD_LOCAL,ParErrs );
        end
 
        if parsed_args["parametrisation"] == "Dirichlet"
          pdf_params = DirichletPDFParams(K_u=params.K_u, K_d=params.K_d, λ_g1=params.λ_g1, λ_g2=params.λ_g2, K_g=params.K_g, λ_q=params.λ_q, K_q=params.K_q, θ=params.θ)
          ParErrs = [params.beta0_1,params.beta0_2,params.beta0_3,params.beta0_4, params.beta0_5,params.beta0_6,params.beta0_7,params.beta0_8]
-         counts_pred_ep, counts_pred_em = @critical  forward_model(pdf_params, qcdnum_params, splint_params, quark_coeffs,ParErrs );
+         counts_pred_ep, counts_pred_em = @critical  forward_model(pdf_params, qcdnum_params, splint_params, quark_coeffs,MD_LOCAL,ParErrs );
        end
 
        if parsed_args["parametrisation"] == "Valence"
          θ = get_scaled_θ(params.λ_u, params.K_u, params.λ_d,params.K_d, Vector(params.θ_tmp))
          pdf_params = ValencePDFParams(λ_u=params.λ_u, K_u=params.K_u, λ_d=params.λ_d, K_d=params.K_d, λ_g1=params.λ_g1, λ_g2=params.λ_g2, K_g=params.K_g, λ_q=params.λ_q, K_q=params.K_q, θ=θ)
          ParErrs = [params.beta0_1,params.beta0_2,params.beta0_3,params.beta0_4, params.beta0_5,params.beta0_6,params.beta0_7,params.beta0_8]
-         counts_pred_ep, counts_pred_em = @critical  forward_model(pdf_params, qcdnum_params, splint_params, quark_coeffs,ParErrs );
+         counts_pred_ep, counts_pred_em = @critical  forward_model(pdf_params, qcdnum_params, splint_params, quark_coeffs,MD_LOCAL,ParErrs );
        end
             ll_value = 0.0
             for i in 1:nbins
@@ -143,8 +144,8 @@ logfuncdensity(function (params)
                    @debug "counts_pred_em[i] < 0, setting to 0" i counts_pred_em[i]
                    counts_pred_em[i] = 0
                 end
-                counts_pred_ep[i] =counts_pred_ep[i]*(1+0.018*params.Beta1)
-                counts_pred_em[i] =counts_pred_em[i]*(1+0.018*params.Beta2)                
+                counts_pred_ep[i] =counts_pred_ep[i]*(1+MD_LOCAL.Ld_ePp_uncertainty*params.Beta1)
+                counts_pred_em[i] =counts_pred_em[i]*(1+MD_LOCAL.Ld_eMp_uncertainty*params.Beta2)                
                 ll_value += logpdf(Poisson(counts_pred_ep[i]), counts_obs_ep[i])
                 ll_value += logpdf(Poisson(counts_pred_em[i]), counts_obs_em[i])
             end
