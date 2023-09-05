@@ -213,7 +213,7 @@ Double differential cross section for all x and
 q2 bins.
 NB: modifications needed to include pol and order.
 """
-function dd_xsecnc_xq2(charge::Int, MetaData::md, x_bin_cen::Array{Float64}, q2_bin_cen::Array{Float64})::Array{Float64}
+function dd_xsecnc_xq2(charge::Int, md::MetaData, x_bin_cen::Array{Float64}, q2_bin_cen::Array{Float64})::Array{Float64}
 
     n_bins = length(x_bin_cen)
 
