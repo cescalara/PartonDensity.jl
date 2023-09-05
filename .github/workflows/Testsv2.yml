@@ -66,12 +66,12 @@ jobs:
       with:
           fetch-depth: 2
     - name: Build and deploy docs
-        env: 
+      env: 
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # If authenticating with GitHub Actions token
           PLOTS_TEST: "true"
           GKSwstype: "100"
           # JULIA_DEBUG: "all"
-        run: |
+      run: |
            julia --project=docs/ -e 'using Pkg; Pkg.develop(PackageSpec(path=pwd())); Pkg.instantiate()'
            julia --project=docs/ docs/make.jl
 
