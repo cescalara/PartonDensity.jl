@@ -33,8 +33,8 @@ using QCDNUM
     pdf_params_list = [val_pdf_params, dir_pdf_params, bern_pdf_params]
 
     # Initialise
-    reference_data_file = string(@__DIR__, "/reference_test_data/counts_pred.csv")
-    counts_pred = CSV.read(reference_data_file, NamedTuple)
+    reference_data_file = string(@__DIR__, "/reference_test_data/counts_pred_ref.csv")
+    counts_pred_ref = CSV.read(reference_data_file, NamedTuple)
 
     qcdnum_grid = QCDNUM.GridParams(x_min=[1.0e-3], x_weights=[1], nx=100,
         qq_bounds=[1.0e2, 3.0e4], qq_weights=[1.0, 1.0],
@@ -48,6 +48,8 @@ using QCDNUM
     quark_coeffs = QuarkCoefficients()
 
     forward_model_init(qcdnum_params, splint_params)
+
+    counts_pred_gen = NamedTuple()
 
     # Run forward model
     for pdf_params in pdf_params_list
@@ -63,6 +65,8 @@ using QCDNUM
             @test all(counts_pred_em .>= 0.0)
             @test all(counts_pred_em .<= 2.0e3)
 
+            counts_pred_gen = merge(counts_pred_gen, (counts_pred_ep_bern=counts_pred_ep, counts_pred_em_bern=counts_pred_em))
+
         elseif typeof(pdf_params) == DirichletPDFParams{Float64,Vector{Float64}}
 
             @test all(counts_pred_ep .>= 0.0)
@@ -71,8 +75,10 @@ using QCDNUM
             @test all(counts_pred_em .>= 0.0)
             @test all(counts_pred_em .<= 1.0e3)
 
-            @test all(counts_pred_ep .≈ counts_pred.counts_pred_ep_dir)
-            @test all(counts_pred_em .≈ counts_pred.counts_pred_em_dir)
+            counts_pred_gen = merge(counts_pred_gen, (counts_pred_ep_dir=counts_pred_ep, counts_pred_em_dir=counts_pred_em))
+
+            @test all(counts_pred_ep .≈ counts_pred_ref.counts_pred_ep_dir)
+            @test all(counts_pred_em .≈ counts_pred_ref.counts_pred_em_dir)
 
         elseif typeof(pdf_params) == ValencePDFParams{Float64,Vector{Float64}}
 
@@ -82,8 +88,10 @@ using QCDNUM
             @test all(counts_pred_em .>= 0.0)
             @test all(counts_pred_em .<= 1.0e3)
 
-            @test all(counts_pred_ep .≈ counts_pred.counts_pred_ep_val)
-            @test all(counts_pred_em .≈ counts_pred.counts_pred_em_val)
+            counts_pred_gen = merge(counts_pred_gen, (counts_pred_ep_val=counts_pred_ep, counts_pred_em_val=counts_pred_em))
+
+            @test all(counts_pred_ep .≈ counts_pred_ref.counts_pred_ep_val)
+            @test all(counts_pred_em .≈ counts_pred_ref.counts_pred_em_val)
 
         end
 
@@ -102,6 +110,10 @@ using QCDNUM
         sim_data["counts_obs_em"] = counts_obs_em
 
         mktempdir() do tmp_dir
+
+            # Demonstrate how reference file is generated
+            generated_data_file = joinpath(tmp_dir, "counts_pred_gen.csv")
+            CSV.write(generated_data_file, counts_pred_gen)
 
             output_file = joinpath(tmp_dir, "test_sim.h5")
 

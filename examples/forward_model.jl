@@ -6,6 +6,7 @@
 
 using QCDNUM, PartonDensity
 using Plots, Printf, NaNMath, Parameters, Random, Distributions
+const MD_DUMMY = MetaData("DUMMY", 141.44, 185.018, 318.1);
 
 # ## Define input PDFs
 # We can use `DirichletPDFParams` or `ValencePDFParams`, as long
@@ -101,10 +102,10 @@ QCDNUM.ssp_uwrite(splint_params.spline_addresses.F3dn, Float64(iaF3dn));
 QCDNUM.ssp_uwrite(splint_params.spline_addresses.FLup, Float64(iaFLup));
 QCDNUM.ssp_uwrite(splint_params.spline_addresses.FLdn, Float64(iaFLdn));
 
-my_funcp = get_input_xsec_func(1) # charge = 1
+my_funcp = get_input_xsec_func(1, MD_DUMMY) # charge = 1
 input_xsecp = @cfunction(my_funcp, Float64, (Ref{Int32}, Ref{Int32}, Ref{UInt8}))
 
-my_funcm = get_input_xsec_func(-1) # charge = -1
+my_funcm = get_input_xsec_func(-1, MD_DUMMY) # charge = -1
 input_xsecm = @cfunction(my_funcm, Float64, (Ref{Int32}, Ref{Int32}, Ref{UInt8}))
 
 # plot
@@ -113,7 +114,7 @@ xsec_on_grid = zeros(g.nx, g.nq);
 
 for ix = 1:g.nx
     for iq = 1:g.nq
-        xsec_on_grid[ix, iq] = _fun_xsec_i(1, ix, iq) # charge = 1
+        xsec_on_grid[ix, iq] = _fun_xsec_i(1, MD_DUMMY, ix, iq) # charge = 1
     end
 end
 
@@ -166,10 +167,8 @@ nbins = size(xbins_M_begin)[1]
 IntXsec_eP = zeros(nbins);
 IntXsec_eM = zeros(nbins);
 for i in 1:nbins
-    IntXsec_eP[i] = QCDNUM.dsp_ints2(iaF_eP, xbins_M_begin[i], xbins_M_end[i],
-        q2bins_M_begin[i], q2bins_M_end[i], 318.0, 4)
-    IntXsec_eM[i] = QCDNUM.dsp_ints2(iaF_eM, xbins_M_begin[i], xbins_M_end[i],
-        q2bins_M_begin[i], q2bins_M_end[i], 318.0, 4)
+    IntXsec_eP[i] = QCDNUM.dsp_ints2(iaF_eP, xbins_M_begin[i], xbins_M_end[i], q2bins_M_begin[i], q2bins_M_end[i], MD_DUMMY.sqrtS, 4)
+    IntXsec_eM[i] = QCDNUM.dsp_ints2(iaF_eM, xbins_M_begin[i], xbins_M_end[i], q2bins_M_begin[i], q2bins_M_end[i], MD_DUMMY.sqrtS, 4)
 end
 
 # 1 for e-p and 0 for e+p

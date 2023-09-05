@@ -15,7 +15,7 @@ numbers_from_file = readdlm("../data/EXAMPLE_1/HERAPDF20_NNLO_EIG_ePp.txt")
 integ_xsec = numbers_from_file[:,3] 
 
 # Corresponding list of expected event numbers
-prediction = get_pred_N(integ_xsec, eMPp); 
+prediction = get_pred_N(integ_xsec, eMPp, MD_ZEUS); 
 
 integ_xsec[153]
 
