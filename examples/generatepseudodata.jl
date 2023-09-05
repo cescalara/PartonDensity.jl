@@ -19,6 +19,15 @@ function parse_commandline()
             help = "Parametrisation -- Dirichlet or Valence"
             arg_type = String
             default = "Dirichlet"
+        "--dataset", "-d"
+            help = "Dataset ID to generate the data"
+            arg_type = String
+            default = "ZEUS_I1787035"
+        "--lumifactor", "-f"
+            help = "Lumi factor for the Dataset"
+            arg_type = Float64
+            default = 1.0
+
     end
 
     return parse_args(s)
@@ -94,10 +103,14 @@ qcdnum_params = QCDNUM.EvolutionParams(order=2, α_S=0.118, q0=100.0, grid_param
     
 splint_params = QCDNUM.SPLINTParams();
 quark_coeffs = QuarkCoefficients();
+
+
+include(string("data/")+parsed_args["dataset"])
+MD_LOCAL::MetaData =  MetaData(MD_G.name, MD_G.Ld_ePp*parsed_args["lumifactor"] , MD_G.Ld_eMp*parsed_args["lumifactor"], MD_G.sqrtS)
+
+
 forward_model_init(qcdnum_params, splint_params)
-
-
-counts_pred_ep, counts_pred_em = forward_model(pdf_params, qcdnum_params,splint_params, quark_coeffs);
+counts_pred_ep, counts_pred_em = forward_model(pdf_params, qcdnum_params,splint_params, quark_coeffs,MD_LOCAL);
     
 nbins = size(counts_pred_ep)[1]
 counts_obs_ep = zeros(UInt64, nbins)
