@@ -144,8 +144,8 @@ logfuncdensity(function (params)
                    @debug "counts_pred_em[i] < 0, setting to 0" i counts_pred_em[i]
                    counts_pred_em[i] = 0
                 end
-                counts_pred_ep[i] =counts_pred_ep[i]*(1+MD_LOCAL.Ld_ePp*params.Beta1)
-                counts_pred_em[i] =counts_pred_em[i]*(1+MD_LOCAL.Ld_eMp*params.Beta2)                
+                counts_pred_ep[i] =counts_pred_ep[i]*(1+MD_LOCAL.Ld_ePp_uncertainty*params.Beta1)
+                counts_pred_em[i] =counts_pred_em[i]*(1+MD_LOCAL.Ld_eMp_uncertainty*params.Beta2)                
                 ll_value += logpdf(Poisson(counts_pred_ep[i]), counts_obs_ep[i])
                 ll_value += logpdf(Poisson(counts_pred_em[i]), counts_obs_em[i])
             end
