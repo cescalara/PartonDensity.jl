@@ -9,7 +9,7 @@ using PartonDensity, CSV, DelimitedFiles
 eMPp = 1 # e+/e- switch 0/1
 
 # Read in an example integrated cross section
-numbers_from_file = readdlm("data/HERAPDF20_NNLO_EIG_ePp.txt") 
+numbers_from_file = readdlm("../data/EXAMPLE_1/HERAPDF20_NNLO_EIG_ePp.txt") 
 
 # List of integrated cross section values in 429 bins 
 integ_xsec = numbers_from_file[:,3] 
@@ -24,7 +24,7 @@ prediction[151]
 # ## Bins in detector space
 #
 # The transfer matrix projects into a list of 153 bins with irregular x and Q2 spacing.
-# The bin edges are provided in `data/zeus_bin_edges.jl` but can also be quickly and
+# The bin edges are provided in `data/ZEUS_I1787035/zeus_bin_edges.jl` but can also be quickly and
 # easily accessed with the helper function `get_bin_info` as shown below.
 
 get_bin_info(10)
