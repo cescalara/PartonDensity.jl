@@ -22,7 +22,7 @@ function parse_commandline()
         "--dataset", "-d"
             help = "Dataset ID to generate the data"
             arg_type = String
-            default = "ZEUS_I1787035"
+            default = "../data/ZEUS_I1787035/ZEUS_I1787035.jl"
         "--lumifactor", "-f"
             help = "Lumi factor for the Dataset"
             arg_type = Float64
@@ -105,7 +105,7 @@ splint_params = QCDNUM.SPLINTParams();
 quark_coeffs = QuarkCoefficients();
 
 
-include(string("../data/",parsed_args["dataset"],parsed_args["dataset"],".jl"))
+include(parsed_args["dataset"])
 MD_LOCAL::MetaData =  MetaData(MD_G.name, MD_G.Ld_ePp*parsed_args["lumifactor"] , MD_G.Ld_eMp*parsed_args["lumifactor"], MD_G.sqrtS)
 
 
