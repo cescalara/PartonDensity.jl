@@ -178,11 +178,11 @@ function rxsecnc_xq2(chage::Int, md::MetaData, x_bin_cen::Array{Float64}, q2_bin
 end
 
 """
-    nc_propagator(q2, x)
+    nc_propagator(md, q2, x)
 """
-function nc_propagator(q2::Float64, x::Float64)::Float64
+function nc_propagator(md::MetaData, q2::Float64, x::Float64)::Float64
 
-    y = q2 / sqrt_s / sqrt_s / x
+    y = q2 / md.sqrtS / md.sqrtS / x
     Yplus = 1 + (1 - y)^2
     alpha = AlphaEM
     conversion_factor = 0.3894e9;  # GeV^2 -> pb^2
@@ -201,7 +201,7 @@ function dd_xsecnc_xq2_i(charge::Int, md::MetaData, x::Float64, q2::Float64, F2:
 
     dd_xsec = -1.0
     
-    dd_xsec = nc_propagator(q2, x) * rxsecnc_xq2_i(charge, md, x, q2, F2, xF3, FL)
+    dd_xsec = nc_propagator(md, q2, x) * rxsecnc_xq2_i(charge, md, x, q2, F2, xF3, FL)
     
     return dd_xsec
 end
