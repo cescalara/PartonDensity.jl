@@ -51,4 +51,27 @@ jobs:
          export JULIA_DEPOT_PATH=/opt/myjulia
          julia --project=. -e 'import Pkg; Pkg.instantiate(); include("test/runtests.jl")'
          
+  build-docs-in-partondensity-docker-image:
+    name: Build docs in PartonDensity Docker image
+    runs-on: ubuntu-latest
+    needs: build-partondensity-docker-image
+    container:
+            image: ghcr.io/cescalara/partondensity.jl:latest
+            credentials:
+               username: ${{ github.actor }}
+               password: ${{ secrets.GITHUB_TOKEN }}    
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v3
+      with:
+          fetch-depth: 2
+    - name: Build and deploy docs
+        env: 
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # If authenticating with GitHub Actions token
+          PLOTS_TEST: "true"
+          GKSwstype: "100"
+          # JULIA_DEBUG: "all"
+        run: |
+           julia --project=docs/ -e 'using Pkg; Pkg.develop(PackageSpec(path=pwd())); Pkg.instantiate()'
+           julia --project=docs/ docs/make.jl
 
