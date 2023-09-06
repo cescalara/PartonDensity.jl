@@ -176,11 +176,11 @@ end
 ePp = 0;
 eMp = 1;
 
-TM_eP = get_TM_elements_ePp
-TM_eM = get_TM_elements_eMp
+TM_eP = m_TM_elements_ePp
+TM_eM = m_TM_elements_eMp
 
-K_eP = get_K_elements_ePp
-K_eM = get_K_elements_eMp
+K_eP = m_K_elements_ePp
+K_eM = m_K_elements_eMp
 
 nbins_out = size(TM_eP)[2];
 
