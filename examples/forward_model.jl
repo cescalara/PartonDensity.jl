@@ -176,8 +176,8 @@ end
 ePp = 0;
 eMp = 1;
 
-TM_eP = get_TM_elements(ePp);
-TM_eM = get_TM_elements(eMp);
+TM_eP = get_TM_elements(ePp,MD_DUMMY);
+TM_eM = get_TM_elements(eMp,MD_DUMMY);
 
 K_eP = get_K_elements(ePp);
 K_eM = get_K_elements(eMp);
