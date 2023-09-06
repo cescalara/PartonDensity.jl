@@ -4,6 +4,26 @@
 
 using PartonDensity, CSV, DelimitedFiles
 
+"""
+    get_bin_info(n, quiet)
+
+Get the bin egdes of the ZEUS 
+detector space for a given 
+bin number, `n`.
+"""
+function get_bin_info(n::Integer; quiet::Bool = false)
+
+    if n < 1 || n > 153
+        @error "Bin number n should be [1, 153]"
+    end
+    if !quiet
+        @info "ZEUS detector bin" n BinQ2low[n] BinQ2high[n] Binxlow[n] Binxhigh[n]
+    end
+    return ([BinQ2low[n], BinQ2high[n]], [Binxlow[n], Binxhigh[n]])
+end
+
+
+
 # ## Transfer matrix
 
 eMPp = 1 # e+/e- switch 0/1
