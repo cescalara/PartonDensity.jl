@@ -4,18 +4,38 @@
 
 using PartonDensity, CSV, DelimitedFiles
 
+"""
+    get_bin_info(n, quiet)
+
+Get the bin egdes of the ZEUS 
+detector space for a given 
+bin number, `n`.
+"""
+function get_bin_info(n::Integer; quiet::Bool = false)
+
+    if n < 1 || n > 153
+        @error "Bin number n should be [1, 153]"
+    end
+    if !quiet
+        @info "ZEUS detector bin" n m_BinQ2low[n] m_BinQ2high[n] m_m_Binxlow[n] m_Binxhigh[n]
+    end
+    return ([m_BinQ2low[n], m_BinQ2high[n]], [m_Binxlow[n], m_Binxhigh[n]])
+end
+
+
+
 # ## Transfer matrix
 
 eMPp = 1 # e+/e- switch 0/1
 
 # Read in an example integrated cross section
-numbers_from_file = readdlm("../data/EXAMPLE_1/HERAPDF20_NNLO_EIG_ePp.txt") 
+numbers_from_file = readdlm("data/EXAMPLE_1/HERAPDF20_NNLO_EIG_ePp.txt") 
 
 # List of integrated cross section values in 429 bins 
 integ_xsec = numbers_from_file[:,3] 
 
 # Corresponding list of expected event numbers
-prediction = get_pred_N(integ_xsec, eMPp, MD_ZEUS); 
+prediction = get_pred_N(integ_xsec, eMPp, MD_ZEUS_I1787035); 
 
 integ_xsec[153]
 
