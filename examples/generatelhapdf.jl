@@ -100,6 +100,10 @@ x = 1.0e-3
 q = 1.0e3
 pdf = Array{Float64}(undef, 13)
 
+g = QCDNUM.load_params(string("fitresults/", parsed_args["fitresults"], ".h5"))
+
+
+
 QCDNUM.qcinit(-6, " ")
 nx = QCDNUM.gxmake(xmin, iwt, ng, nxin, iosp)
 nq = QCDNUM.gqmake(qq, wt, ngq, nqin)
