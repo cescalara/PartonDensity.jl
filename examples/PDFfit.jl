@@ -164,7 +164,9 @@ convergence = BrooksGelmanConvergence(threshold=1.3);
 burnin = MCMCMultiCycleBurnin(max_ncycles=50);
 samples = bat_sample(posterior, MCMCSampling(mcalg=mcalg, nsteps=parsed_args["nsteps"], nchains=parsed_args["nchains"])).result;
 # Let's save the result for further analysis
-bat_write(string("fitresults/fit-",parsed_args["parametrisation"],"-",parsed_args["priorshift"],"-",seedtxt,"-",parsed_args["pseudodata"],".h5"), samples)
+fname=string("fitresults/fit-",parsed_args["parametrisation"],"-",parsed_args["priorshift"],"-",seedtxt,"-",parsed_args["pseudodata"],".h5")
+bat_write(fname, samples)
+QCDNUM.save_params(fname, qcdnum_params)
 end 
 
 main()
