@@ -61,7 +61,7 @@ jobs:
          export JULIA_DEPOT_PATH=/opt/myjulia
          mkdir -p pseudodata
          julia --project=. examples/generatepseudodata.jl -s 42 -p Dirichlet -f 2.0 
-
+         ls -lah pseudodata
          
   build-docs-in-partondensity-docker-image:
     name: Build docs in PartonDensity Docker image
