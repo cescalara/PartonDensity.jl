@@ -163,12 +163,12 @@ plot(p1, xlabel="x", ylabel="q2",
 #
 # Here, we neglect any possible contribution from systematic errors
 
-nbins = size(xbins_M_begin)[1]
+nbins = size(m_xbins_M_begin)[1]
 IntXsec_eP = zeros(nbins);
 IntXsec_eM = zeros(nbins);
 for i in 1:nbins
-    IntXsec_eP[i] = QCDNUM.dsp_ints2(iaF_eP, xbins_M_begin[i], xbins_M_end[i], q2bins_M_begin[i], q2bins_M_end[i], MD_DUMMY.sqrtS, 4)
-    IntXsec_eM[i] = QCDNUM.dsp_ints2(iaF_eM, xbins_M_begin[i], xbins_M_end[i], q2bins_M_begin[i], q2bins_M_end[i], MD_DUMMY.sqrtS, 4)
+    IntXsec_eP[i] = QCDNUM.dsp_ints2(iaF_eP, m_xbins_M_begin[i], m_xbins_M_end[i], m_q2bins_M_begin[i], m_q2bins_M_end[i], MD_DUMMY.sqrtS, 4)
+    IntXsec_eM[i] = QCDNUM.dsp_ints2(iaF_eM, m_xbins_M_begin[i], m_xbins_M_end[i], m_q2bins_M_begin[i], m_q2bins_M_end[i], MD_DUMMY.sqrtS, 4)
 end
 
 # 1 for e-p and 0 for e+p
@@ -176,11 +176,11 @@ end
 ePp = 0;
 eMp = 1;
 
-TM_eP = get_TM_elements(ePp,MD_DUMMY);
-TM_eM = get_TM_elements(eMp,MD_DUMMY);
+TM_eP = m_TM_elements_ePp
+TM_eM = m_TM_elements_eMp
 
-K_eP = get_K_elements(ePp);
-K_eM = get_K_elements(eMp);
+K_eP = m_K_elements_ePp
+K_eM = m_K_elements_eMp
 
 nbins_out = size(TM_eP)[2];
 

@@ -58,22 +58,22 @@ function forward_model(pdf_params::Union{BernsteinPDFParams,BernsteinDirichletPD
     QCDNUM.ssp_s2fill(iaF_eM, input_xsecm, splint_params.rscut)
 
     # Integrate over cross section
-    nbins = size(xbins_M_begin)[1]
+    nbins = size(m_xbins_M_begin)[1]
     integ_xsec_ep = zeros(nbins)
     integ_xsec_em = zeros(nbins)
     for i in 1:nbins
-        integ_xsec_ep[i] = QCDNUM.dsp_ints2(iaF_eP, xbins_M_begin[i], xbins_M_end[i], q2bins_M_begin[i], q2bins_M_end[i], md.sqrtS, 4)
-        integ_xsec_em[i] = QCDNUM.dsp_ints2(iaF_eM, xbins_M_begin[i], xbins_M_end[i], q2bins_M_begin[i], q2bins_M_end[i], md.sqrtS, 4)
+        integ_xsec_ep[i] = QCDNUM.dsp_ints2(iaF_eP, m_xbins_M_begin[i], m_xbins_M_end[i], m_q2bins_M_begin[i], m_q2bins_M_end[i], md.sqrtS, 4)
+        integ_xsec_em[i] = QCDNUM.dsp_ints2(iaF_eM, m_xbins_M_begin[i], m_xbins_M_end[i], m_q2bins_M_begin[i], m_q2bins_M_end[i], md.sqrtS, 4)
     end
 
     # Fold through response to get counts
     ePp = 0
     eMp = 1
-    TM_eP = get_TM_elements(ePp,md)
-    TM_eM = get_TM_elements(eMp,md)
+    TM_eP = m_TM_elements_ePp
+    TM_eM = m_TM_elements_eMp
 
-    K_eP = get_K_elements(ePp)
-    K_eM = get_K_elements(eMp)
+    K_eP = m_K_elements_ePp
+    K_eM = m_K_elements_eMp
 
     nbins_out = size(TM_eP)[2]
 
