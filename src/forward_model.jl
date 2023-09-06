@@ -127,12 +127,12 @@ function forward_model(pdf_params::AbstractPDFParams,
     ePp = 0
     eMp = 1
 
-    TM_eP = get_TM_elements(ePp,md)
-    TM_eM = get_TM_elements(eMp,md)
+    TM_eP = get_TM_elements_ePp
+    TM_eM = get_TM_elements_eMp
 
 
-    K_eP = get_K_elements(ePp)
-    K_eM = get_K_elements(eMp)
+    K_eP = get_K_elements_ePp
+    K_eM = get_K_elements_eMp
 
     T = promote_type(map(eltype, (sys_err_params, Tnm_sys_ePp, Tnm_sys_eMp,TM_eP, TM_eM, K_eP, K_eM, integ_xsec_ep, integ_xsec_em))...)
 

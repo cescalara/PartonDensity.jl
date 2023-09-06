@@ -17,8 +17,13 @@ export Tnm_sys_ePp, Tnm_sys_eMp
 export MD_ZEUS_I1787035
 export get_pred_N
 export get_data_events
-export get_TM_elements
-export get_K_elements
+
+
+export get_TM_elements_ePp
+export get_TM_elements_eMp
+
+export get_K_elements_ePp
+export get_K_elements_eMp
 export get_bin_info
 
 export q2bins_M_begin
@@ -263,4 +268,7 @@ function Init_sys()
      println(Tnm_sys_ePp[NP1,NP2,1])
     
 end
-
+const get_TM_elements_ePp = get_TM_elements(0,MD_ZEUS_I1787035);
+const get_TM_elements_eMp = get_TM_elements(1,MD_ZEUS_I1787035);
+const get_K_elements_ePp  = get_K_elements(0);
+const get_K_elements_eMp  = get_K_elements(1);
