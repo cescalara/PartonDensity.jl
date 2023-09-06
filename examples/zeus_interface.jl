@@ -17,7 +17,7 @@ function get_bin_info(n::Integer; quiet::Bool = false)
         @error "Bin number n should be [1, 153]"
     end
     if !quiet
-        @info "ZEUS detector bin" n m_BinQ2low[n] m_BinQ2high[n] m_m_Binxlow[n] m_Binxhigh[n]
+        @info "ZEUS detector bin" n m_BinQ2low[n] m_BinQ2high[n] m_Binxlow[n] m_Binxhigh[n]
     end
     return ([m_BinQ2low[n], m_BinQ2high[n]], [m_Binxlow[n], m_Binxhigh[n]])
 end
