@@ -16,6 +16,9 @@ export Init_sys
 
 export MD_ZEUS_I1787035
 
+export m_Tnm_sys_ePp
+export m_Tnm_sys_ePp
+
 export m_TM_elements_ePp
 export m_TM_elements_eMp
 
