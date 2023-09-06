@@ -81,7 +81,7 @@ my_funcp = get_input_xsec_func(1, MD_DUMMY) # charge = 1
 input_xsecp = @cfunction(my_funcp, Float64, (Ref{Int32}, Ref{Int32}, Ref{UInt8}))
 
 my_funcm = get_input_xsec_func(-1, MD_DUMMY) # charge = -1
-input_xsecm = @cfunction(my_funcm, Float64, (Ref{Int32}, Ref{Int32}, Ref{UInt8}))</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">Ptr{Nothing} @0x00007fc9973d88a0</code></pre><p>plot</p><pre><code class="language-julia hljs">g = qcdnum_params.grid_params
+input_xsecm = @cfunction(my_funcm, Float64, (Ref{Int32}, Ref{Int32}, Ref{UInt8}))</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">Ptr{Nothing} @0x00007fee237d8880</code></pre><p>plot</p><pre><code class="language-julia hljs">g = qcdnum_params.grid_params
 xsec_on_grid = zeros(g.nx, g.nq);
 
 for ix = 1:g.nx
@@ -123,11 +123,11 @@ IntXsec_eM = zeros(nbins);
 for i in 1:nbins
     IntXsec_eP[i] = QCDNUM.dsp_ints2(iaF_eP, xbins_M_begin[i], xbins_M_end[i], q2bins_M_begin[i], q2bins_M_end[i], MD_DUMMY.sqrtS, 4)
     IntXsec_eM[i] = QCDNUM.dsp_ints2(iaF_eM, xbins_M_begin[i], xbins_M_end[i], q2bins_M_begin[i], q2bins_M_end[i], MD_DUMMY.sqrtS, 4)
-end</code></pre><p>1 for e-p and 0 for e+p</p><pre><code class="language- hljs">ePp = 0;
+end</code></pre><p>1 for e-p and 0 for e+p</p><pre><code class="language-julia hljs">ePp = 0;
 eMp = 1;
 
-TM_eP = get_TM_elements(ePp);
-TM_eM = get_TM_elements(eMp);
+TM_eP = get_TM_elements(ePp,MD_DUMMY);
+TM_eM = get_TM_elements(eMp,MD_DUMMY);
 
 K_eP = get_K_elements(ePp);
 K_eM = get_K_elements(eMp);
@@ -148,4 +148,24 @@ for j in 1:nbins_out
 
 end
 
-counts_pred_eM</code></pre><hr/><p><em>This page was generated using <a href="https://github.com/fredrikekre/Literate.jl">Literate.jl</a>.</em></p></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="../zeus_interface/">« ZEUS interface</a><a class="docs-footer-nextpage" href="../prior_bat_implementation/">Prior model implementation in BAT.jl »</a><div class="flexbox-break"></div><p class="footer-message">Powered by <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> and the <a href="https://julialang.org/">Julia Programming Language</a>.</p></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> version 0.27.25 on <span class="colophon-date" title="Tuesday 5 September 2023 19:09">Tuesday 5 September 2023</span>. Using Julia version 1.9.2.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>
+counts_pred_eM</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">153-element Vector{Float64}:
+ 651.6430308810627
+ 462.3474434974716
+ 353.8250890402993
+ 304.3408226976592
+ 200.58796784717183
+ 180.09268590111463
+ 132.68825877655811
+ 276.3002068237758
+ 704.476353274788
+ 587.3200097391523
+   ⋮
+  14.133048867826203
+   8.186102087178547
+   4.6763201873520055
+   2.522324578546638
+   1.5184036052034076
+   0.9856294574716068
+   0.1073669154427297
+  53.9465198773069
+   2.211269559843675</code></pre><hr/><p><em>This page was generated using <a href="https://github.com/fredrikekre/Literate.jl">Literate.jl</a>.</em></p></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="../zeus_interface/">« ZEUS interface</a><a class="docs-footer-nextpage" href="../prior_bat_implementation/">Prior model implementation in BAT.jl »</a><div class="flexbox-break"></div><p class="footer-message">Powered by <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> and the <a href="https://julialang.org/">Julia Programming Language</a>.</p></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> version 0.27.25 on <span class="colophon-date" title="Wednesday 6 September 2023 10:30">Wednesday 6 September 2023</span>. Using Julia version 1.9.2.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>
