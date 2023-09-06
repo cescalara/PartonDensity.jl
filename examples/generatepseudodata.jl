@@ -105,8 +105,8 @@ splint_params = QCDNUM.SPLINTParams();
 quark_coeffs = QuarkCoefficients();
 
 
-include(string("data/")+parsed_args["dataset"])
-MD_LOCAL::MetaData =  MetaData(MD_G.name, MD_G.Ld_ePp*parsed_args["lumifactor"] , MD_G.Ld_eMp*parsed_args["lumifactor"], MD_G.Ld_ePp_uncertainty,MD_G.Ld_eMp_uncertainty, MD_G.sqrtS)
+#include(string("data/")+parsed_args["dataset"])
+MD_LOCAL::MetaData =  MetaData(MD_ZEUS_I1787035, parsed_args["lumifactor"])
 
 
 forward_model_init(qcdnum_params, splint_params)
@@ -126,7 +126,7 @@ sim_data["nbins"] = nbins;
 sim_data["counts_obs_ep"] = counts_obs_ep;
 sim_data["counts_obs_em"] = counts_obs_em;
 
-pd_write_sim(string("pseudodata/simulation-",parsed_args["parametrisation"],"-",seedtxt,".h5"), pdf_params, sim_data, MD_G)
+pd_write_sim(string("pseudodata/simulation-",parsed_args["parametrisation"],"-",seedtxt,".h5"), pdf_params, sim_data, MD_LOCAL)
 end
 
 main()
