@@ -59,6 +59,7 @@ jobs:
       run : |
          export JULIA_PKGDIR=/opt/julia
          export JULIA_DEPOT_PATH=/opt/myjulia
+         mkdir -p pseudodata
          julia --project=. examples/generatepseudodata.jl -s 42 -p Dirichlet -f 2.0 
 
          
