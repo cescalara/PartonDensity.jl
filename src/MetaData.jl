@@ -1,6 +1,6 @@
 export MetaData
 
-struct MetaData
+mutable struct MetaData
  name::String
  Ld_ePp :: Float64
  Ld_eMp :: Float64
