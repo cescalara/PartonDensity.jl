@@ -29,7 +29,7 @@ end
 eMPp = 1 # e+/e- switch 0/1
 
 # Read in an example integrated cross section
-numbers_from_file = readdlm("../data/EXAMPLE_1/HERAPDF20_NNLO_EIG_ePp.txt") 
+numbers_from_file = readdlm("data/EXAMPLE_1/HERAPDF20_NNLO_EIG_ePp.txt") 
 
 # List of integrated cross section values in 429 bins 
 integ_xsec = numbers_from_file[:,3] 

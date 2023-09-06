@@ -54,8 +54,7 @@ jobs:
       run : |
          export JULIA_PKGDIR=/opt/julia
          export JULIA_DEPOT_PATH=/opt/myjulia
-         cd examples
-         julia --project=. -e 'import Pkg; Pkg.instantiate(); include("zeus_interface.jl")'
+         julia --project=. -e 'import Pkg; Pkg.instantiate(); include("examples/zeus_interface.jl")'
 
          
   build-docs-in-partondensity-docker-image:
