@@ -28,7 +28,7 @@ function get_pred_N(Integ_xsec, eMPp, md::MetaData)
     K = m_K_elements_ePp
     else
     TM = m_TM_elements_eMp
-    K = m_K_elements_eMp)    
+    K = m_K_elements_eMp    
     end
     xsec_pred = zeros(153)
     for j in 1:153
