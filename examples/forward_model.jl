@@ -163,12 +163,12 @@ plot(p1, xlabel="x", ylabel="q2",
 #
 # Here, we neglect any possible contribution from systematic errors
 
-nbins = size(xbins_M_begin)[1]
+nbins = size(m_xbins_M_begin)[1]
 IntXsec_eP = zeros(nbins);
 IntXsec_eM = zeros(nbins);
 for i in 1:nbins
-    IntXsec_eP[i] = QCDNUM.dsp_ints2(iaF_eP, xbins_M_begin[i], xbins_M_end[i], q2bins_M_begin[i], q2bins_M_end[i], MD_DUMMY.sqrtS, 4)
-    IntXsec_eM[i] = QCDNUM.dsp_ints2(iaF_eM, xbins_M_begin[i], xbins_M_end[i], q2bins_M_begin[i], q2bins_M_end[i], MD_DUMMY.sqrtS, 4)
+    IntXsec_eP[i] = QCDNUM.dsp_ints2(iaF_eP, m_xbins_M_begin[i], m_xbins_M_end[i], m_q2bins_M_begin[i], m_q2bins_M_end[i], MD_DUMMY.sqrtS, 4)
+    IntXsec_eM[i] = QCDNUM.dsp_ints2(iaF_eM, m_xbins_M_begin[i], m_xbins_M_end[i], m_q2bins_M_begin[i], m_q2bins_M_end[i], MD_DUMMY.sqrtS, 4)
 end
 
 # 1 for e-p and 0 for e+p
