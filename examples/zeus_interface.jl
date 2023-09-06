@@ -22,6 +22,25 @@ function get_bin_info(n::Integer; quiet::Bool = false)
     return ([m_BinQ2low[n], m_BinQ2high[n]], [m_Binxlow[n], m_Binxhigh[n]])
 end
 
+function get_pred_N(Integ_xsec, eMPp, md::MetaData)
+    if eMPp == 0
+    TM = m_TM_elements_ePp
+    K = m_K_elements_ePp
+    else
+    TM = m_TM_elements_eMp
+    K = m_K_elements_eMp)    
+    end
+    xsec_pred = zeros(153)
+    for j in 1:153
+        temp=0.
+        for i in 1:429
+
+        temp = temp +(TM[i,j]./K[i]) * Integ_xsec[i];
+        end
+        xsec_pred[j] = temp
+    end
+    return xsec_pred;
+end
 
 
 # ## Transfer matrix

@@ -134,16 +134,16 @@ function forward_model(pdf_params::AbstractPDFParams,
     K_eP = m_K_elements_ePp
     K_eM = m_K_elements_eMp
 
-    T = promote_type(map(eltype, (sys_err_params, Tnm_sys_ePp, Tnm_sys_eMp,TM_eP, TM_eM, K_eP, K_eM, integ_xsec_ep, integ_xsec_em))...)
+    T = promote_type(map(eltype, (sys_err_params, m_Tnm_sys_ePp,  m_Tnm_sys_eMp,TM_eP, TM_eM, K_eP, K_eM, integ_xsec_ep, integ_xsec_em))...)
 
     counts_pred_ep = similar(TM_eP, T, size(TM_eP, 2))
     counts_pred_em = similar(TM_eM, T, size(TM_eM, 2))
 
     syserr_axis = axes(sys_err_params, 1)
 
-    @argcheck axes(TM_eP, 2) == axes(TM_eM, 2) == axes(Tnm_sys_ePp, 2) == axes(Tnm_sys_eMp, 2)
+    @argcheck axes(TM_eP, 2) == axes(TM_eM, 2) == axes( m_Tnm_sys_ePp, 2) == axes( m_Tnm_sys_eMp, 2)
     @argcheck axes(TM_eP, 1) == axes(TM_eM, 1) == axes(K_eP, 1) == axes(K_eM, 1)
-    @argcheck axes(sys_err_params, 1) == axes(Tnm_sys_ePp, 3) == axes(Tnm_sys_eMp, 3)
+    @argcheck axes(sys_err_params, 1) == axes( m_Tnm_sys_ePp, 3) == axes( m_Tnm_sys_eMp, 3)
 
     bin_out_axis = axes(counts_pred_ep, 1)
     bin_axis = axes(TM_eP, 1)
@@ -159,8 +159,8 @@ function forward_model(pdf_params::AbstractPDFParams,
         for i in bin_axis
             # Add variation for parameters, will do nothing if no systematic errors are provided:
             for k in syserr_axis
-                TotSys_var_ep += sys_err_params[k] * Tnm_sys_ePp[i, j, k]
-                TotSys_var_em += sys_err_params[k] * Tnm_sys_eMp[i, j, k]
+                TotSys_var_ep += sys_err_params[k] *  m_Tnm_sys_ePp[i, j, k]
+                TotSys_var_em += sys_err_params[k] *  m_Tnm_sys_eMp[i, j, k]
             end
             counts_pred_ep[j] += (TM_eP[i, j] + TotSys_var_ep) * (1.0 / K_eP[i]) * integ_xsec_ep[i]
             counts_pred_em[j] += (TM_eM[i, j] + TotSys_var_em) * (1.0 / K_eM[i]) * integ_xsec_em[i]
