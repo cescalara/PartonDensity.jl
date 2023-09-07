@@ -112,14 +112,14 @@ function forward_model(pdf_params::AbstractPDFParams,
     QCDNUM.ssp_s2fill(iaF_eM, input_xsecm, splint_params.rscut)
 
     # Integrate over cross section
-    nbins = size(m_xbins_M_begin)[1]
-    bins_axis = axes(m_xbins_M_begin, 1)
+    nbins = size(md.m_xbins_M_begin)[1]
+    bins_axis = axes(md.m_xbins_M_begin, 1)
 
-    integ_xsec_ep = similar(m_xbins_M_begin)
-    integ_xsec_em = similar(m_xbins_M_begin)
+    integ_xsec_ep = similar(md.m_xbins_M_begin)
+    integ_xsec_em = similar(md.m_xbins_M_begin)
     for i in bins_axis
-        integ_xsec_ep[i] = QCDNUM.dsp_ints2(iaF_eP, m_xbins_M_begin[i], m_xbins_M_end[i], m_q2bins_M_begin[i], m_q2bins_M_end[i], md.sqrtS, 4)
-        integ_xsec_em[i] = QCDNUM.dsp_ints2(iaF_eM, m_xbins_M_begin[i], m_xbins_M_end[i], m_q2bins_M_begin[i], m_q2bins_M_end[i], md.sqrtS, 4)
+        integ_xsec_ep[i] = QCDNUM.dsp_ints2(iaF_eP, md.m_xbins_M_begin[i], md.m_xbins_M_end[i], md.m_q2bins_M_begin[i], md.m_q2bins_M_end[i], md.sqrtS, 4)
+        integ_xsec_em[i] = QCDNUM.dsp_ints2(iaF_eM, md.m_xbins_M_begin[i], md.m_xbins_M_end[i], md.m_q2bins_M_begin[i], md.m_q2bins_M_end[i], md.sqrtS, 4)
     end
 
     counts_pred_ep, counts_pred_em = f_cross_section_to_counts(integ_xsec_ep,integ_xsec_em,sys_err_params)

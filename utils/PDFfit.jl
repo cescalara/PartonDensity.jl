@@ -78,8 +78,8 @@ forward_model_init(qcdnum_params, splint_params)
 
 sim_data = Dict{String,Any}()
 sim_data["nbins"] = nbins;
-sim_data["counts_obs_ep"]=m_Data_Events_ePp
-sim_data["counts_obs_em"]=m_Data_Events_eMp
+sim_data["counts_obs_ep"]=MD_G.m_Data_Events_ePp
+sim_data["counts_obs_em"]=MD_G.m_Data_Events_eMp
 θ = [ 0.228, 0.104, 0.249, 0.249, 0.104, 0.052, 0.010, 0.005, 0.0005]
 θ_sum=sum(θ[1:9])
 θ=θ/θ_sum  
