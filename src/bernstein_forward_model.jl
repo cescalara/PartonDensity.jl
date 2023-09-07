@@ -1,5 +1,3 @@
-using HDF5
-
 export forward_model, forward_model_init
 
 function forward_model(pdf_params::Union{BernsteinPDFParams,BernsteinDirichletPDFParams}, 
@@ -43,18 +41,15 @@ function forward_model(pdf_params::Union{BernsteinPDFParams,BernsteinDirichletPD
     QCDNUM.ssp_s2f123(iaF3dn, qcdnum_params.output_pdf_loc, quark_coeffs.valdn, 3, 0.0)
 
     # Get input cross section function
-    my_funcp = get_input_xsec_func(1,md)
+    my_funcp = get_input_xsec_func(1, md)
     input_xsecp = @cfunction($my_funcp, Float64, (Ref{Int32}, Ref{Int32}, Ref{UInt8}))
 
-    my_funcm = get_input_xsec_func(-1,md)
+    my_funcm = get_input_xsec_func(-1, md)
     input_xsecm = @cfunction($my_funcm, Float64, (Ref{Int32}, Ref{Int32}, Ref{UInt8}))
 
-
     # Make two cross section splines
-    #set_lepcharge(1)
     QCDNUM.ssp_s2fill(iaF_eP, input_xsecp, splint_params.rscut)
 
-    #set_lepcharge(-1)
     QCDNUM.ssp_s2fill(iaF_eM, input_xsecm, splint_params.rscut)
 
     # Integrate over cross section
@@ -66,33 +61,6 @@ function forward_model(pdf_params::Union{BernsteinPDFParams,BernsteinDirichletPD
         integ_xsec_em[i] = QCDNUM.dsp_ints2(iaF_eM, m_xbins_M_begin[i], m_xbins_M_end[i], m_q2bins_M_begin[i], m_q2bins_M_end[i], md.sqrtS, 4)
     end
 
-    # Fold through response to get counts
-    ePp = 0
-    eMp = 1
-    TM_eP = m_TM_elements_ePp
-    TM_eM = m_TM_elements_eMp
-
-    K_eP = m_K_elements_ePp
-    K_eM = m_K_elements_eMp
-
-    nbins_out = size(TM_eP)[2]
-
-    counts_pred_ep = zeros(nbins_out)
-    counts_pred_em = zeros(nbins_out)
-
-    for j in 1:nbins_out
-
-        for i in 1:nbins
-
-            counts_pred_ep[j] += TM_eP[i, j] * (1.0 / K_eP[i]) * integ_xsec_ep[i]
-            counts_pred_em[j] += TM_eM[i, j] * (1.0 / K_eM[i]) * integ_xsec_em[i]
-
-        end
-
-    end
-
+    counts_pred_ep, counts_pred_em = f_cross_section_to_counts(integ_xsec_ep,integ_xsec_em)
     return counts_pred_ep, counts_pred_em
-
 end
-
-
