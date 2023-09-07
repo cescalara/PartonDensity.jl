@@ -59,12 +59,12 @@ end
 
 Go from input PDF parameters to the expected number of events in bins.
 """
-function forward_model(pdf_params::AbstractPDFParams, 
+function forward_model(pdf_params::AbstractPDFParams,
                        qcdnum_params::QCDNUM.EvolutionParams,
                        splint_params::QCDNUM.SPLINTParams, 
                        quark_coeffs::QuarkCoefficients,
-                       md::MetaData = MD_ZEUS_I1787035,
-                       sys_err_params::Vector{Float64}=zeros(nsyst))
+                       md::MetaData = MD_ZEUS_I1787035
+                       ,sys_err_params::Vector{Float64}=zeros(nsyst))
 
     # Get input PDF function
     my_func = get_input_pdf_func(pdf_params)
@@ -72,7 +72,6 @@ function forward_model(pdf_params::AbstractPDFParams,
 
     # Evolve PDFs
     iq0 = QCDNUM.iqfrmq(qcdnum_params.q0)
-
     ϵ = QCDNUM.evolfg(qcdnum_params.output_pdf_loc, input_pdf.cfunc, input_pdf.map, iq0)
 
     # Debugging
@@ -123,49 +122,6 @@ function forward_model(pdf_params::AbstractPDFParams,
         integ_xsec_em[i] = QCDNUM.dsp_ints2(iaF_eM, m_xbins_M_begin[i], m_xbins_M_end[i], m_q2bins_M_begin[i], m_q2bins_M_end[i], md.sqrtS, 4)
     end
 
-    # Fold through response to get counts
-    ePp = 0
-    eMp = 1
-
-    TM_eP = m_TM_elements_ePp
-    TM_eM = m_TM_elements_eMp
-
-
-    K_eP = m_K_elements_ePp
-    K_eM = m_K_elements_eMp
-
-    T = promote_type(map(eltype, (sys_err_params, m_Tnm_sys_ePp,  m_Tnm_sys_eMp,TM_eP, TM_eM, K_eP, K_eM, integ_xsec_ep, integ_xsec_em))...)
-
-    counts_pred_ep = similar(TM_eP, T, size(TM_eP, 2))
-    counts_pred_em = similar(TM_eM, T, size(TM_eM, 2))
-
-    syserr_axis = axes(sys_err_params, 1)
-
-    @argcheck axes(TM_eP, 2) == axes(TM_eM, 2) == axes( m_Tnm_sys_ePp, 2) == axes( m_Tnm_sys_eMp, 2)
-    @argcheck axes(TM_eP, 1) == axes(TM_eM, 1) == axes(K_eP, 1) == axes(K_eM, 1)
-    @argcheck axes(sys_err_params, 1) == axes( m_Tnm_sys_ePp, 3) == axes( m_Tnm_sys_eMp, 3)
-
-    bin_out_axis = axes(counts_pred_ep, 1)
-    bin_axis = axes(TM_eP, 1)
-
-    # Calculate TotSys_var_em == sys_err_params[k] * Tnm_sys_ePp[i,j,k] up front?
-
-    fill!(counts_pred_ep, 0)
-    fill!(counts_pred_em, 0)
-
-    for j in bin_out_axis
-        TotSys_var_ep::T = 0
-        TotSys_var_em::T = 0
-        for i in bin_axis
-            # Add variation for parameters, will do nothing if no systematic errors are provided:
-            for k in syserr_axis
-                TotSys_var_ep += sys_err_params[k] *  m_Tnm_sys_ePp[i, j, k]
-                TotSys_var_em += sys_err_params[k] *  m_Tnm_sys_eMp[i, j, k]
-            end
-            counts_pred_ep[j] += (TM_eP[i, j] + TotSys_var_ep) * (1.0 / K_eP[i]) * integ_xsec_ep[i]
-            counts_pred_em[j] += (TM_eM[i, j] + TotSys_var_em) * (1.0 / K_eM[i]) * integ_xsec_em[i]
-        end
-    end
-
+    counts_pred_ep, counts_pred_em = f_cross_section_to_counts(integ_xsec_ep,integ_xsec_em,sys_err_params)
     return counts_pred_ep, counts_pred_em
 end

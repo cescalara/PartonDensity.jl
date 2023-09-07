@@ -171,31 +171,6 @@ for i in 1:nbins
     IntXsec_eM[i] = QCDNUM.dsp_ints2(iaF_eM, m_xbins_M_begin[i], m_xbins_M_end[i], m_q2bins_M_begin[i], m_q2bins_M_end[i], MD_DUMMY.sqrtS, 4)
 end
 
-# 1 for e-p and 0 for e+p
-
-ePp = 0;
-eMp = 1;
-
-TM_eP = m_TM_elements_ePp
-TM_eM = m_TM_elements_eMp
-
-K_eP = m_K_elements_ePp
-K_eM = m_K_elements_eMp
-
-nbins_out = size(TM_eP)[2];
-
-counts_pred_eP = zeros(nbins_out);
-counts_pred_eM = zeros(nbins_out);
-
-for j in 1:nbins_out
-
-    for i in 1:nbins
-
-        counts_pred_eP[j] += TM_eP[i, j] * (1.0 / K_eP[i]) * IntXsec_eP[i]
-        counts_pred_eM[j] += TM_eM[i, j] * (1.0 / K_eM[i]) * IntXsec_eM[i]
-
-    end
-
-end
+counts_pred_eP, counts_pred_eM = f_cross_section_to_counts(IntXsec_eP,IntXsec_eM)
 
 counts_pred_eM

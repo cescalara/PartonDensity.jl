@@ -22,43 +22,20 @@ function get_bin_info(n::Integer; quiet::Bool = false)
     return ([m_BinQ2low[n], m_BinQ2high[n]], [m_Binxlow[n], m_Binxhigh[n]])
 end
 
-function get_pred_N(Integ_xsec, eMPp, md::MetaData)
-    if eMPp == 0
-    TM = m_TM_elements_ePp
-    K = m_K_elements_ePp
-    else
-    TM = m_TM_elements_eMp
-    K = m_K_elements_eMp    
-    end
-    xsec_pred = zeros(153)
-    for j in 1:153
-        temp=0.
-        for i in 1:429
-
-        temp = temp +(TM[i,j]./K[i]) * Integ_xsec[i];
-        end
-        xsec_pred[j] = temp
-    end
-    return xsec_pred;
-end
-
-
-# ## Transfer matrix
-
-eMPp = 1 # e+/e- switch 0/1
 
 # Read in an example integrated cross section
 numbers_from_file = readdlm("data/EXAMPLE_1/HERAPDF20_NNLO_EIG_ePp.txt") 
 
 # List of integrated cross section values in 429 bins 
-integ_xsec = numbers_from_file[:,3] 
+integ_xsec_ePp = numbers_from_file[:,3] 
+integ_xsec_eMp = numbers_from_file[:,3] 
 
 # Corresponding list of expected event numbers
-prediction = get_pred_N(integ_xsec, eMPp, MD_ZEUS_I1787035); 
+prediction_ePp, prediction_eMp = f_cross_section_to_counts(integ_xsec_ePp,integ_xsec_eMp)
 
-integ_xsec[153]
+integ_xsec_ePp[153]
 
-prediction[151]
+prediction_ePp[151]
 
 # ## Bins in detector space
 #
