@@ -28,7 +28,7 @@ numbers_from_file = readdlm("data/EXAMPLE_1/HERAPDF20_NNLO_EIG_ePp.txt")
 
 # List of integrated cross section values in 429 bins 
 integ_xsec_ePp = numbers_from_file[:,3] 
-integ_xsec_ePm = numbers_from_file[:,3] 
+integ_xsec_eMp = numbers_from_file[:,3] 
 
 # Corresponding list of expected event numbers
 prediction_ePp, prediction_eMp = f_cross_section_to_counts(integ_xsec_ePp,integ_xsec_eMp)
