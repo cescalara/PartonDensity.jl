@@ -11,8 +11,8 @@ mutable struct MetaData
                          m_q2bins_M_end::Array{Float64}
                          m_xbins_M_begin::Array{Float64}
                          m_xbins_M_end::Array{Float64}
-                         m_Data_Events_eMp::Array{Int}
-                         m_Data_Events_ePp::Array{Int}
+                         m_Data_Events_eMp::Array{Int64}
+                         m_Data_Events_ePp::Array{Int64}
 end
 
 function MetaData(input::MetaData, f::Float64) 
