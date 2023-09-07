@@ -92,10 +92,6 @@ MD_LOCAL::MetaData = MD_TEMP
 
 prior=get_priors(parsed_args)
 
-# The `@critical` macro is used because `forward_model()` is currently not thread safe, so
-# this protects it from being run in parallel.
-
-
 likelihood = let d = sim_data
 counts_obs_ep = d["counts_obs_ep"]
 counts_obs_em = d["counts_obs_em"]

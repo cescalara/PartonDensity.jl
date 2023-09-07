@@ -28,7 +28,7 @@ using QCDNUM
     forward_model_init(qcdnum_params, splint_params)
 
     # run forward model 
-    counts_pred_ep, counts_pred_em = forward_model(pdf_params, qcdnum_params, splint_params, quark_coeffs)
+    counts_pred_ep, counts_pred_em = forward_model(pdf_params, qcdnum_params, splint_params, quark_coeffs,MD_ZEUS_I1787035)
 
     # take a poisson sample
     nbins = size(counts_pred_ep)[1]
@@ -75,8 +75,7 @@ using QCDNUM
 
             end
 
-            counts_pred_ep, counts_pred_em = @critical forward_model(pdf_params,
-                qcdnum_params, splint_params, quark_coeffs)
+            counts_pred_ep, counts_pred_em = @critical forward_model(pdf_params, qcdnum_params, splint_params, quark_coeffs,MD_ZEUS_I1787035)
 
             ll_value = 0.0
             for i in 1:nbins
@@ -133,8 +132,7 @@ end
     forward_model_init(qcdnum_params, splint_params)
 
     # run forward model 
-    counts_pred_ep, counts_pred_em = forward_model(pdf_params, qcdnum_params,
-        splint_params, quark_coeffs)
+    counts_pred_ep, counts_pred_em = forward_model(pdf_params, qcdnum_params,splint_params, quark_coeffs,MD_ZEUS_I1787035)
 
     # take a poisson sample
     nbins = size(counts_pred_ep)[1]
@@ -177,8 +175,7 @@ end
             pdf_params = ValencePDFParams(λ_u=params.λ_u, K_u=params.K_u, λ_d=params.λ_d, K_d=params.K_d, λ_g1=params.λ_g1, λ_g2=params.λ_g2,
                 K_g=params.K_g, λ_q=params.λ_q, K_q=params.K_q, θ=θ)
 
-            counts_pred_ep, counts_pred_em = @critical forward_model(pdf_params,
-                qcdnum_params, splint_params, quark_coeffs)
+            counts_pred_ep, counts_pred_em = @critical forward_model(pdf_params, qcdnum_params, splint_params, quark_coeffs,MD_ZEUS_I1787035)
 
             ll_value = 0.0
             for i in 1:nbins
