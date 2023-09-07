@@ -62,6 +62,17 @@ jobs:
          mkdir -p pseudodata
          julia --project=. utils/generatepseudodata.jl -s 42 -p Dirichlet -f 2.0 
          ls -lah pseudodata
+    - name: Run4
+      run : |
+         export JULIA_PKGDIR=/opt/julia
+         export JULIA_DEPOT_PATH=/opt/myjulia
+         julia --project=. -e 'import Pkg; Pkg.instantiate(); include("examples/forward_model.jl")'
+    - name: Run5
+      run : |
+         export JULIA_PKGDIR=/opt/julia
+         export JULIA_DEPOT_PATH=/opt/myjulia
+         julia --project=. -e 'import Pkg; Pkg.instantiate(); include("examples/pdf_parametrisation.jl")'
+
          
   build-docs-in-partondensity-docker-image:
     name: Build docs in PartonDensity Docker image
