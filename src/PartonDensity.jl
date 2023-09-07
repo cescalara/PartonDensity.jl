@@ -13,6 +13,8 @@ include("MetaData.jl")
 include("parameters_IO.jl")
 include("cross_section.jl")
 include("../data/ZEUS_I1787035/ZEUS_I1787035.jl")
+using ZEUS_I1787035
+ZEUS_I1787035.Init_sys()
 include("forward_model.jl")
 include("PDploting.jl")
 

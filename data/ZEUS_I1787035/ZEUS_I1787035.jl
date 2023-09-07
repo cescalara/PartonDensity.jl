@@ -9,6 +9,7 @@ S = Born-level integrated sigma
 
 Based on C++ code by R. Aggarwal.
 """
+module ZEUS_I1787035
 
 include("../../src/MetaData.jl")
 
@@ -267,3 +268,4 @@ function f_cross_section_to_counts(integ_xsec_ep::Array{Float64},integ_xsec_em::
 
 end
 
+end
