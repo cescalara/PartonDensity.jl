@@ -11,6 +11,7 @@ Based on C++ code by R. Aggarwal.
 """
 
 using PartonDensity
+using ArgCheck
 
 export Init_sys
 
