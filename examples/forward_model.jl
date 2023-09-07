@@ -173,6 +173,6 @@ for i in 1:nbins
     IntXsec_eM[i] = QCDNUM.dsp_ints2(iaF_eM, MD_DUMMY.m_xbins_M_begin[i], MD_DUMMY.m_xbins_M_end[i], MD_DUMMY.m_q2bins_M_begin[i], MD_DUMMY.m_q2bins_M_end[i], MD_DUMMY.sqrtS, 4)
 end
 
-counts_pred_eP, counts_pred_eM = f_cross_section_to_counts(IntXsec_eP,IntXsec_eM)
+counts_pred_eP, counts_pred_eM = f_cross_section_to_counts(MD_DUMMY,IntXsec_eP,IntXsec_eM)
 
 counts_pred_eM
