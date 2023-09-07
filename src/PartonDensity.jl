@@ -14,7 +14,6 @@ include("parameters_IO.jl")
 include("cross_section.jl")
 include("../data/ZEUS_I1787035/ZEUS_I1787035.jl")
 include("forward_model.jl")
-include("bernstein_forward_model.jl")
 include("PDploting.jl")
 
 using Requires
