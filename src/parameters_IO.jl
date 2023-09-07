@@ -54,7 +54,14 @@ function pd_read_sim(file_name::String)
 
     local pdf_params
     sim_data = Dict{String,Any}()
-    meta_data::MetaData = MetaData("",0.0,0.0,0.0,0.0,0.0)
+    meta_data::MetaData = MetaData("",0.0,0.0,0.0,0.0,0.0,
+                               Float64.([0]),
+                               Float64.([0]),
+                               Float64.([0]),
+                               Float64.([0]),
+                               Int64.([0]),
+                               Int64.([0])
+                               )
 
     h5open(file_name, "r") do fid
 
@@ -70,7 +77,14 @@ function pd_read_sim(file_name::String)
         read(gg["Ld_eMp"]),
         read(gg["Ld_ePp_uncertainty"]),
         read(gg["Ld_eMp_uncertainty"]),
-        read(gg["sqrtS"]))
+        read(gg["sqrtS"]),
+                                       Float64.([0]),
+                               Float64.([0]),
+                               Float64.([0]),
+                               Float64.([0]),
+                               Int64.([0]),
+                               Int64.([0])
+        )
 
 
         g = fid["truth"]
