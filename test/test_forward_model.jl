@@ -54,8 +54,7 @@ using QCDNUM
     # Run forward model
     for pdf_params in pdf_params_list
 
-        counts_pred_ep, counts_pred_em = forward_model(pdf_params, qcdnum_params,
-            splint_params, quark_coeffs)
+        counts_pred_ep, counts_pred_em = forward_model(pdf_params, qcdnum_params,splint_params, quark_coeffs,MD_ZEUS_I1787035)
 
         if typeof(pdf_params) == BernsteinPDFParams
 

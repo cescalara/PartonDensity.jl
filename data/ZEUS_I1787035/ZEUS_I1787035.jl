@@ -9,6 +9,7 @@ S = Born-level integrated sigma
 
 Based on C++ code by R. Aggarwal.
 """
+#using ArgCheck;
 
 include("../../src/MetaData.jl")
 

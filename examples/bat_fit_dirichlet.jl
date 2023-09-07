@@ -10,7 +10,7 @@ using PartonDensity
 using QCDNUM
 using Plots, Random, Distributions, ValueShapes, ParallelProcessingTools
 using StatsBase, LinearAlgebra
-
+include("../data/ZEUS_I1787035/ZEUS_I1787035.jl")
 gr(fmt=:png);
 rng = MersenneTwister(42)
 
@@ -56,8 +56,7 @@ quark_coeffs = QuarkCoefficients();
 forward_model_init(qcdnum_params, splint_params)
 
 # run forward model 
-counts_pred_ep, counts_pred_em = forward_model(pdf_params, qcdnum_params,
-    splint_params, quark_coeffs);
+counts_pred_ep, counts_pred_em = forward_model(pdf_params, qcdnum_params,splint_params, quark_coeffs, MD_ZEUS_I1787035);
 
 #
 # take a poisson sample
@@ -125,8 +124,7 @@ likelihood = let d = sim_data
         pdf_params = DirichletPDFParams(K_u=params.K_u, K_d=params.K_d, λ_g1=params.λ_g1, λ_g2=params.λ_g2,
             K_g=params.K_g, λ_q=params.λ_q, K_q=params.K_q, θ=Vector(params.θ))
 
-        counts_pred_ep, counts_pred_em = @critical forward_model(pdf_params,
-            qcdnum_params, splint_params, quark_coeffs)
+        counts_pred_ep, counts_pred_em = @critical forward_model(pdf_params,qcdnum_params, splint_params, quark_coeffs, MD_ZEUS_I1787035)
 
         ll_value = 0.0
         for i in 1:nbins

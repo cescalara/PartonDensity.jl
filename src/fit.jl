@@ -58,7 +58,9 @@ function get_likelihood end
 
 function get_likelihood(pdf_params::ValencePDFParams, sim_data::Dict{String,Any},
     qcdnum_params::QCDNUM.EvolutionParams, splint_params::QCDNUM.SPLINTParams,
-    quark_coeffs::QuarkCoefficients)
+    quark_coeffs::QuarkCoefficients
+        ,md::MetaData
+    )
 
     likelihood = let d = sim_data
 
@@ -75,8 +77,7 @@ function get_likelihood(pdf_params::ValencePDFParams, sim_data::Dict{String,Any}
                 K_d=params.K_d, λ_g1=params.λ_g1, λ_g2=params.λ_g2,
                 K_g=params.K_g, λ_q=params.λ_q, K_q=params.K_q, θ=θ)
 
-            counts_pred_ep, counts_pred_em = @critical forward_model(pdf_params, qcdnum_params,
-                splint_params, quark_coeffs)
+            counts_pred_ep, counts_pred_em = @critical forward_model(pdf_params, qcdnum_params,splint_params, quark_coeffs,md)
 
             ll_value = 0.0
             for i in 1:nbins
@@ -106,7 +107,9 @@ end
 
 function get_likelihood(pdf_params::DirichletPDFParams, sim_data::Dict{String,Any},
     qcdnum_params::QCDNUM.EvolutionParams, splint_params::QCDNUM.SPLINTParams,
-    quark_coeffs::QuarkCoefficients)
+    quark_coeffs::QuarkCoefficients
+    ,md::MetaData
+    )
 
     likelihood = let d = sim_data
 
@@ -128,8 +131,7 @@ function get_likelihood(pdf_params::DirichletPDFParams, sim_data::Dict{String,An
 
             end
 
-            counts_pred_ep, counts_pred_em = @critical forward_model(pdf_params, qcdnum_params,
-                splint_params, quark_coeffs)
+            counts_pred_ep, counts_pred_em = @critical forward_model(pdf_params, qcdnum_params,splint_params, quark_coeffs,md)
 
             ll_value = 0.0
             for i in 1:nbins
