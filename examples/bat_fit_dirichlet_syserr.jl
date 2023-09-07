@@ -38,8 +38,7 @@ quark_coeffs = QuarkCoefficients();
 # expected counts accordingly.
 forward_model_init(qcdnum_params, splint_params)
 sys_err_params = rand(rng, MvNormal(zeros(PartonDensity.nsyst), ones(PartonDensity.nsyst)))
-counts_pred_ep, counts_pred_em = forward_model(pdf_params, qcdnum_params,
-    splint_params, quark_coeffs, sys_err_params);
+counts_pred_ep, counts_pred_em = forward_model(pdf_params, qcdnum_params, splint_params, quark_coeffs, MD_ZEUS_I1787035, sys_err_params);
 
 nbins = size(counts_pred_ep)[1]
 counts_obs_ep = zeros(UInt64, nbins)

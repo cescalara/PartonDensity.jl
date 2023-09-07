@@ -9,7 +9,6 @@ S = Born-level integrated sigma
 
 Based on C++ code by R. Aggarwal.
 """
-#using ArgCheck;
 
 using PartonDensity
 
@@ -216,7 +215,7 @@ const m_Tnm_sys_ePp = Tnm_sys_ePp
 const m_Tnm_sys_eMp = Tnm_sys_eMp
 
 
-function PartonDensity.f_cross_section_to_counts(integ_xsec_ep::Array{Float64},integ_xsec_em::Array{Float64},sys_err_params::Vector{Float64}=zeros(nsyst))
+function PartonDensity.f_cross_section_to_counts(integ_xsec_ep::Array{Float64},integ_xsec_em::Array{Float64},sys_err_params::Vector{Float64}=zeros(8))
 
     # Fold through response to get counts
     ePp = 0
@@ -238,7 +237,7 @@ function PartonDensity.f_cross_section_to_counts(integ_xsec_ep::Array{Float64},i
 
     @argcheck axes(TM_eP, 2) == axes(TM_eM, 2) == axes( m_Tnm_sys_ePp, 2) == axes( m_Tnm_sys_eMp, 2)
     @argcheck axes(TM_eP, 1) == axes(TM_eM, 1) == axes(K_eP, 1) == axes(K_eM, 1)
-    @argcheck axes(sys_err_params, 1) == axes( m_Tnm_sys_ePp, 3) == axes( m_Tnm_sys_eMp, 3)
+#    @argcheck axes(sys_err_params, 1) == axes( m_Tnm_sys_ePp, 3) == axes( m_Tnm_sys_eMp, 3)
 
     bin_out_axis = axes(counts_pred_ep, 1)
     bin_axis = axes(TM_eP, 1)

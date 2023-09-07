@@ -21,3 +21,4 @@ function MetaData(input::MetaData, f::Float64)
    output.Ld_ePp= input.Ld_ePp*f
    output
 end 
+function f_cross_section_to_counts end
