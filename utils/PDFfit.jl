@@ -2,7 +2,7 @@
 using BAT, DensityInterface
 using PartonDensity
 using QCDNUM
-using Plots, Colors , Random, Distributions, ValueShapes, ParallelProcessingTools
+using Random, Distributions, ValueShapes, ParallelProcessingTools
 using StatsBase, LinearAlgebra
 using DelimitedFiles
 using ArgParse
@@ -51,9 +51,6 @@ function main()
     for (arg,val) in parsed_args
         println("  $arg  =>  $val")
     end
-
-gr(fmt=:png);
-
 
 counts_obs_ep = m_Data_Events_ePp
 counts_obs_em = m_Data_Events_eMp
