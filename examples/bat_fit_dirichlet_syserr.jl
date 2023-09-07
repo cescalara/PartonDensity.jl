@@ -39,7 +39,6 @@ quark_coeffs = QuarkCoefficients();
 forward_model_init(qcdnum_params, splint_params)
 sys_err_params = rand(rng, MvNormal(zeros(PartonDensity.nsyst), ones(PartonDensity.nsyst)))
 counts_pred_ep, counts_pred_em = forward_model(pdf_params, qcdnum_params, splint_params, quark_coeffs,MD_ZEUS_I1787035, sys_err_params);
->>>>>>> origin/main
 
 nbins = size(counts_pred_ep)[1]
 counts_obs_ep = zeros(UInt64, nbins)
@@ -100,11 +99,7 @@ likelihood = let d = sim_data
         sys_err_params = [params.beta0_1, params.beta0_2, params.beta0_3, params.beta0_4,
             params.beta0_5, params.beta0_6, params.beta0_7, params.beta0_8]
 
-<<<<<<< HEAD
-        counts_pred_ep, counts_pred_em = @critical forward_model(pdf_params,qcdnum_params, splint_params, quark_coeffs, MD_ZEUS_I1787035, sys_err_params)
-=======
         counts_pred_ep, counts_pred_em = @critical forward_model(pdf_params, qcdnum_params, splint_params, quark_coeffs,MD_ZEUS_I1787035, sys_err_params)
->>>>>>> origin/main
 
         ll_value = 0.0
         for i in 1:nbins
