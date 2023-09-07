@@ -163,12 +163,12 @@ plot(p1, xlabel="x", ylabel="q2",
 #
 # Here, we neglect any possible contribution from systematic errors
 
-nbins = size(m_xbins_M_begin)[1]
+nbins = size(MD_DUMMY.m_xbins_M_begin)[1]
 IntXsec_eP = zeros(nbins);
 IntXsec_eM = zeros(nbins);
 for i in 1:nbins
-    IntXsec_eP[i] = QCDNUM.dsp_ints2(iaF_eP, m_xbins_M_begin[i], m_xbins_M_end[i], m_q2bins_M_begin[i], m_q2bins_M_end[i], MD_DUMMY.sqrtS, 4)
-    IntXsec_eM[i] = QCDNUM.dsp_ints2(iaF_eM, m_xbins_M_begin[i], m_xbins_M_end[i], m_q2bins_M_begin[i], m_q2bins_M_end[i], MD_DUMMY.sqrtS, 4)
+    IntXsec_eP[i] = QCDNUM.dsp_ints2(iaF_eP, MD_DUMMY.m_xbins_M_begin[i], MD_DUMMY.m_xbins_M_end[i], MD_DUMMY.m_q2bins_M_begin[i], MD_DUMMY.m_q2bins_M_end[i], MD_DUMMY.sqrtS, 4)
+    IntXsec_eM[i] = QCDNUM.dsp_ints2(iaF_eM, MD_DUMMY.m_xbins_M_begin[i], MD_DUMMY.m_xbins_M_end[i], MD_DUMMY.m_q2bins_M_begin[i], MD_DUMMY.m_q2bins_M_end[i], MD_DUMMY.sqrtS, 4)
 end
 
 counts_pred_eP, counts_pred_eM = f_cross_section_to_counts(IntXsec_eP,IntXsec_eM)

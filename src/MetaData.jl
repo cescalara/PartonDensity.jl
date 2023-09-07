@@ -7,6 +7,12 @@ mutable struct MetaData
  Ld_ePp_uncertainty :: Float64
  Ld_eMp_uncertainty :: Float64
  sqrtS::Float64
+                        m_q2bins_M_begin::Array{Float64}
+                         m_q2bins_M_end::Array{Float64}
+                         m_xbins_M_begin::Array{Float64}
+                         m_xbins_M_end::Array{Float64}
+                         m_Data_Events_eMp::Array{Float64}
+                         m_Data_Events_ePp::Array{Float64}
 end
 
 function MetaData(input::MetaData, f::Float64) 
