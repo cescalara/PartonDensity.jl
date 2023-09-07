@@ -122,6 +122,6 @@ function forward_model(pdf_params::AbstractPDFParams,
         integ_xsec_em[i] = QCDNUM.dsp_ints2(iaF_eM, m_xbins_M_begin[i], m_xbins_M_end[i], m_q2bins_M_begin[i], m_q2bins_M_end[i], md.sqrtS, 4)
     end
 
-    counts_pred_ep, counts_pred_em = f_cross_section_to_counts(integ_xsec_ep,integ_xsec_em)
+    counts_pred_ep, counts_pred_em = f_cross_section_to_counts(integ_xsec_ep,integ_xsec_em,sys_err_params)
     return counts_pred_ep, counts_pred_em
 end

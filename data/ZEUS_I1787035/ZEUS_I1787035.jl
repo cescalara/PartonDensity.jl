@@ -225,7 +225,7 @@ const m_Tnm_sys_ePp = Tnm_sys_ePp
 const m_Tnm_sys_eMp = Tnm_sys_eMp
 
 
-function f_cross_section_to_counts(integ_xsec_em::Array{Float64},integ_xsec_ep::Array{Float64})
+function f_cross_section_to_counts(integ_xsec_em::Array{Float64},integ_xsec_ep::Array{Float64},sys_err_params::Vector{Float64})
 
     # Fold through response to get counts
     ePp = 0

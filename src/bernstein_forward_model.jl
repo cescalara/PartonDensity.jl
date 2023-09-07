@@ -5,7 +5,7 @@ function forward_model(pdf_params::Union{BernsteinPDFParams,BernsteinDirichletPD
                        splint_params::QCDNUM.SPLINTParams, 
                        quark_coeffs::QuarkCoefficients,
                        md::MetaData = MD_ZEUS_I1787035
-                       )
+                       ,sys_err_params::Vector{Float64}=zeros(nsyst))
 
     # Get input PDF function
     my_func = get_input_pdf_func(pdf_params)
@@ -61,6 +61,6 @@ function forward_model(pdf_params::Union{BernsteinPDFParams,BernsteinDirichletPD
         integ_xsec_em[i] = QCDNUM.dsp_ints2(iaF_eM, m_xbins_M_begin[i], m_xbins_M_end[i], m_q2bins_M_begin[i], m_q2bins_M_end[i], md.sqrtS, 4)
     end
 
-    counts_pred_ep, counts_pred_em = f_cross_section_to_counts(integ_xsec_ep,integ_xsec_em)
+    counts_pred_ep, counts_pred_em = f_cross_section_to_counts(integ_xsec_ep,integ_xsec_em,sys_err_params)
     return counts_pred_ep, counts_pred_em
 end
