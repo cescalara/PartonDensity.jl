@@ -125,3 +125,7 @@ function forward_model(pdf_params::AbstractPDFParams,
     counts_pred_ep, counts_pred_em = f_cross_section_to_counts(integ_xsec_ep,integ_xsec_em,sys_err_params)
     return counts_pred_ep, counts_pred_em
 end
+
+
+function f_cross_section_to_counts end
+export f_cross_section_to_counts
