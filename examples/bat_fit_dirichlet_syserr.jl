@@ -11,7 +11,7 @@ using BAT, DensityInterface
 using QCDNUM
 using Plots, Random, Distributions, ValueShapes, ParallelProcessingTools
 using StatsBase, LinearAlgebra
-include("../data/ZEUS_I1787035/ZEUS_I1787035.jl")
+include("../../data/ZEUS_I1787035/ZEUS_I1787035.jl")
 gr(fmt=:png);
 rng = MersenneTwister(42);
 
@@ -38,11 +38,7 @@ quark_coeffs = QuarkCoefficients();
 # expected counts accordingly.
 forward_model_init(qcdnum_params, splint_params)
 sys_err_params = rand(rng, MvNormal(zeros(PartonDensity.nsyst), ones(PartonDensity.nsyst)))
-<<<<<<< HEAD
-counts_pred_ep, counts_pred_em = forward_model(pdf_params, qcdnum_params, splint_params, quark_coeffs, MD_ZEUS_I1787035, sys_err_params);
-=======
 counts_pred_ep, counts_pred_em = forward_model(pdf_params, qcdnum_params, splint_params, quark_coeffs,MD_ZEUS_I1787035, sys_err_params);
->>>>>>> origin/main
 
 nbins = size(counts_pred_ep)[1]
 counts_obs_ep = zeros(UInt64, nbins)
