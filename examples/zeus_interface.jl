@@ -3,7 +3,7 @@
 # Here is a short demonstration of how to access the ZEUS transfer matrix and bin interface.
 
 using PartonDensity, CSV, DelimitedFiles
-
+include("../data/ZEUS_I1787035/ZEUS_I1787035.jl")
 
 # Read in an example integrated cross section
 numbers_from_file = readdlm("data/EXAMPLE_1/HERAPDF20_NNLO_EIG_ePp.txt") 
