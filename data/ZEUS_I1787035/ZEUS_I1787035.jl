@@ -16,14 +16,6 @@ export Init_sys
 
 export MD_ZEUS_I1787035
 
-#To be removed later
-export m_TM_elements_ePp
-export m_TM_elements_eMp
-
-export m_K_elements_ePp
-export m_K_elements_eMp
-##
-
 export f_cross_section_to_counts
 
 export m_q2bins_M_begin
@@ -225,7 +217,7 @@ const m_Tnm_sys_ePp = Tnm_sys_ePp
 const m_Tnm_sys_eMp = Tnm_sys_eMp
 
 
-function f_cross_section_to_counts(integ_xsec_em::Array{Float64},integ_xsec_ep::Array{Float64},sys_err_params::Vector{Float64})
+function f_cross_section_to_counts(integ_xsec_em::Array{Float64},integ_xsec_ep::Array{Float64},sys_err_params::Vector{Float64}=zeros(MD_ZEUS_I1787035.nsyst))
 
     # Fold through response to get counts
     ePp = 0
