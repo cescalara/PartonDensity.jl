@@ -1,6 +1,7 @@
 abstract type MetaData end
 
 export MetaData
+export scale_lumi
 
 mutable struct MetaDataZEUS{T} <: MetaData
  name::String
@@ -39,7 +40,7 @@ function MetaDataIO(input::MetaData)
 end 
 
 
-function MetaDataZEUS(input::MetaDataZEUS, f::Float64) 
+function scale_lumi(input, f::Float64) 
    output = input
    output.Ld_eMp= input.Ld_eMp*f
    output.Ld_ePp= input.Ld_ePp*f
