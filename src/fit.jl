@@ -3,7 +3,6 @@ using ParallelProcessingTools
 using DensityInterface
 
 export get_prior, get_likelihood
-export plot_model_space, plot_data_space
 
 """
     get_prior(pdf_params)
