@@ -58,8 +58,7 @@ quark_coeffs = QuarkCoefficients();
 forward_model_init(qcdnum_params, splint_params)
 
 # run forward model 
-counts_pred_ep, counts_pred_em = forward_model(pdf_params, qcdnum_params,
-    splint_params, quark_coeffs);
+counts_pred_ep, counts_pred_em = forward_model(pdf_params, qcdnum_params,splint_params, quark_coeffs,MD_ZEUS_I1787035);
 
 #
 # take a poisson sample
