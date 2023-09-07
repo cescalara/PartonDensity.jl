@@ -12,29 +12,6 @@ Based on C++ code by R. Aggarwal.
 
 using PartonDensity
 using ArgCheck
-export MetaDataZEUS
-
-mutable struct MetaDataZEUS <: MetaData
- name::String
- Ld_ePp :: Float64
- Ld_eMp :: Float64
- Ld_ePp_uncertainty :: Float64
- Ld_eMp_uncertainty :: Float64
- sqrtS::Float64
- m_q2bins_M_begin::Array{Float64}
- m_q2bins_M_end::Array{Float64}
- m_xbins_M_begin::Array{Float64}
- m_xbins_M_end::Array{Float64}
- m_Data_Events_eMp::Array{Int64}
- m_Data_Events_ePp::Array{Int64}
-end
-
-function MetaDataZEUS(input::MetaDataZEUS, f::Float64) 
-   output = input
-   output.Ld_eMp= input.Ld_eMp*f
-   output.Ld_ePp= input.Ld_ePp*f
-   output
-end 
 
 
 export Init_sys
@@ -105,14 +82,7 @@ const Kii_eMp = [1.075590,  1.004940,  0.997145,  0.994087,  0.991775,  0.990224
 const m_Data_Events_eMp = Int64.([ 743,    580,    441,    416,    283,    248,    227,    504,    789,    681,    604,    493,    403,    385,    271,    258,    671,    598,    489,    450,    402,    342,    231,    224,    363,    414,    552,    454,    412,    430,    326,    272,    209,    310,    368,    358,    308,    317,    300,    206,    183,    139,    231,    202,    419,    358,    351,    298,    276,    254,    195,    158,    227,    173,    265,    251,    214,    228,    172,    124,    157,     86,    138,     74,    214,    187,    153,    159,    132,    117,     75,     72,     48,     76,     51,    168,    142,    160,    119,    122,    111,     74,     37,     67,     36,    104,    106,     77,     82,     68,     58,     65,     26,     32,     19,    151,    117,     90,     84,     76,     48,     34,     23,     33,     17,     90,     98,    103,     69,     60,     47,     31,     24,     14,     18,      5,    114,    117,    117,     91,     92,     52,     42,     14,     21,     14,      5,      3,     93,     89,     68,     56,     49,     41,     23,     17,      8,      4,     10,      1,     76,     53,     40,     27,     19,     12,      8,      5,      4,      1,      1,    120,      8]);
 const m_Data_Events_ePp = Int64.([ 567,    418,    321,    274,    207,    176,    152,    371,    599,    497,    407,    351,    288,    291,    199,    185,    482,    433,    344,    314,    275,    255,    184,    190,    284,    281,    377,    314,    285,    325,    213,    210,    143,    219,    275,    262,    230,    206,    197,    153,    148,    107,    180,    146,    288,    281,    244,    223,    225,    202,    147,    119,    167,    115,    180,    161,    161,    146,    117,     94,     79,     65,     85,     62,    135,    122,    114,    134,     81,     83,     51,     66,     30,     53,     31,    110,    111,    110,     87,     65,     71,     41,     36,     47,     27,     75,     99,     79,     61,     48,     46,     30,     13,     14,     13,    100,     63,     78,     45,     42,     29,     26,     21,     24,     11,     55,     54,     67,     53,     34,     21,     23,     16,      9,     12,      6,     60,     74,     60,     50,     66,     36,     33,     13,     13,     12,     13,      3,     45,     34,     40,     37,     28,     27,     13,      5,     10,      6,      1,      0,     19,     24,     23,     15,     14,      9,      8,      7,      2,      0,      0,     41,      3]);
 
-const MD_ZEUS_I1787035 = MetaDataZEUS("ZEUS_I1787035", 141.44, 185.018, 0.018,0.018, 318.0,
-                         m_q2bins_M_begin,
-                         m_q2bins_M_end,
-                         m_xbins_M_begin,
-                         m_xbins_M_end,
-                         m_Data_Events_eMp,
-                         m_Data_Events_ePp                      
-                         );
+
 
 const MD_G = MD_ZEUS_I1787035
 
@@ -232,7 +202,7 @@ const m_Tnm_sys_ePp = Tnm_sys_ePp
 const m_Tnm_sys_eMp = Tnm_sys_eMp
 
 #function f_cross_section_to_counts(md::Metadata, integ_xsec_ep::Array{Float64},integ_xsec_em::Array{Float64},sys_err_params::Vector{Float64}=zeros(8)) 
-function f_cross_section_to_counts(md::MetaDataZEUS,integ_xsec_ep::Array{Float64},integ_xsec_em::Array{Float64},sys_err_params::Vector{Float64}=zeros(8))
+function f_cross_section_to_counts(integ_xsec_ep::Array{Float64},integ_xsec_em::Array{Float64},sys_err_params::Vector{Float64}=zeros(8))
 
     # Fold through response to get counts
     ePp = 0
