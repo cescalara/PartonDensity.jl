@@ -64,7 +64,7 @@ function forward_model(pdf_params::AbstractPDFParams,
                        splint_params::QCDNUM.SPLINTParams, 
                        quark_coeffs::QuarkCoefficients,
                        md::MetaData
-                       ,sys_err_params::Vector{Float64}=zeros(nsyst))
+                       ,sys_err_params::Vector{Float64}=zeros(1))
 
     # Get input PDF function
     my_func = get_input_pdf_func(pdf_params)
