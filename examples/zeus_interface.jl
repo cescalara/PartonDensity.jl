@@ -14,7 +14,7 @@ integ_xsec_ePp = numbers_from_file[:,3]
 integ_xsec_eMp = numbers_from_file[:,3] 
 
 # Corresponding list of expected event numbers
-prediction_ePp, prediction_eMp = f_cross_section_to_counts(MD_ZEUS_I1787035,integ_xsec_ePp,integ_xsec_eMp)
+prediction_ePp, prediction_eMp = MD_ZEUS_I1787035.f_cross_section_to_counts(integ_xsec_ePp,integ_xsec_eMp)
 
 integ_xsec_ePp[153]
 
