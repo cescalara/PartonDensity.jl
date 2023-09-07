@@ -6,6 +6,7 @@ using Plots, Colors , Random, Distributions, ValueShapes, ParallelProcessingTool
 using StatsBase, LinearAlgebra
 
 using ArgParse
+include("../data/ZEUS_I1787035/ZEUS_I1787035.jl")
 
 function parse_commandline()
     s = ArgParseSettings()
@@ -106,7 +107,7 @@ quark_coeffs = QuarkCoefficients();
 
 
 #include(string("data/")+parsed_args["dataset"])
-MD_LOCAL::MetaData =  MetaData(MD_ZEUS_I1787035, parsed_args["lumifactor"])
+MD_LOCAL =  scale_lumi(MD_ZEUS_I1787035, parsed_args["lumifactor"])
 
 
 forward_model_init(qcdnum_params, splint_params)

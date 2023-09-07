@@ -52,7 +52,7 @@ end
 
 function get_likelihood(pdf_params::BernsteinPDFParams, sim_data::Dict{String,Any},
     qcdnum_params::QCDNUM.EvolutionParams, splint_params::QCDNUM.SPLINTParams,
-    quark_coeffs::QuarkCoefficients)
+    quark_coeffs::QuarkCoefficients, md::MetaData)
 
     likelihood = let d = sim_data
 
@@ -73,7 +73,7 @@ function get_likelihood(pdf_params::BernsteinPDFParams, sim_data::Dict{String,An
                 bspoly_params=Vector(params.bspoly_params)
             )
 
-            counts_pred_ep, counts_pred_em = @critical forward_model(pdf_params, qcdnum_params,splint_params, quark_coeffs,MD_ZEUS_I1787035)
+            counts_pred_ep, counts_pred_em = @critical forward_model(pdf_params, qcdnum_params,splint_params, quark_coeffs,md)
 
             ll_value = 0.0
             for i in 1:nbins
@@ -103,7 +103,7 @@ end
 
 function get_likelihood(pdf_params::BernsteinDirichletPDFParams, sim_data::Dict{String,Any},
     qcdnum_params::QCDNUM.EvolutionParams, splint_params::QCDNUM.SPLINTParams,
-    quark_coeffs::QuarkCoefficients, pos_init_u_only::Bool)
+    quark_coeffs::QuarkCoefficients, pos_init_u_only::Bool,md::MetaData)
 
     likelihood = let d = sim_data
 

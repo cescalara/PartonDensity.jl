@@ -10,7 +10,7 @@ using PartonDensity
 using QCDNUM
 using Plots, Random, Distributions, ValueShapes, ParallelProcessingTools
 using StatsBase, LinearAlgebra
-
+include("../data/ZEUS_I1787035/ZEUS_I1787035.jl")
 gr(fmt=:png);
 rng = MersenneTwister(42)
 
