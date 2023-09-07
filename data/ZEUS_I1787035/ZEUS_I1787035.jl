@@ -10,6 +10,7 @@ S = Born-level integrated sigma
 Based on C++ code by R. Aggarwal.
 """
 module ZEUS_I1787035
+using ArgCheck
 
 include("../../src/MetaData.jl")
 
