@@ -58,7 +58,11 @@ quark_coeffs = QuarkCoefficients();
 forward_model_init(qcdnum_params, splint_params)
 
 # run forward model 
+<<<<<<< HEAD
 counts_pred_ep, counts_pred_em = forward_model(pdf_params, qcdnum_params,splint_params, quark_coeffs,MD_ZEUS_I1787035);
+=======
+counts_pred_ep, counts_pred_em = forward_model(pdf_params, qcdnum_params, splint_params, quark_coeffs,MD_ZEUS_I1787035);
+>>>>>>> origin/main
 
 #
 # take a poisson sample
@@ -114,8 +118,6 @@ prior = NamedTupleDist(
 # then running the forward model to get the predicted counts and comparing to
 # the observed counts using a simple Poisson likelihood.
 #
-# The `@critical` macro is used because `forward_model()` is currently not thread safe, so
-# this protects it from being run in parallel.
 
 likelihood = let d = sim_data
 
@@ -132,7 +134,11 @@ likelihood = let d = sim_data
             K_d=params.K_d, λ_g1=params.λ_g1, λ_g2=params.λ_g2,
             K_g=params.K_g, λ_q=params.λ_q, K_q=params.K_q, θ=θ)
 
+<<<<<<< HEAD
         counts_pred_ep, counts_pred_em = @critical forward_model(pdf_params,qcdnum_params, splint_params, quark_coeffs, MD_ZEUS_I1787035)
+=======
+        counts_pred_ep, counts_pred_em = @critical forward_model(pdf_params, qcdnum_params, splint_params, quark_coeffs,MD_ZEUS_I1787035)
+>>>>>>> origin/main
 
         ll_value = 0.0
         for i in 1:nbins

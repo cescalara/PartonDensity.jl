@@ -4,8 +4,7 @@ export forward_model, forward_model_init
     forward_model_init(qcdnum_grid, qcdnum_params)
 
 Initialise forward model. Initialises QCDNUM and builds weight tables to 
-save time in subsequent iterations. Must be called prior to first instance 
-of `forward_model()`.
+save time in subsequent iterations. 
 """
 function forward_model_init(qcdnum_params::QCDNUM.EvolutionParams, splint_params::QCDNUM.SPLINTParams)
 
@@ -54,8 +53,7 @@ end
 
 
 """
-    forward_model(pdf_params, qcdnum_grid, 
-                  splint_params, quark_coeffs, sys_err_params)
+    forward_model(pdf_params, qcdnum_grid, splint_params, quark_coeffs, sys_err_params, MD)
 
 Go from input PDF parameters to the expected number of events in bins.
 """
@@ -64,7 +62,11 @@ function forward_model(pdf_params::AbstractPDFParams,
                        splint_params::QCDNUM.SPLINTParams, 
                        quark_coeffs::QuarkCoefficients,
                        md::MetaData
+<<<<<<< HEAD
                        ,sys_err_params::Vector{Float64}=zeros(1))
+=======
+                       ,sys_err_params::Vector{Float64}=zeros(nsyst))
+>>>>>>> origin/main
 
     # Get input PDF function
     my_func = get_input_pdf_func(pdf_params)
