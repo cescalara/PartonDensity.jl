@@ -272,7 +272,7 @@ function f_cross_section_to_counts(integ_xsec_em::Array{Float64},integ_xsec_ep::
     end
 
 
-
+    return counts_pred_ep, counts_pred_em
 
 end
 
