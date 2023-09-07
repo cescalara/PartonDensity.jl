@@ -43,8 +43,7 @@ quark_coeffs = QuarkCoefficients();</code></pre><p>initialise QCDNUM</p><pre><co
  ZMFILLW: start weight calculations   4  38   0   0
  ZMFILLW: calculations completed
 ┌ Warning: SPLINT is already initialised, skipping call to QCDNUM.ssp_spinit()
-└ @ QCDNUM /opt/myjulia/packages/QCDNUM/gx4Mo/src/splint/initialisation.jl:36</code></pre><p>run forward model</p><pre><code class="language-julia hljs">counts_pred_ep, counts_pred_em = forward_model(pdf_params, qcdnum_params,
-    splint_params, quark_coeffs);</code></pre><p>take a poisson sample</p><pre><code class="language-julia hljs">nbins = size(counts_pred_ep)[1]
+└ @ QCDNUM /opt/myjulia/packages/QCDNUM/gx4Mo/src/splint/initialisation.jl:36</code></pre><p>run forward model</p><pre><code class="language-julia hljs">counts_pred_ep, counts_pred_em = forward_model(pdf_params, qcdnum_params, splint_params, quark_coeffs,MD_ZEUS_I1787035);</code></pre><p>take a poisson sample</p><pre><code class="language-julia hljs">nbins = size(counts_pred_ep)[1]
 counts_obs_ep = zeros(UInt64, nbins)
 counts_obs_em = zeros(UInt64, nbins)
 
@@ -71,7 +70,7 @@ QCDNUM.save_params(&quot;output/params_val.h5&quot;, splint_params)</code></pre>
     K_g=Truncated(Normal(pdf_params.K_g, 1), 2, 10),
     λ_q=Truncated(Normal(pdf_params.λ_q, 0.1), -1, 0),
     K_q=Truncated(Normal(pdf_params.K_q, 0.5), 3, 7)
-);</code></pre><p>The likelihood is similar to that used in the <em>input PDF parametrisation</em> example. We start by accessing the current parameter set of the sampler&#39;s iteration, then running the forward model to get the predicted counts and comparing to the observed counts using a simple Poisson likelihood.</p><p>The <code>@critical</code> macro is used because <code>forward_model()</code> is currently not thread safe, so this protects it from being run in parallel.</p><pre><code class="language-julia hljs">likelihood = let d = sim_data
+);</code></pre><p>The likelihood is similar to that used in the <em>input PDF parametrisation</em> example. We start by accessing the current parameter set of the sampler&#39;s iteration, then running the forward model to get the predicted counts and comparing to the observed counts using a simple Poisson likelihood.</p><pre><code class="language-julia hljs">likelihood = let d = sim_data
 
     counts_obs_ep = d[&quot;counts_obs_ep&quot;]
     counts_obs_em = d[&quot;counts_obs_em&quot;]
@@ -86,8 +85,7 @@ QCDNUM.save_params(&quot;output/params_val.h5&quot;, splint_params)</code></pre>
             K_d=params.K_d, λ_g1=params.λ_g1, λ_g2=params.λ_g2,
             K_g=params.K_g, λ_q=params.λ_q, K_q=params.K_q, θ=θ)
 
-        counts_pred_ep, counts_pred_em = @critical forward_model(pdf_params,
-            qcdnum_params, splint_params, quark_coeffs)
+        counts_pred_ep, counts_pred_em = @critical forward_model(pdf_params, qcdnum_params, splint_params, quark_coeffs,MD_ZEUS_I1787035)
 
         ll_value = 0.0
         for i in 1:nbins
@@ -138,4 +136,4 @@ plot(x_grid, wrap_xtotx, samples, colors=[:skyblue4, :skyblue3, :skyblue1],
 plot!(x_grid, [log(xtotx(x, pdf_params)) for x in x_grid], color=&quot;black&quot;, lw=3,
     label=&quot;Truth&quot;, linestyle=:dash)
 plot!(ylabel=&quot;log(xtotx)&quot;)</code></pre><p>Using <code>PartonDensity.jl</code></p><pre><code class="language- hljs">plot_model_space(pdf_params, samples, nsamples=500)</code></pre><p>Alternatively, we can also visualise the implications of the fit in the <em>data space</em>, as shown below.</p><pre><code class="language- hljs">plot_data_space(pdf_params, sim_data, samples, qcdnum_params,
-    splint_params, quark_coeffs, nsamples=500)</code></pre><p>The first results seem promising, but these are really just first checks and more work will have to be done to verify the method.</p><hr/><p><em>This page was generated using <a href="https://github.com/fredrikekre/Literate.jl">Literate.jl</a>.</em></p></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="../prior_bat_implementation/">« Prior model implementation in BAT.jl</a><a class="docs-footer-nextpage" href="../bat_fit_dirichlet/">Fit with Dirichlet parametrisation »</a><div class="flexbox-break"></div><p class="footer-message">Powered by <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> and the <a href="https://julialang.org/">Julia Programming Language</a>.</p></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> version 0.27.25 on <span class="colophon-date" title="Thursday 7 September 2023 15:52">Thursday 7 September 2023</span>. Using Julia version 1.9.2.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>
+    splint_params, quark_coeffs, nsamples=500)</code></pre><p>The first results seem promising, but these are really just first checks and more work will have to be done to verify the method.</p><hr/><p><em>This page was generated using <a href="https://github.com/fredrikekre/Literate.jl">Literate.jl</a>.</em></p></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="../prior_bat_implementation/">« Prior model implementation in BAT.jl</a><a class="docs-footer-nextpage" href="../bat_fit_dirichlet/">Fit with Dirichlet parametrisation »</a><div class="flexbox-break"></div><p class="footer-message">Powered by <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> and the <a href="https://julialang.org/">Julia Programming Language</a>.</p></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> version 0.27.25 on <span class="colophon-date" title="Thursday 7 September 2023 16:53">Thursday 7 September 2023</span>. Using Julia version 1.9.2.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>
