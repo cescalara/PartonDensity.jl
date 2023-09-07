@@ -54,8 +54,7 @@ end
 
 
 """
-    forward_model(pdf_params, qcdnum_grid, 
-                  splint_params, quark_coeffs, sys_err_params)
+    forward_model(pdf_params, qcdnum_grid, splint_params, quark_coeffs, sys_err_params)
 
 Go from input PDF parameters to the expected number of events in bins.
 """
