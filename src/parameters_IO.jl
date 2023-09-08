@@ -38,7 +38,12 @@ function pd_write_sim(file_name::String, pdf_params::Union{ValencePDFParams,Diri
         meta_data_group["Ld_ePp_uncertainty"] = meta_data.Ld_ePp_uncertainty
         meta_data_group["Ld_eMp_uncertainty"] = meta_data.Ld_eMp_uncertainty
         meta_data_group["sqrtS"] = meta_data.sqrtS
-
+  meta_data_group["m_q2bins_M_begin"]= meta_data.m_q2bins_M_begin
+ meta_data_group[ "m_q2bins_M_end"]= meta_data.m_q2bins_M_end
+  meta_data_group["m_xbins_M_begin"]= meta_data.m_xbins_M_begin
+  meta_data_group["m_xbins_M_end"]= meta_data.m_xbins_M_end
+  meta_data_group["m_Data_Events_eMp"]= meta_data.m_Data_Events_eMp
+  meta_data_group["m_Data_Events_ePp"]= meta_data.m_Data_Events_ePp
 
     end
 
@@ -70,8 +75,13 @@ function pd_read_sim(file_name::String, md::MetaData )
         meta_data.Ld_ePp_uncertainty=read(gg["Ld_ePp_uncertainty"])
         meta_data.Ld_eMp_uncertainty=read(gg["Ld_eMp_uncertainty"])
         meta_data.sqrtS=read(gg["sqrtS"])
-
-
+        meta_data.m_q2bins_M_begin= read(gg["m_q2bins_M_begin"])
+        meta_data.m_q2bins_M_end= read(gg["m_q2bins_M_end"])
+        meta_data.m_xbins_M_begin= read(gg["m_xbins_M_begin"])
+        meta_data.m_xbins_M_end= read(gg["m_xbins_M_end"])
+        meta_data.m_Data_Events_eMp= read(gg["m_Data_Events_eMp"])
+        meta_data.m_Data_Events_ePp= read(gg["m_Data_Events_ePp"])
+        meta_data.f_cross_section_to_counts = md.f_cross_section_to_counts
         g = fid["truth"]
         if read(g["param_type"]) == VALENCE_TYPE
 
@@ -154,7 +164,12 @@ function pd_write_sim(file_name::String, pdf_params::Union{BernsteinPDFParams,Be
         meta_data_group["Ld_ePp_uncertainty"] = meta_data.Ld_ePp_uncertainty
         meta_data_group["Ld_eMp_uncertainty"] = meta_data.Ld_eMp_uncertainty
         meta_data_group["sqrtS"] = meta_data.sqrtS
-
+  meta_data_group["m_q2bins_M_begin"]= meta_data.m_q2bins_M_begin
+ meta_data_group[ "m_q2bins_M_end"]= meta_data.m_q2bins_M_end
+  meta_data_group["m_xbins_M_begin"]= meta_data.m_xbins_M_begin
+  meta_data_group["m_xbins_M_end"]= meta_data.m_xbins_M_end
+  meta_data_group["m_Data_Events_eMp"]= meta_data.m_Data_Events_eMp
+  meta_data_group["m_Data_Events_ePp"]= meta_data.m_Data_Events_ePp
     end
 
     return nothing
