@@ -29,6 +29,11 @@ function parse_commandline()
             arg_type = Float64
             default = 1.0
 
+        "--check", "-c"
+            help = "Parametrisation -- Dirichlet or Valence"
+            arg_type = Bool
+            default = false
+
     end
 
     return parse_args(s)
@@ -128,6 +133,11 @@ sim_data["counts_obs_ep"] = counts_obs_ep;
 sim_data["counts_obs_em"] = counts_obs_em;
 
 pd_write_sim(string("pseudodata/simulation-",parsed_args["parametrisation"],"-",seedtxt,".h5"), pdf_params, sim_data, MD_LOCAL)
+
+if parsed_args["check"]
+println("Check the written data")
+pdf_paramsR, sim_dataR, MD_LOCALR = pd_read_sim(string("pseudodata/simulation-",parsed_args["parametrisation"],"-",seedtxt,".h5"), MD_LOCAL)
+end
 end
 
 main()

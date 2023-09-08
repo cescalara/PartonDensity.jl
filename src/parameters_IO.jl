@@ -50,13 +50,12 @@ end
 
 Read in the simulated truth and simulated data from HDF5 file.
 """
-function pd_read_sim(file_name::String)
+function pd_read_sim(file_name::String, md::MetaData )
 
     local pdf_params
     sim_data = Dict{String,Any}()
-    meta_data::MetaDataIO = MetaDataIO("",0.0,0.0,0.0,0.0,0.0
-                               )
-
+    meta_data = md
+    
     h5open(file_name, "r") do fid
 
         # read sim_data
@@ -65,14 +64,12 @@ function pd_read_sim(file_name::String)
         end
 
         gg = fid["meta"]
-        meta_data=MetaDataIO(
-        read(gg["name"]),
-        read(gg["Ld_ePp"]),
-        read(gg["Ld_eMp"]),
-        read(gg["Ld_ePp_uncertainty"]),
-        read(gg["Ld_eMp_uncertainty"]),
-        read(gg["sqrtS"])
-        )
+        meta_data.name=read(gg["name"])
+        meta_data.Ld_ePp=read(gg["Ld_ePp"])
+        meta_data.Ld_eMp=read(gg["Ld_eMp"])
+        meta_data.Ld_ePp_uncertainty=read(gg["Ld_ePp_uncertainty"])
+        meta_data.Ld_eMp_uncertainty=read(gg["Ld_eMp_uncertainty"])
+        meta_data.sqrtS=read(gg["sqrtS"])
 
 
         g = fid["truth"]
