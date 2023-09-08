@@ -118,7 +118,7 @@ using QCDNUM
 
             pd_write_sim(output_file, pdf_params, sim_data, MD_ZEUS_I1787035)
 
-            new_pdf_params, new_sim_data, md = pd_read_sim(output_file)
+            new_pdf_params, new_sim_data, md = pd_read_sim(output_file,MD_ZEUS_I1787035)
 
             @test typeof(new_pdf_params) == typeof(pdf_params)
 
