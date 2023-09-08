@@ -16,7 +16,6 @@ end
 
 function parse_commandline()
     s = ArgParseSettings()
-
     @add_arg_table s begin
         "--seed", "-s"
             help = "Seed"
@@ -30,10 +29,7 @@ function parse_commandline()
             help = "Input fitresults -- file in the pseudodata directory w/o the extension"
             arg_type = String
             default = "fit-Dirichlet-0-42-data"    
-            
-            
     end
-
     return parse_args(s)
 end
 
@@ -49,8 +45,12 @@ println(seed)
 seedtxt=string(seed)
 rng = MersenneTwister(seed)
 
-qcdnum_grid = QCDNUM.GridParams(x_min=[1.0e-3, 1.0e-1, 5.0e-1], x_weights=[1, 2, 2], nx=100, qq_bounds=[1.0e2, 3.0e4], qq_weights=[1.0, 1.0], nq=50, spline_interp=3)
-qcdnum_params = QCDNUM.EvolutionParams(order=2, α_S=0.118, q0=100.0, grid_params=qcdnum_grid,n_fixed_flav=5, iqc=1, iqb=1, iqt=1, weight_type=1);
+
+gg = QCDNUM.load_params(string("fitresults/", parsed_args["fitresults"], "2.h5"))
+
+#qcdnum_grid = QCDNUM.GridParams(x_min=[1.0e-3, 1.0e-1, 5.0e-1], x_weights=[1, 2, 2], nx=100, qq_bounds=[1.0e2, 3.0e4], qq_weights=[1.0, 1.0], nq=50, spline_interp=3)
+qcdnum_params =  gg["evolution_params"]
+#QCDNUM.EvolutionParams(order=2, α_S=0.118, q0=100.0, grid_params=qcdnum_grid,n_fixed_flav=5, iqc=1, iqb=1, iqt=1, weight_type=1);
     
 splint_params = QCDNUM.SPLINTParams();
 quark_coeffs = QuarkCoefficients();
@@ -100,15 +100,6 @@ x = 1.0e-3
 q = 1.0e3
 pdf = Array{Float64}(undef, 13)
 
-gg = QCDNUM.load_params(string("fitresults/", parsed_args["fitresults"], "2.h5"))
-print(gg)
-println("---")
-print(gg["evolution_params"])
-
-
-g=gg["evolution_params"]
-
-print(g.order)
 
 QCDNUM.qcinit(-6, " ")
 nx = QCDNUM.gxmake(xmin, iwt, ng, nxin, iosp)
@@ -159,10 +150,7 @@ allq = Float64.([
 1.096570E+01,1.388560E+01,1.779290E+01,2.308550E+01,3.034710E+01,4.044480E+01,
 5.468640E+01,7.507240E+01,1.047120E+02,1.485170E+02,2.143800E+02,3.152120E+02,
 4.725370E+02,7.229460E+02,1.129950E+03,1.806160E+03,2.955930E+03])
-allalpha = Float64.([
-1.096570E+01,1.388560E+01,1.779290E+01,2.308550E+01,3.034710E+01,4.044480E+01,
-5.468640E+01,7.507240E+01,1.047120E+02,1.485170E+02,2.143800E+02,3.152120E+02,
-4.725370E+02,7.229460E+02,1.129950E+03,1.806160E+03,2.955930E+03])
+allalpha = copy(allq)
 for (i, qq) in enumerate(allq)
   allalpha[i] =QCDNUM.asfunc(qq*qq)[1]
 end
@@ -181,14 +169,14 @@ write(f,string(Ns+1))
 write(f,"\n")
 write(f,"Particle: 2212
 Flavors: [-5,-4, -3, -2, -1, 1, 2, 3, 4, 5, 21]
-OrderQCD: ",string(g.order),"
+OrderQCD: ",string(qcdnum_params.order),"
 ForcePositive: 1
 FlavorScheme: fixed
-NumFlavors: 5
-XMin: 0.001
+NumFlavors: ",string(qcdnum_params.n_fixed_flav),"
+XMin: ",string(qcdnum_params.grid_params.x_min[1]),"
 XMax: 1
-QMin: 100
-QMax: 30000
+QMin: ",string(qcdnum_params.q0),"
+QMax: ",string(qcdnum_params.grid_params.qq_bounds[2]),"
 MZ: 91.1876
 MUp: 0
 MDown: 0
@@ -196,8 +184,8 @@ MStrange: 0
 MCharm: 1.3
 MBottom: 4.75
 MTop: 172
-AlphaS_MZ: ",string(g.α_S),"
-AlphaS_OrderQCD: ",string(g.order),"
+AlphaS_MZ: ",string(qcdnum_params.α_S),"
+AlphaS_OrderQCD: ",string(qcdnum_params.order),"
 AlphaS_Type: ipol
 AlphaS_Qs: ")
 write(f,string(allq))
@@ -235,7 +223,7 @@ end
     end
     for s in  allparams
       global pdf_params=s
-      println(pdf_params)
+      #println(pdf_params)
       QCDNUM.evolfg(itype, func_c, def, iq0)
       open(string("CABCHSV2023nnlo/CABCHSV2023nnlo_", lpad(string(NN),4,"0"),".dat"), "w") do f
       if (NN==0)
