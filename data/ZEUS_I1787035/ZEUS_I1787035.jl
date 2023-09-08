@@ -196,6 +196,8 @@ const m_TM_elements_eMp = get_TM_elements(1);
 const m_Tnm_sys_ePp = Tnm_sys_ePp
 const m_Tnm_sys_eMp = Tnm_sys_eMp
 
+Init_sys()
+
 function f_cross_section_to_counts(integ_xsec_ep::Array{Float64},integ_xsec_em::Array{Float64},sys_err_params::Vector{Float64}=zeros(8))
 
     # Fold through response to get counts
