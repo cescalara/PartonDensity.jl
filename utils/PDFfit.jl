@@ -9,7 +9,7 @@ using ArgParse
 import HDF5
  
 include("priors.jl")
-include("../data/ZEUS_I1787035/ZEUS_I1787035.jl")
+include(string(dirname(pathof(PartonDensity)),"/../data/ZEUS_I1787035/ZEUS_I1787035.jl"))
 
 function parse_commandline()
     s = ArgParseSettings()
@@ -86,7 +86,7 @@ sim_data["counts_obs_em"]=MD_G.m_Data_Events_eMp
 somepdf_params = DirichletPDFParams(K_u=3.7, K_d=3.7, λ_g1=0.5, λ_g2=-0.5, K_g=5.0,λ_q=-0.5, K_q=6.0, θ=θ);
 MD_TEMP::MetaData = MD_G
 if parsed_args["pseudodata"] != "data"
-  somepdf_params, sim_data, MD_TEMP = pd_read_sim(string("pseudodata/",parsed_args["pseudodata"],".h5"));
+  somepdf_params, sim_data, MD_TEMP = pd_read_sim(string("pseudodata/",parsed_args["pseudodata"],".h5"),MD_G);
 end
 MD_LOCAL::MetaData = MD_TEMP
 
