@@ -141,5 +141,3 @@ end
 end
 
 main()
-#julia --project=. utils/PDFfit.jl -s 45 -p  Dirichlet -d simulation-Dirichlet-42 -n 250 --max_ncycles=0  --nsteps_per_cycle=10 --nsteps_final=10 --strict=false --dummylikelihood=true
-#julia --project=. utils/generatelhapdf.jl -s 43 -p Dirichlet -f fit-Dirichlet-0-45-simulation-Dirichlet-42
