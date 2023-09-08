@@ -100,9 +100,15 @@ x = 1.0e-3
 q = 1.0e3
 pdf = Array{Float64}(undef, 13)
 
-g = QCDNUM.load_params(string("fitresults/", parsed_args["fitresults"], ".h5"))
+gg = QCDNUM.load_params(string("fitresults/", parsed_args["fitresults"], "2.h5"))
+print(gg)
+println("---")
+print(gg["evolution_params"])
 
 
+g=gg["evolution_params"]
+
+print(g.order)
 
 QCDNUM.qcinit(-6, " ")
 nx = QCDNUM.gxmake(xmin, iwt, ng, nxin, iosp)
@@ -175,7 +181,7 @@ write(f,string(Ns+1))
 write(f,"\n")
 write(f,"Particle: 2212
 Flavors: [-5,-4, -3, -2, -1, 1, 2, 3, 4, 5, 21]
-OrderQCD: 2
+OrderQCD: ",string(g.order),"
 ForcePositive: 1
 FlavorScheme: fixed
 NumFlavors: 5
@@ -190,8 +196,8 @@ MStrange: 0
 MCharm: 1.3
 MBottom: 4.75
 MTop: 172
-AlphaS_MZ: 0.118
-AlphaS_OrderQCD: 2
+AlphaS_MZ: ",string(g.α_S),"
+AlphaS_OrderQCD: ",string(g.order),"
 AlphaS_Type: ipol
 AlphaS_Qs: ")
 write(f,string(allq))

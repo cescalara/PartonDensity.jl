@@ -141,3 +141,6 @@ end
 end
 
 main()
+#julia --project=. utils/PDFfit.jl -s 45 -p  Dirichlet -d simulation-Dirichlet-42 -n 250 -c 4 -m 2
+#julia --project=. utils/generatelhapdf.jl -s 43 -p Dirichlet -f fit-Dirichlet-0-45-simulation-Dirichlet-42
+#julia --project=. utils/generatelhapdf.jl -s 43 -p Dirichlet -f fit-Dirichlet-0-45-simulation-Dirichlet-42

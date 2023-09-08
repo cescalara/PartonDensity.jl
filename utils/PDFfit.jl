@@ -32,6 +32,12 @@ function parse_commandline()
             help = "Number of steps"
             arg_type = Int
             default = 10^3
+            
+        "--max_ncycles", "-m"
+            help = "max_ncycles"
+            arg_type = Int
+            default = 50
+            
         "--parametrisation", "-p"
             help = "Parametrisation -- Dirichlet or Valence"
             arg_type = String
@@ -97,6 +103,7 @@ counts_obs_ep = d["counts_obs_ep"]
 counts_obs_em = d["counts_obs_em"]
 nbins = d["nbins"]
 logfuncdensity(function (params)
+       return -100.0;
        if parsed_args["parametrisation"] == "Bernstein"
          vec_bspp = Vector(params.bspoly_params)
          bspoly_params = [[vec_bspp[Int(2 * i - 1)], vec_bspp[Int(2 * i)]] for i in 1:length(vec_bspp)/2]
@@ -154,12 +161,17 @@ end
 posterior = PosteriorDensity(likelihood, prior);
 mcalg = MetropolisHastings(proposal=BAT.MvTDistProposal(10.0))
 convergence = BrooksGelmanConvergence(threshold=1.3);
-burnin = MCMCMultiCycleBurnin(max_ncycles=50);
-samples = bat_sample(posterior, MCMCSampling(mcalg=mcalg, nsteps=parsed_args["nsteps"], nchains=parsed_args["nchains"])).result;
+#burnin = MCMCMultiCycleBurnin(max_ncycles=parsed_args["max_ncycles"]);
+#samples = bat_sample(posterior, MCMCSampling(mcalg=mcalg, nsteps=parsed_args["nsteps"], nchains=parsed_args["nchains"])).result;
+
+burnin = MCMCMultiCycleBurnin(max_ncycles=0, nsteps_per_cycle = 10, nsteps_final = 10);
+samples = bat_sample(posterior, MCMCSampling(mcalg=mcalg, nsteps=parsed_args["nsteps"], nchains=parsed_args["nchains"],strict=false)).result;
+
 # Let's save the result for further analysis
 fname=string("fitresults/fit-",parsed_args["parametrisation"],"-",parsed_args["priorshift"],"-",seedtxt,"-",parsed_args["pseudodata"],".h5")
+fname2=string("fitresults/fit-",parsed_args["parametrisation"],"-",parsed_args["priorshift"],"-",seedtxt,"-",parsed_args["pseudodata"],"2.h5")
 bat_write(fname, samples)
-QCDNUM.save_params(fname, qcdnum_params)
+QCDNUM.save_params(fname2, qcdnum_params)
 end 
 
 main()
