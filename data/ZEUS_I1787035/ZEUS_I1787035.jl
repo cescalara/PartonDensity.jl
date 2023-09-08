@@ -14,8 +14,6 @@ using PartonDensity
 using ArgCheck
 
 
-export Init_sys
-
 export MD_ZEUS_I1787035
 
 
@@ -109,7 +107,14 @@ function get_TM_elements(eMPp)
 end
 
 
-
+const banner = """
+I.~Abt \textit{et al.} [ZEUS and ZEUS],
+``Study of proton parton distribution functions at high \$x\$ using ZEUS data,''
+Phys. Rev. D \textbf{101} (2020) no.11, 112009
+[erratum: Phys. Rev. D \textbf{106} (2022) no.7, 079901]
+doi:10.1103/PhysRevD.101.112009
+[arXiv:2003.08742 [hep-ex]].
+"""
 
 
 """
@@ -118,6 +123,9 @@ end
 Reads various systematic errors and feeds them for further use
 """
 function Init_sys()
+
+println("Initialize the data for:")
+println(banner)
 # NP1 429
 # NP2 153
 # nsyst 8
@@ -195,6 +203,8 @@ const m_TM_elements_ePp = get_TM_elements(0);
 const m_TM_elements_eMp = get_TM_elements(1);
 const m_Tnm_sys_ePp = Tnm_sys_ePp
 const m_Tnm_sys_eMp = Tnm_sys_eMp
+
+Init_sys()
 
 function f_cross_section_to_counts(integ_xsec_ep::Array{Float64},integ_xsec_em::Array{Float64},sys_err_params::Vector{Float64}=zeros(8))
 
