@@ -72,7 +72,16 @@ jobs:
          export JULIA_PKGDIR=/opt/julia
          export JULIA_DEPOT_PATH=/opt/myjulia
          julia --project=. -e 'import Pkg; Pkg.instantiate(); include("examples/pdf_parametrisation.jl")'
-
+    - name: Run6
+      run : |
+         export JULIA_PKGDIR=/opt/julia
+         export JULIA_DEPOT_PATH=/opt/myjulia
+         ls -lah pseudodata
+         mkdir -p fitresults
+         julia --project=. utils/PDFfit.jl -s 45 -p  Dirichlet -d simulation-Dirichlet-42 -n 250 --max_ncycles=0  --nsteps_per_cycle=10 --nsteps_final=10 --strict=false --dummylikelihood=true
+         ls -lah fitresults
+         mkdir -p CABCHSV2023nnlo
+         julia --project=. utils/generatelhapdf.jl -s 43 -p Dirichlet -f fit-Dirichlet-0-45-simulation-Dirichlet-42
          
   build-docs-in-partondensity-docker-image:
     name: Build docs in PartonDensity Docker image
