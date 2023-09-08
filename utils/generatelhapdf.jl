@@ -6,14 +6,6 @@ using Random, Distributions, ValueShapes, ParallelProcessingTools
 using StatsBase, LinearAlgebra
 using Printf
 using ArgParse
-pdf_params = DirichletPDFParams(K_u=3.1, K_d=3.7, λ_g1=0.7, λ_g2=-0.5, K_g=5.0,λ_q=-0.5, K_q=6.0,θ=[0.22, 0.10, 0.24, 0.24, 0.10,0.05, 0.01, 0.005, 0.0005])
-
-function func(ipdf, x)::Float64
-#pdf_params = DirichletPDFParams(K_u=3.7, K_d=3.7, λ_g1=0.5, λ_g2=-0.5, K_g=5.0,λ_q=-0.5, K_q=6.0,θ=[0.22, 0.10, 0.24, 0.24, 0.10,0.05, 0.01, 0.005, 0.0005])
-r::Float64 = get_input_pdf_func(pdf_params)(ipdf, x)
-return r
-end
-
 function parse_commandline()
     s = ArgParseSettings()
     @add_arg_table s begin
@@ -33,7 +25,6 @@ function parse_commandline()
     return parse_args(s)
 end
 
-
 function main()
 parsed_args = parse_commandline()
 println("Parsed args:")
@@ -45,75 +36,11 @@ println(seed)
 seedtxt=string(seed)
 rng = MersenneTwister(seed)
 
-
 gg = QCDNUM.load_params(string("fitresults/", parsed_args["fitresults"], "2.h5"))
-
-#qcdnum_grid = QCDNUM.GridParams(x_min=[1.0e-3, 1.0e-1, 5.0e-1], x_weights=[1, 2, 2], nx=100, qq_bounds=[1.0e2, 3.0e4], qq_weights=[1.0, 1.0], nq=50, spline_interp=3)
 qcdnum_params =  gg["evolution_params"]
-#QCDNUM.EvolutionParams(order=2, α_S=0.118, q0=100.0, grid_params=qcdnum_grid,n_fixed_flav=5, iqc=1, iqb=1, iqt=1, weight_type=1);
-    
-splint_params = QCDNUM.SPLINTParams();
+ splint_params = QCDNUM.SPLINTParams();
 quark_coeffs = QuarkCoefficients();
 forward_model_init(qcdnum_params, splint_params)
-
-func_c = @cfunction(func, Float64, (Ref{Int32}, Ref{Float64}))
-
-
-xmin = Float64.([1.0e-4])
-iwt = Int32.([1])
-ng = 1
-nxin = 100
-iosp = 3
-nx = 10
-
-qq = Float64.([2e0, 1e4])
-wt = Float64.([1e0, 1e0])
-nq = 1
-nqin = 60
-ngq = 2
-itype = 1
-
-as0 = 0.364
-r20 = 2.0
-
-q2c = 3.0
-q2b = 25.0
-q0 = 2.0
-#q0 = 100.0
-iqt = 999
-
-def = Float64.([0., 0., 0., 0., 0.,-1., 0., 1., 0., 0., 0., 0., 0.,     
-                0., 0., 0., 0.,-1., 0., 0., 0., 1., 0., 0., 0., 0.,      
-                0., 0., 0.,-1., 0., 0., 0., 0., 0., 1., 0., 0., 0.,      
-                0., 0., 0., 0., 0., 1., 0., 0., 0., 0., 0., 0., 0.,      
-                0., 0., 0., 0., 1., 0., 0., 0., 0., 0., 0., 0., 0.,      
-                0., 0., 0., 1., 0., 0., 0., 0., 0., 0., 0., 0., 0.,      
-                0., 0.,-1., 0., 0., 0., 0., 0., 0., 0., 1., 0., 0.,      
-                0., 0., 1., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0.,      
-                0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0.,      
-                0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0.,      
-                0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0.,      
-                0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0.]);
-
-nfin = 0
-x = 1.0e-3
-q = 1.0e3
-pdf = Array{Float64}(undef, 13)
-
-
-QCDNUM.qcinit(-6, " ")
-nx = QCDNUM.gxmake(xmin, iwt, ng, nxin, iosp)
-nq = QCDNUM.gqmake(qq, wt, ngq, nqin)
-nw = QCDNUM.fillwt(itype)
-QCDNUM.setord(3)
-QCDNUM.setalf(as0, r20)
-iqc = QCDNUM.iqfrmq(q2c)
-iqb = QCDNUM.iqfrmq(q2b)
-iqt = QCDNUM.iqfrmq(1e11)
-QCDNUM.setcbt(0, iqc, iqb, 0)
-iq0 = QCDNUM.iqfrmq(q0)
-#println("OK1")
-QCDNUM.evolfg(itype, func_c, def, iq0)
 
 allx = Float64.([
 1.113780E-03,1.360370E-03,1.661560E-03,2.029430E-03,2.478750E-03,3.027550E-03,
@@ -145,16 +72,12 @@ allx = Float64.([
 9.529995E-01,9.565290E-01,9.600845E-01,9.636400E-01,9.672225E-01,9.708050E-01,
 9.744140E-01,9.780230E-01,9.816585E-01,9.852940E-01,9.889570E-01,9.926200E-01,
 9.963100E-01,1.000000E+00])
-#allq = Float64.([100.,200,300,400,500,1000,5000,10000])
-allq = Float64.([
-1.096570E+01,1.388560E+01,1.779290E+01,2.308550E+01,3.034710E+01,4.044480E+01,
-5.468640E+01,7.507240E+01,1.047120E+02,1.485170E+02,2.143800E+02,3.152120E+02,
-4.725370E+02,7.229460E+02,1.129950E+03,1.806160E+03,2.955930E+03])
+allq = Float64.([1.096570E+01,1.388560E+01,1.779290E+01,2.308550E+01,3.034710E+01,4.044480E+01,5.468640E+01,7.507240E+01,1.047120E+02,1.485170E+02])
 allalpha = copy(allq)
 for (i, qq) in enumerate(allq)
   allalpha[i] =QCDNUM.asfunc(qq*qq)[1]
 end
-    Ns = 50
+Ns = 50
 
 open("CABCHSV2023nnlo/CABCHSV2023nnlo.info", "w") do f
   write(f,"
@@ -199,7 +122,6 @@ AlphaS_Lambda5: 0.226
 
 end
 
-
     samples_data = bat_read(string("fitresults/", parsed_args["fitresults"], ".h5")).result;
     sub_samples_all = BAT.bat_sample(samples_data, BAT.OrderedResampling(nsamples=100)).result;
     samples_mode2 = mode(sub_samples_all);
@@ -222,9 +144,15 @@ end
       )
     end
     for s in  allparams
-      global pdf_params=s
-      #println(pdf_params)
-      QCDNUM.evolfg(itype, func_c, def, iq0)
+    
+     my_func = get_input_pdf_func(s)
+     input_pdf = QCDNUM.InputPDF(func=my_func, map=input_pdf_map)
+
+    # Evolve PDFs
+     iq0 = QCDNUM.iqfrmq(qcdnum_params.q0)
+     ϵ = QCDNUM.evolfg(qcdnum_params.output_pdf_loc, input_pdf.cfunc, input_pdf.map, iq0)
+     itype=1
+
       open(string("CABCHSV2023nnlo/CABCHSV2023nnlo_", lpad(string(NN),4,"0"),".dat"), "w") do f
       if (NN==0)
         write(f,"PdfType: central\nFormat: lhagrid1\n---\n")
@@ -241,7 +169,8 @@ end
       for xx in allx
         for qq in allq
           #@printf("%f\n",qq)
-          pdf = QCDNUM.allfxq(itype, xx, qq, 0, 1)
+          qq2=qq*qq
+          pdf = QCDNUM.allfxq(itype, xx, qq2, 0, 1)
           @printf(f, "%8.8f %8.8f %8.8f %8.8f %8.8f %8.8f %8.8f %8.8f %8.8f %8.8f %8.8f\n",pdf[1],pdf[2],pdf[3],pdf[4],pdf[5],pdf[6],pdf[7],pdf[8],pdf[9],pdf[10],pdf[11]) 
         end 
       end
