@@ -194,6 +194,7 @@ fname=string("fitresults/fit-",parsed_args["parametrisation"],"-",parsed_args["p
 fname2=string("fitresults/fit-",parsed_args["parametrisation"],"-",parsed_args["priorshift"],"-",seedtxt,"-",parsed_args["pseudodata"],"2.h5")
 bat_write(fname, samples)
 QCDNUM.save_params(fname2, qcdnum_params)
+
 end 
 
 main()
