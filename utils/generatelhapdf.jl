@@ -62,7 +62,7 @@ Reference: arXiv:2309.xxxx
 Format: lhagrid1
 DataVersion: 1
 NumMembers: ")
-write(f,string(Ns+1))
+write(f,string(parsed_args["replicas"]+1))
 write(f,"\n")
 write(f,"Particle: 2212
 Flavors: [-5,-4, -3, -2, -1, 1, 2, 3, 4, 5, 21]
@@ -99,25 +99,65 @@ end
     samples_data = bat_read(string("fitresults/", parsed_args["fitresults"], ".h5")).result;
     sub_samples_all = BAT.bat_sample(samples_data, BAT.OrderedResampling(nsamples=parsed_args["replicas"])).result;
     samples_mode2 = mode(sub_samples_all);
-    sub_samples = BAT.bat_sample(samples_data, BAT.OrderedResampling(nsamples=Ns)).result;
-
-    pdf_params_s = DirichletPDFParams(K_u=samples_mode2.K_u, K_d=samples_mode2.K_d, K_q=samples_mode2.K_q,
+    sub_samples = BAT.bat_sample(samples_data, BAT.OrderedResampling(nsamples=parsed_args["replicas"])).result;
+    println(samples_data)
+    if parsed_args["parametrisation"] == "Dirichlet"
+        pdf_params_s = DirichletPDFParams(
+                                      K_u=samples_mode2.K_u, 
+                                      K_d=samples_mode2.K_d, 
+                                      K_q=samples_mode2.K_q,
                                       λ_g1=samples_mode2.λ_g1, 
                                       λ_g2=samples_mode2.λ_g2,
                                       K_g=samples_mode2.K_g, 
                                       λ_q=samples_mode2.λ_q, 
                                       θ=Vector(samples_mode2.θ))
-    allparams = [pdf_params_s]
+        allparams = [pdf_params_s]
 
-    for s in eachindex(sub_samples)
-      push!(allparams,DirichletPDFParams(K_u=sub_samples.v.K_u[s], K_d=sub_samples.v.K_d[s], K_q=sub_samples.v.K_q[s],
+        for s in eachindex(sub_samples)
+        push!(allparams,DirichletPDFParams(
+                                      K_u=sub_samples.v.K_u[s], 
+                                      K_d=sub_samples.v.K_d[s], 
+                                      K_q=sub_samples.v.K_q[s],
                                       λ_g1=sub_samples.v.λ_g1[s], 
                                       λ_g2=sub_samples.v.λ_g2[s],
                                       K_g=sub_samples.v.K_g[s], 
                                       λ_q=sub_samples.v.λ_q[s], 
                                       θ=Vector(sub_samples.v.θ[s]))
-      )
+        )
+        end
     end
+    if parsed_args["parametrisation"] == "Valence"
+        pdf_params_s = ValencePDFParams(
+                                      λ_u=samples_mode2.λ_u, 
+                                      K_u=samples_mode2.K_u, 
+                                      λ_d=samples_mode2.λ_d, 
+                                      K_d=samples_mode2.K_d, 
+                                      λ_g1=samples_mode2.λ_g1, 
+                                      λ_g2=samples_mode2.λ_g2, 
+                                      K_g=samples_mode2.K_g, 
+                                      λ_q=samples_mode2.λ_q, 
+                                      K_q=samples_mode2.K_q, 
+                                      θ=Vector(samples_mode2.θ))
+        allparams = [pdf_params_s]
+
+        for s in eachindex(sub_samples)
+        push!(allparams,DValencePDFParams(
+                                      λ_u=sub_samples.v.λ_u[s], 
+                                      K_u=sub_samples.v.K_u[s], 
+                                      λ_d=sub_samples.v.λ_d[s], 
+                                      K_d=sub_samples.v.K_d[s], 
+                                      λ_g1=sub_samples.v.λ_g1[s], 
+                                      λ_g2=sub_samples.v.λ_g2[s], 
+                                      K_g=sub_samples.v.K_g[s], 
+                                      λ_q=sub_samples.v.λ_q[s], 
+                                      K_q=sub_samples.v.K_q[s], 
+                                      θ=Vector(sub_samples.v.θ))
+        )
+        end
+    end
+
+
+
 
     NN=0
     #push!(allparams,samples_mode2)
