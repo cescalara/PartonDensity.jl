@@ -96,7 +96,7 @@ AlphaS_Lambda5: 0.226
 
 end
 
-    samples_data = bat_read((string("fitresults/", parsed_args["fitresults"], ".h5"),"samples")).result;
+    samples_data = bat_read(string("fitresults/", parsed_args["fitresults"], ".h5")).result;
     sub_samples_all = BAT.bat_sample(samples_data, BAT.OrderedResampling(nsamples=parsed_args["replicas"])).result;
     samples_mode2 = mode(sub_samples_all);
     sub_samples = BAT.bat_sample(samples_data, BAT.OrderedResampling(nsamples=Ns)).result;
