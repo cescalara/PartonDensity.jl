@@ -138,7 +138,7 @@ println(banner)
 
 
  global Tnm_Ee_sys_ePp = zeros(NP1,NP2)
- global Tnm_Eehigh_ePp[NP1,NP2]
+ global Tnm_Eehigh_ePp = zeros(NP1,NP2)
     
  Tnm_sys_ePp = zeros(NP1,NP2,nsyst)
  Tnm_sys_eMp = zeros(NP1,NP2,nsyst)
