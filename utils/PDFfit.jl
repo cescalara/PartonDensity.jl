@@ -61,12 +61,9 @@ function parse_commandline()
             help = "Parametrisation -- Dirichlet or Valence"
             arg_type = String
             default = "Dirichlet"
-        "--pseudodata", "-d"
-            help = "Input pseudodata -- file in the pseudodata directory w/o the extension"
-            arg_type = String
-            default = "data"
     end
 
+    @add_arg_table(s, ["--pseudodata", "-d"], help = "Input pseudodata -- file in the pseudodata directory w/o the extension", default = ["data"], nargs => '*');
     return parse_args(s)
 end
 
@@ -100,27 +97,10 @@ forward_model_init(qcdnum_params, splint_params)
 prior=get_priors(parsed_args)
 
 
-sim_data = Dict{String,Any}()
-
-sim_data["counts_obs_ep"]=MD_G.m_Data_Events_ePp
-sim_data["counts_obs_em"]=MD_G.m_Data_Events_eMp
-MD_TEMP::MetaData = MD_G
-
-if parsed_args["pseudodata"] != "data"
-  somepdf_params, sim_data, MD_TEMP = pd_read_sim(string("pseudodata/",parsed_args["pseudodata"],".h5"),MD_G);
-end
-MD_LOCAL::MetaData = MD_TEMP
 
 
+function params_to_pdfparams(params)
 
-likelihood = let d = sim_data
-counts_obs_ep = d["counts_obs_ep"]
-counts_obs_em = d["counts_obs_em"]
-nbins = size(d["counts_obs_ep"])[1]
-logfuncdensity(function (params)
-       if parsed_args["dummylikelihood"]
-         return -100.0;
-       end
        if parsed_args["parametrisation"] == "Bernstein"
          vec_bspp = Vector(params.bspoly_params)
          bspoly_params = [[vec_bspp[Int(2 * i - 1)], vec_bspp[Int(2 * i)]] for i in 1:length(vec_bspp)/2]
@@ -136,23 +116,48 @@ logfuncdensity(function (params)
          pdf_params = BernsteinDirichletPDFParams(initial_U=initU,initial_D=initD, λ_g1=params.λ_g1, λ_g2=params.λ_g2,
                     K_g=params.K_g, λ_q=params.λ_q, K_q=params.K_q,bspoly_params=bspoly_params,bspoly_params_d=bspoly_params_d,θ=Vector(params.θ))
          ParErrs = [params.beta0_1,params.beta0_2,params.beta0_3,params.beta0_4, params.beta0_5,params.beta0_6,params.beta0_7,params.beta0_8]
-         counts_pred_ep, counts_pred_em = @critical  forward_model(pdf_params, qcdnum_params, splint_params, quark_coeffs,MD_LOCAL,ParErrs );
        end
 
        if parsed_args["parametrisation"] == "Dirichlet"
          pdf_params = DirichletPDFParams(K_u=params.K_u, K_d=params.K_d, λ_g1=params.λ_g1, λ_g2=params.λ_g2, K_g=params.K_g, λ_q=params.λ_q, K_q=params.K_q, θ=params.θ)
          ParErrs = [params.beta0_1,params.beta0_2,params.beta0_3,params.beta0_4, params.beta0_5,params.beta0_6,params.beta0_7,params.beta0_8]
-         counts_pred_ep, counts_pred_em = @critical  forward_model(pdf_params, qcdnum_params, splint_params, quark_coeffs,MD_LOCAL,ParErrs );
        end
 
        if parsed_args["parametrisation"] == "Valence"
          θ = get_scaled_θ(params.λ_u, params.K_u, params.λ_d,params.K_d, Vector(params.θ_tmp))
          pdf_params = ValencePDFParams(λ_u=params.λ_u, K_u=params.K_u, λ_d=params.λ_d, K_d=params.K_d, λ_g1=params.λ_g1, λ_g2=params.λ_g2, K_g=params.K_g, λ_q=params.λ_q, K_q=params.K_q, θ=θ)
          ParErrs = [params.beta0_1,params.beta0_2,params.beta0_3,params.beta0_4, params.beta0_5,params.beta0_6,params.beta0_7,params.beta0_8]
-         counts_pred_ep, counts_pred_em = @critical  forward_model(pdf_params, qcdnum_params, splint_params, quark_coeffs,MD_LOCAL,ParErrs );
        end
-            ll_value = 0.0
-            for i in 1:nbins
+
+       return pdf_params, ParErrs
+
+end
+
+ds_vector=parsed_args["pseudodata"]
+d_vector =[]
+output=string("")
+for i in 1:length(ds_vector)
+  output=string(output,ds_vector[i])
+  MD_TEMP::MetaData = MD_G
+  if ds_vector[i] != "data"
+     somepdf_params, sim_data, MD_TEMP = pd_read_sim(string("pseudodata/",ds_vector[i],".h5"),MD_G);
+     MD_TEMP.m_Data_Events_ePp =sim_data["counts_obs_ep"]
+     MD_TEMP.m_Data_Events_eMp =sim_data["counts_obs_em"]
+  end
+  push!(d_vector,MD_TEMP)
+end
+
+likelihood = let d_v = d_vector
+logfuncdensity(function (params)
+       if parsed_args["dummylikelihood"]
+         return -100.0;
+       end
+         ll_value = 0.0
+         pdf_params, ParErrs = params_to_pdfparams(params)
+         for k in 1:length(ds_vector)
+            counts_pred_ep, counts_pred_em = @critical  forward_model(pdf_params, qcdnum_params, splint_params, quark_coeffs, d_v[k],ParErrs );
+
+            for i in 1:length(counts_pred_ep)
                 if counts_pred_ep[i] < 0
                    @debug "counts_pred_ep[i] < 0, setting to 0" i counts_pred_ep[i]
                    counts_pred_ep[i] = 0
@@ -161,12 +166,13 @@ logfuncdensity(function (params)
                    @debug "counts_pred_em[i] < 0, setting to 0" i counts_pred_em[i]
                    counts_pred_em[i] = 0
                 end
-                counts_pred_ep[i] =counts_pred_ep[i]*(1+MD_LOCAL.Ld_ePp_uncertainty*params.Beta1)
-                counts_pred_em[i] =counts_pred_em[i]*(1+MD_LOCAL.Ld_eMp_uncertainty*params.Beta2)                
-                ll_value += logpdf(Poisson(counts_pred_ep[i]), counts_obs_ep[i])
-                ll_value += logpdf(Poisson(counts_pred_em[i]), counts_obs_em[i])
+                counts_pred_ep[i] =counts_pred_ep[i]*(1+d_v[k].Ld_ePp_uncertainty*params.Beta1)
+                counts_pred_em[i] =counts_pred_em[i]*(1+d_v[k].Ld_eMp_uncertainty*params.Beta2)                
+                ll_value += logpdf(Poisson(counts_pred_ep[i]), d_v[k].m_Data_Events_ePp[i])
+                ll_value += logpdf(Poisson(counts_pred_em[i]), d_v[k].m_Data_Events_eMp[i])
             end
-            return ll_value
+          end
+          return ll_value
     end)
 end
 
@@ -177,7 +183,7 @@ convergence = BrooksGelmanConvergence(threshold=1.3);
 burnin = MCMCMultiCycleBurnin(max_ncycles=parsed_args["max_ncycles"],nsteps_per_cycle=parsed_args["nsteps_per_cycle"],nsteps_final=parsed_args["nsteps_final"]);
 samples = bat_sample(posterior, MCMCSampling(mcalg=mcalg, nsteps=parsed_args["nsteps"], nchains=parsed_args["nchains"],strict=parsed_args["strict"])).result;
 
-fname=string("fitresults/fit-",parsed_args["parametrisation"],"-",parsed_args["priorshift"],"-",seedtxt,"-",parsed_args["pseudodata"])
+fname=string("fitresults/fit-",parsed_args["parametrisation"],"-",parsed_args["priorshift"],"-",seedtxt,"-",output)
 bat_write(string(fname,".h5"), samples)
 QCDNUM.save_params(string(fname,"_qcdnum.h5"), qcdnum_params)
 end 
