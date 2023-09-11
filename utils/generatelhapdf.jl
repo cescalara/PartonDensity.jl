@@ -40,7 +40,7 @@ println(seed)
 seedtxt=string(seed)
 rng = MersenneTwister(seed)
 
-gg = QCDNUM.load_params(string("fitresults/", parsed_args["fitresults"], "2.h5"))
+gg = QCDNUM.load_params(string("fitresults/", parsed_args["fitresults"], "_qcdnum.h5"))
 qcdnum_params =  gg["evolution_params"]
 splint_params = QCDNUM.SPLINTParams();
 quark_coeffs = QuarkCoefficients();

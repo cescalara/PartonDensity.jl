@@ -52,11 +52,6 @@ function parse_commandline()
             arg_type = Bool
             default = true
 
-  # max_ncycles=0, nsteps_per_cycle = 10, nsteps_final = 10)         
-#  nsteps_per_cycle: Int64 10000
-#  max_ncycles: Int64 30
-#  nsteps_final: Int64 1000
-
          "--dummylikelihood"
             help = "dummylikelihood"
             arg_type = Bool
@@ -82,10 +77,7 @@ function main()
         println("  $arg  =>  $val")
     end
 
-counts_obs_ep = m_Data_Events_ePp
-counts_obs_em = m_Data_Events_eMp
 
-nbins = size(counts_obs_ep)[1]
 
 seed=parsed_args["seed"]
 println(seed)
@@ -105,30 +97,29 @@ quark_coeffs = QuarkCoefficients();
 # initialise QCDNUM
 forward_model_init(qcdnum_params, splint_params)
 
+prior=get_priors(parsed_args)
+
 
 sim_data = Dict{String,Any}()
-sim_data["nbins"] = nbins;
+
 sim_data["counts_obs_ep"]=MD_G.m_Data_Events_ePp
 sim_data["counts_obs_em"]=MD_G.m_Data_Events_eMp
-θ = [ 0.228, 0.104, 0.249, 0.249, 0.104, 0.052, 0.010, 0.005, 0.0005]
-θ_sum=sum(θ[1:9])
-θ=θ/θ_sum  
-somepdf_params = DirichletPDFParams(K_u=3.7, K_d=3.7, λ_g1=0.5, λ_g2=-0.5, K_g=5.0,λ_q=-0.5, K_q=6.0, θ=θ);
 MD_TEMP::MetaData = MD_G
+
 if parsed_args["pseudodata"] != "data"
   somepdf_params, sim_data, MD_TEMP = pd_read_sim(string("pseudodata/",parsed_args["pseudodata"],".h5"),MD_G);
 end
 MD_LOCAL::MetaData = MD_TEMP
 
-prior=get_priors(parsed_args)
+
 
 likelihood = let d = sim_data
 counts_obs_ep = d["counts_obs_ep"]
 counts_obs_em = d["counts_obs_em"]
-nbins = d["nbins"]
+nbins = size(d["counts_obs_ep"])[1]
 logfuncdensity(function (params)
        if parsed_args["dummylikelihood"]
-       return -100.0;
+         return -100.0;
        end
        if parsed_args["parametrisation"] == "Bernstein"
          vec_bspp = Vector(params.bspoly_params)
@@ -179,22 +170,16 @@ logfuncdensity(function (params)
     end)
 end
 
-# We can now run the MCMC sampler. We will start by using the
-# Metropolis-Hastings algorithm as implemented in `BAT.jl`.
-# To demonstrate, we run a short chain of 10^3 iterations, which
-# should take around 10 minutes.
 
 posterior = PosteriorDensity(likelihood, prior);
 mcalg = MetropolisHastings(proposal=BAT.MvTDistProposal(10.0))
 convergence = BrooksGelmanConvergence(threshold=1.3);
 burnin = MCMCMultiCycleBurnin(max_ncycles=parsed_args["max_ncycles"],nsteps_per_cycle=parsed_args["nsteps_per_cycle"],nsteps_final=parsed_args["nsteps_final"]);
 samples = bat_sample(posterior, MCMCSampling(mcalg=mcalg, nsteps=parsed_args["nsteps"], nchains=parsed_args["nchains"],strict=parsed_args["strict"])).result;
-# Let's save the result for further analysis
-fname=string("fitresults/fit-",parsed_args["parametrisation"],"-",parsed_args["priorshift"],"-",seedtxt,"-",parsed_args["pseudodata"],".h5")
-fname2=string("fitresults/fit-",parsed_args["parametrisation"],"-",parsed_args["priorshift"],"-",seedtxt,"-",parsed_args["pseudodata"],"2.h5")
-bat_write(fname, samples)
-QCDNUM.save_params(fname2, qcdnum_params)
 
+fname=string("fitresults/fit-",parsed_args["parametrisation"],"-",parsed_args["priorshift"],"-",seedtxt,"-",parsed_args["pseudodata"])
+bat_write(string(fname,".h5"), samples)
+QCDNUM.save_params(string(fname,"_qcdnum.h5"), qcdnum_params)
 end 
 
 main()
