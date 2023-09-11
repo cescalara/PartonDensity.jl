@@ -137,6 +137,7 @@ ds_vector=parsed_args["pseudodata"]
 d_vector =[]
 output=string("")
 for i in 1:length(ds_vector)
+  println(string("Reading ",ds_vector[i]))
   output=string(output,ds_vector[i])
   MD_TEMP::MetaData = MD_G
   if ds_vector[i] != "data"
@@ -144,6 +145,7 @@ for i in 1:length(ds_vector)
      MD_TEMP.m_Data_Events_ePp =sim_data["counts_obs_ep"]
      MD_TEMP.m_Data_Events_eMp =sim_data["counts_obs_em"]
   end
+  println(string("Name ",MD_TEMP.name))
   push!(d_vector,MD_TEMP)
 end
 
@@ -183,7 +185,9 @@ convergence = BrooksGelmanConvergence(threshold=1.3);
 burnin = MCMCMultiCycleBurnin(max_ncycles=parsed_args["max_ncycles"],nsteps_per_cycle=parsed_args["nsteps_per_cycle"],nsteps_final=parsed_args["nsteps_final"]);
 samples = bat_sample(posterior, MCMCSampling(mcalg=mcalg, nsteps=parsed_args["nsteps"], nchains=parsed_args["nchains"],strict=parsed_args["strict"])).result;
 
+
 fname=string("fitresults/fit-",parsed_args["parametrisation"],"-",parsed_args["priorshift"],"-",seedtxt,"-",output)
+println("Will write ",fname)
 bat_write(string(fname,".h5"), samples)
 QCDNUM.save_params(string(fname,"_qcdnum.h5"), qcdnum_params)
 end 
