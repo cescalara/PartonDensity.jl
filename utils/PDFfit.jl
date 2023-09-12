@@ -177,6 +177,7 @@ burnin = MCMCMultiCycleBurnin(max_ncycles=parsed_args["max_ncycles"],nsteps_per_
 samples = bat_sample(posterior, MCMCSampling(mcalg=mcalg, nsteps=parsed_args["nsteps"], nchains=parsed_args["nchains"],strict=parsed_args["strict"])).result;
 
 
+
 fname=string("fitresults/fit-",parsed_args["parametrisation"],"-",parsed_args["priorshift"],"-",seedtxt,"-",output)
 println("Will write ",fname)
 bat_write(string(fname,".h5"), samples)
