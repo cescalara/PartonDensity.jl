@@ -15,7 +15,10 @@ using ArgCheck
 
 
 export MD_ZEUS_I1787035
-
+export m_BinQ2low 
+export m_BinQ2high
+export m_Binxlow
+export m_Binxhigh
 
 
 include("ePp_jl/SysTnm_Eehigh_ePp.jl")
