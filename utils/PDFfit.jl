@@ -61,12 +61,9 @@ function parse_commandline()
             help = "Parametrisation -- Dirichlet or Valence"
             arg_type = String
             default = "Dirichlet"
-        "--pseudodata", "-d"
-            help = "Input pseudodata -- file in the pseudodata directory w/o the extension"
-            arg_type = String
-            default = "data"
     end
 
+    @add_arg_table(s, ["--pseudodata", "-d"], help = "Input pseudodata -- file in the pseudodata directory w/o the extension", default = ["data"], nargs => '*');
     return parse_args(s)
 end
 
@@ -128,31 +125,32 @@ function params_to_pdfparams(params)
        return pdf_params, ParErrs
 end
 
-sim_data = Dict{String,Any}()
-
-sim_data["counts_obs_ep"]=MD_G.m_Data_Events_ePp
-sim_data["counts_obs_em"]=MD_G.m_Data_Events_eMp
-MD_TEMP::MetaData = MD_G
-
-if parsed_args["pseudodata"] != "data"
-  somepdf_params, sim_data, MD_TEMP = pd_read_sim(string("pseudodata/",parsed_args["pseudodata"],".h5"),MD_G);
+ds_vector=parsed_args["pseudodata"]
+d_vector =[]
+output=string("")
+for i in 1:length(ds_vector)
+  println(string("Reading ",ds_vector[i]))
+  output=string(output,ds_vector[i])
+  MD_TEMP::MetaData = MD_G
+  if ds_vector[i] != "data"
+     somepdf_params, sim_data, MD_TEMP = pd_read_sim(string("pseudodata/",ds_vector[i],".h5"),MD_G);
+     MD_TEMP.m_Data_Events_ePp =sim_data["counts_obs_ep"]
+     MD_TEMP.m_Data_Events_eMp =sim_data["counts_obs_em"]
+  end
+  println(string("Name ",MD_TEMP.name))
+  push!(d_vector,MD_TEMP)
 end
-MD_LOCAL::MetaData = MD_TEMP
 
-
-
-likelihood = let d = sim_data
-counts_obs_ep = d["counts_obs_ep"]
-counts_obs_em = d["counts_obs_em"]
-nbins = size(d["counts_obs_ep"])[1]
+likelihood = let d_v = d_vector
 logfuncdensity(function (params)
        if parsed_args["dummylikelihood"]
          return -100.0;
        end
        ll_value = 0.0
        pdf_params, ParErrs = params_to_pdfparams(params)
-       counts_pred_ep, counts_pred_em = @critical  forward_model(pdf_params, qcdnum_params, splint_params, quark_coeffs,MD_LOCAL,ParErrs );
-            for i in 1:nbins
+       for k in 1:length(ds_vector)
+       counts_pred_ep, counts_pred_em = @critical  forward_model(pdf_params, qcdnum_params, splint_params, quark_coeffs, d_v[k],ParErrs );
+            for i in 1:length(counts_pred_ep)
                 if counts_pred_ep[i] < 0
                    @debug "counts_pred_ep[i] < 0, setting to 0" i counts_pred_ep[i]
                    counts_pred_ep[i] = 0
@@ -161,10 +159,11 @@ logfuncdensity(function (params)
                    @debug "counts_pred_em[i] < 0, setting to 0" i counts_pred_em[i]
                    counts_pred_em[i] = 0
                 end
-                counts_pred_ep[i] =counts_pred_ep[i]*(1+MD_LOCAL.Ld_ePp_uncertainty*params.Beta1)
-                counts_pred_em[i] =counts_pred_em[i]*(1+MD_LOCAL.Ld_eMp_uncertainty*params.Beta2)                
-                ll_value += logpdf(Poisson(counts_pred_ep[i]), counts_obs_ep[i])
-                ll_value += logpdf(Poisson(counts_pred_em[i]), counts_obs_em[i])
+                counts_pred_ep[i] =counts_pred_ep[i]*(1+d_v[k].Ld_ePp_uncertainty*params.Beta1)
+                counts_pred_em[i] =counts_pred_em[i]*(1+d_v[k].Ld_eMp_uncertainty*params.Beta2)                
+                ll_value += logpdf(Poisson(counts_pred_ep[i]), d_v[k].m_Data_Events_ePp[i])
+                ll_value += logpdf(Poisson(counts_pred_em[i]), d_v[k].m_Data_Events_eMp[i])
+            end
            end
            return ll_value
     end)
@@ -178,7 +177,8 @@ burnin = MCMCMultiCycleBurnin(max_ncycles=parsed_args["max_ncycles"],nsteps_per_
 samples = bat_sample(posterior, MCMCSampling(mcalg=mcalg, nsteps=parsed_args["nsteps"], nchains=parsed_args["nchains"],strict=parsed_args["strict"])).result;
 
 
-fname=string("fitresults/fit-",parsed_args["parametrisation"],"-",parsed_args["priorshift"],"-",seedtxt,"-",parsed_args["pseudodata"])
+
+fname=string("fitresults/fit-",parsed_args["parametrisation"],"-",parsed_args["priorshift"],"-",seedtxt,"-",output)
 println("Will write ",fname)
 bat_write(string(fname,".h5"), samples)
 QCDNUM.save_params(string(fname,"_qcdnum.h5"), qcdnum_params)
