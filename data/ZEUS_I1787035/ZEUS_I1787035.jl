@@ -193,7 +193,7 @@ const m_Tnm_sys_eMp = Tnm_sys_eMp
 
 Init_sys()
 
-function f_cross_section_to_counts(integ_xsec_ep::Array{Float64},integ_xsec_em::Array{Float64},sys_err_params::Vector{Float64}=zeros(8))
+function f_cross_section_to_counts(LUMI_ePp::Float64,LUMI_eMp::Float64, integ_xsec_ep::Array{Float64},integ_xsec_em::Array{Float64},sys_err_params::Vector{Float64}=zeros(8))
 
     # Fold through response to get counts
     ePp = 0
@@ -234,8 +234,8 @@ function f_cross_section_to_counts(integ_xsec_ep::Array{Float64},integ_xsec_em::
                 TotSys_var_ep += sys_err_params[k] *  m_Tnm_sys_ePp[i, j, k]
                 TotSys_var_em += sys_err_params[k] *  m_Tnm_sys_eMp[i, j, k]
             end
-            counts_pred_ep[j] += (TM_eP[i, j] + TotSys_var_ep) * (1.0 / K_eP[i]) * integ_xsec_ep[i]
-            counts_pred_em[j] += (TM_eM[i, j] + TotSys_var_em) * (1.0 / K_eM[i]) * integ_xsec_em[i]
+            counts_pred_ep[j] += (TM_eP[i, j]*LUMI_ePp/m_Ld_ePp + TotSys_var_ep) * (1.0 / K_eP[i]) * integ_xsec_ep[i]
+            counts_pred_em[j] += (TM_eM[i, j]*LUMI_eMp/m_Ld_eMp + TotSys_var_em) * (1.0 / K_eM[i]) * integ_xsec_em[i]
         end
     end
 
