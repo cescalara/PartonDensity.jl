@@ -39,7 +39,6 @@ Pkg.add("WeakRefStrings"); \
 Pkg.add("InlineStrings");  \
 Pkg.add("Documenter");  \
 Pkg.add("CSV");            \
-Pkg.add("BenchmarkTools");            \
 Pkg.add("ArgParse");'
 
 

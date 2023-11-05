@@ -6,7 +6,6 @@ using Random, Distributions, ValueShapes, ParallelProcessingTools
 using StatsBase, LinearAlgebra
 using DelimitedFiles
 using ArgParse
-using BenchmarkTools
 import HDF5
  
 include("priors.jl")
