@@ -6,6 +6,7 @@ using Random, Distributions, ValueShapes, ParallelProcessingTools
 using StatsBase, LinearAlgebra
 using DelimitedFiles
 using ArgParse
+using BenchmarkTools
 import HDF5
  
 include("priors.jl")
@@ -141,15 +142,21 @@ for i in 1:length(ds_vector)
   push!(d_vector,MD_TEMP)
 end
 
-likelihood = let d_v = d_vector
-logfuncdensity(function (params)
+dummy = false
        if parsed_args["dummylikelihood"]
+         dummy=true
+       end
+
+likelihood = let d_v = d_vector, qcdnum_params = qcdnum_params, splint_params =splint_params, quark_coeffs=quark_coeffs, dummy=dummy
+logfuncdensity(function (params)
+       if dummy
          return -100.0;
        end
        ll_value = 0.0
        pdf_params, ParErrs = params_to_pdfparams(params)
-       for k in 1:length(ds_vector)
-       counts_pred_ep, counts_pred_em = @critical  forward_model(pdf_params, qcdnum_params, splint_params, quark_coeffs, d_v[k],ParErrs );
+       #println("1OK")
+       for k in 1:length(d_v)
+            counts_pred_ep, counts_pred_em = @critical  forward_model(pdf_params, qcdnum_params, splint_params, quark_coeffs, d_v[k],ParErrs );
             for i in 1:length(counts_pred_ep)
                 if counts_pred_ep[i] < 0
                    @debug "counts_pred_ep[i] < 0, setting to 0" i counts_pred_ep[i]
