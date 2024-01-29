@@ -1,4 +1,4 @@
-name: CIv2
+name: CI
 on: 
   push: 
   schedule:
@@ -34,7 +34,7 @@ jobs:
          fi
 
   run-in-partondensity-docker-image:
-    name: Run in PartonDensity Docker image
+    name: Run tests and examples
     runs-on: ubuntu-latest
     needs: build-partondensity-docker-image
     container:
@@ -45,17 +45,17 @@ jobs:
     steps:
     - name: Checkout
       uses: actions/checkout@v2
-    - name: Run1
+    - name: Tests
       run : |
          export JULIA_PKGDIR=/opt/julia
          export JULIA_DEPOT_PATH=/opt/myjulia
          julia --project=. -e 'import Pkg; Pkg.instantiate(); include("test/runtests.jl")'
-    - name: Run2
+    - name: ZEUS interface example
       run : |
          export JULIA_PKGDIR=/opt/julia
          export JULIA_DEPOT_PATH=/opt/myjulia
          julia --project=. -e 'import Pkg; Pkg.instantiate(); include("examples/zeus_interface.jl")'
-    - name: Run3
+    - name: Generate pseudodata example
       run : |
          export JULIA_PKGDIR=/opt/julia
          export JULIA_DEPOT_PATH=/opt/myjulia
@@ -63,17 +63,17 @@ jobs:
          julia --project=. utils/generatepseudodata.jl -s 42 -p Dirichlet -f 0.5 -c true
          julia --project=. utils/generatepseudodata.jl -s 43 -p Dirichlet -f 1.5 -c true
          ls -lah pseudodata
-    - name: Run4
+    - name: Forward model example
       run : |
          export JULIA_PKGDIR=/opt/julia
          export JULIA_DEPOT_PATH=/opt/myjulia
          julia --project=. -e 'import Pkg; Pkg.instantiate(); include("examples/forward_model.jl")'
-    - name: Run5
+    - name: PDF parametrisation example
       run : |
          export JULIA_PKGDIR=/opt/julia
          export JULIA_DEPOT_PATH=/opt/myjulia
          julia --project=. -e 'import Pkg; Pkg.instantiate(); include("examples/pdf_parametrisation.jl")'
-    - name: Run6
+    - name: PDF fit example
       run : |
          export JULIA_PKGDIR=/opt/julia
          export JULIA_DEPOT_PATH=/opt/myjulia
