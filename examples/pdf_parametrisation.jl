@@ -8,16 +8,15 @@
 # * *Full Dirichlet*
 # * *Valence shape + Dirichlet*
 #
-# We are still investigating which approach will be most
-# effective, and so both options are currently implemented,
-# as detailed below.
+# We plan to explore the implementation of more parameterisations in the future, and our package
+# is set up in a modular way to handle this. 
 
 using Distributions, Plots, SpecialFunctions, Printf
 const sf = SpecialFunctions;
 
 # ## "Full Dirichlet" approach
 #
-# A clean way to ensure the momentum sum rule would be to sample different
+# A clean way to ensure the momentum sum rule is to sample different
 # contributions of the momentrum density integral from a Dirichlet distribution,
 # then use these weights to set the parameters on the individual Beta distributions.
 
@@ -34,12 +33,14 @@ for i in 1:9
 end
 plot!(xlabel="I_i = A_i B_i")
 
-# This would be great as the sum rule is automatically conserved
+# This is great as the sum rule is automatically conserved
 
 sum(data, dims=1)
 
-# But, it could be non-trivial to choose the Dirichlet weights for a
-# sensible prior, and connect to the physics of the problem.
+# But, it is still non-trivial to choose the Dirichlet weights for a
+# sensible prior, and connect to the physics of the problem. 
+# We recommend simulating from the prior and visualising the results
+# as a useful workflow in this case (see e.g. prior predictive checks).
 
 I = rand(dirichlet)
 
@@ -59,10 +60,10 @@ A_u = 2 / sf.beta(λ_u, K_u + 1)
 
 I[1] ≈ A_u * sf.beta(λ_u + 1, K_u + 1)
 
-# While this approach might be nice, it could be hard to set priors on the shape
+# While this approach also has its advantages, it is hard to set priors on the shape
 # of the valence distributions, as the `λ_u` and `λ_d` are now derived parameters, dependent
 # on the specified Dirichlet weights and `K_u`/`K_d` values. However, sensible prior choices
-# could be made using e.g. prior predictive checks.
+# can be made using e.g. prior predictive checks, as already mentioned above.
 
 # ## "Valence shape + Dirichlet" approach
 #
@@ -70,18 +71,17 @@ I[1] ≈ A_u * sf.beta(λ_u + 1, K_u + 1)
 # valence params through the shape of their Beta distributions, then using a
 # Dirichlet to specify the weights of the gluon and sea components. The problem
 # here is it isn't clear how to specify that the d contribution must be less than
-# the u contribution, but it is possible to do this indirectly through priors on
-# the shape parameters. This would however also require some further investigation.
+# the u contribution. However, it is possible to do this indirectly through priors on
+# the shape parameters. Doing so would require some further investigation.
 
 x = range(0, stop=1, length=50)
 
 # High-level priors
-# Looks like we maybe want to change lambda and K priors to boost these components
 
-λ_u = 0.7 #rand(Uniform(0, 1))
-K_u = 4 #rand(Uniform(2, 10))
-λ_d = 0.5 #rand(Uniform(0, 1))
-K_d = 6 #rand(Uniform(2, 10))
+λ_u = 0.7
+K_u = 4
+λ_d = 0.5
+K_d = 6
 
 u_V = Beta(λ_u, K_u + 1)
 A_u = 2 / sf.beta(λ_u, K_u + 1)
@@ -214,8 +214,6 @@ end
 
 plot!(xlabel="x", ylabel="x f(x)", xscale=:log, legend=false,
     ylims=(1e-8, 10), yscale=:log)
-
-# Looks like naive priors need some work...
 
 # ## PDF Parametrisation interface
 #

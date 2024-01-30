@@ -8,7 +8,7 @@ using QCDNUM, PartonDensity
 using Plots, Printf, NaNMath, Parameters, Random, Distributions
 include("../data/ZEUS_I1787035/ZEUS_I1787035.jl")
 
-const MD_DUMMY = MD_ZEUS_I1787035
+const MD_DOCS = MD_ZEUS_I1787035
 
 # ## Define input PDFs
 # We can use `DirichletPDFParams` or `ValencePDFParams`, as long
@@ -104,10 +104,10 @@ QCDNUM.ssp_uwrite(splint_params.spline_addresses.F3dn, Float64(iaF3dn));
 QCDNUM.ssp_uwrite(splint_params.spline_addresses.FLup, Float64(iaFLup));
 QCDNUM.ssp_uwrite(splint_params.spline_addresses.FLdn, Float64(iaFLdn));
 
-my_funcp = get_input_xsec_func(1, MD_DUMMY) # charge = 1
+my_funcp = get_input_xsec_func(1, MD_DOCS) # charge = 1
 input_xsecp = @cfunction(my_funcp, Float64, (Ref{Int32}, Ref{Int32}, Ref{UInt8}))
 
-my_funcm = get_input_xsec_func(-1, MD_DUMMY) # charge = -1
+my_funcm = get_input_xsec_func(-1, MD_DOCS) # charge = -1
 input_xsecm = @cfunction(my_funcm, Float64, (Ref{Int32}, Ref{Int32}, Ref{UInt8}))
 
 # plot
@@ -116,7 +116,7 @@ xsec_on_grid = zeros(g.nx, g.nq);
 
 for ix = 1:g.nx
     for iq = 1:g.nq
-        xsec_on_grid[ix, iq] = _fun_xsec_i(1, MD_DUMMY, ix, iq) # charge = 1
+        xsec_on_grid[ix, iq] = _fun_xsec_i(1, MD_DOCS, ix, iq) # charge = 1
     end
 end
 
@@ -165,14 +165,14 @@ plot(p1, xlabel="x", ylabel="q2",
 #
 # Here, we neglect any possible contribution from systematic errors
 
-nbins = size(MD_DUMMY.m_xbins_M_begin)[1]
+nbins = size(MD_DOCS.m_xbins_M_begin)[1]
 IntXsec_eP = zeros(nbins);
 IntXsec_eM = zeros(nbins);
 for i in 1:nbins
-    IntXsec_eP[i] = QCDNUM.dsp_ints2(iaF_eP, MD_DUMMY.m_xbins_M_begin[i], MD_DUMMY.m_xbins_M_end[i], MD_DUMMY.m_q2bins_M_begin[i], MD_DUMMY.m_q2bins_M_end[i], MD_DUMMY.sqrtS, 4)
-    IntXsec_eM[i] = QCDNUM.dsp_ints2(iaF_eM, MD_DUMMY.m_xbins_M_begin[i], MD_DUMMY.m_xbins_M_end[i], MD_DUMMY.m_q2bins_M_begin[i], MD_DUMMY.m_q2bins_M_end[i], MD_DUMMY.sqrtS, 4)
+    IntXsec_eP[i] = QCDNUM.dsp_ints2(iaF_eP, MD_DOCS.m_xbins_M_begin[i], MD_DOCS.m_xbins_M_end[i], MD_DOCS.m_q2bins_M_begin[i], MD_DOCS.m_q2bins_M_end[i], MD_DOCS.sqrtS, 4)
+    IntXsec_eM[i] = QCDNUM.dsp_ints2(iaF_eM, MD_DOCS.m_xbins_M_begin[i], MD_DOCS.m_xbins_M_end[i], MD_DOCS.m_q2bins_M_begin[i], MD_DOCS.m_q2bins_M_end[i], MD_DOCS.sqrtS, 4)
 end
 
-counts_pred_eP, counts_pred_eM = MD_DUMMY.f_cross_section_to_counts(MD_DUMMY.Ld_ePp, MD_DUMMY.Ld_eMp,IntXsec_eP,IntXsec_eM)
+counts_pred_eP, counts_pred_eM = MD_DOCS.f_cross_section_to_counts(MD_DOCS.Ld_ePp, MD_DOCS.Ld_eMp, IntXsec_eP, IntXsec_eM)
 
 counts_pred_eM

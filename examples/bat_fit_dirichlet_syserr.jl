@@ -126,3 +126,7 @@ BAT.checked_logdensityof(posterior, rand(prior))
 
 #import HDF5
 #bat_write("output/results.h5", samples)
+
+# Examples of how to analyse the results of the fit can be found in the 
+# *Fit with valence parametrisation* and  *Fit with Dirichlet parametrisation* 
+# sections of this documentation

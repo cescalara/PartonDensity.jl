@@ -2,8 +2,6 @@
 #
 # In this example we show how to bring the PDF parametrisation and
 # forward model together with `BAT.jl` to perform a fit of simulated data.
-# This fit is a work in progress and just a starting point for verification
-# of the method.
 
 using BAT, DensityInterface
 using PartonDensity
@@ -56,7 +54,7 @@ quark_coeffs = QuarkCoefficients();
 forward_model_init(qcdnum_params, splint_params)
 
 # run forward model 
-counts_pred_ep, counts_pred_em = forward_model(pdf_params, qcdnum_params, splint_params, quark_coeffs,MD_ZEUS_I1787035);
+counts_pred_ep, counts_pred_em = forward_model(pdf_params, qcdnum_params, splint_params, quark_coeffs, MD_ZEUS_I1787035);
 
 #
 # take a poisson sample
@@ -122,7 +120,7 @@ likelihood = let d = sim_data
         pdf_params = DirichletPDFParams(K_u=params.K_u, K_d=params.K_d, λ_g1=params.λ_g1, λ_g2=params.λ_g2,
             K_g=params.K_g, λ_q=params.λ_q, K_q=params.K_q, θ=Vector(params.θ))
 
-        counts_pred_ep, counts_pred_em = @critical forward_model(pdf_params,qcdnum_params, splint_params, quark_coeffs,MD_ZEUS_I1787035)
+        counts_pred_ep, counts_pred_em = @critical forward_model(pdf_params, qcdnum_params, splint_params, quark_coeffs, MD_ZEUS_I1787035)
 
         ll_value = 0.0
         for i in 1:nbins
@@ -242,6 +240,3 @@ plot_model_space(pdf_params, samples, nsamples=500)
 
 plot_data_space(pdf_params, sim_data, samples, qcdnum_params,
     splint_params, quark_coeffs, nsamples=500)
-
-# The first results seem promising, but these are really just first checks
-# and more work will have to be done to verify the method.
