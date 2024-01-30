@@ -5,10 +5,11 @@
 using PartonDensity, CSV, DelimitedFiles
 
 zeus_include_path = string(chop(pathof(PartonDensity), tail=20), "data/ZEUS_I1787035/ZEUS_I1787035.jl")
+sample_data_include_path = string(chop(pathof(PartonDensity), tail=20), "docs/src/data/HERAPDF20_NNLO_EIG_ePp.txt")
 include(zeus_include_path)
 
 # Read in an example integrated cross section
-numbers_from_file = readdlm("data/HERAPDF20_NNLO_EIG_ePp.txt")
+numbers_from_file = readdlm(sample_data_include_path)
 
 # List of integrated cross section values in 429 bins 
 integ_xsec_ePp = numbers_from_file[:, 3]
