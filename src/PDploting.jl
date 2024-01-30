@@ -74,8 +74,8 @@ end
 
 
 """
-    plot_data_space(pdf_params, sim_data, samples, qcdnum_grid, 
-                    qcdnum_params, splint_params, quark_coeffs)
+    plot_data_space(pdf_params, sim_data, samples,
+                    qcdnum_params, splint_params, quark_coeffs, md)
 
 Compare truth and posterior samples in the data space.
 """
@@ -84,7 +84,7 @@ function plot_data_space end
 
 function plot_data_space(pdf_params::AbstractPDFParams, sim_data::Dict{String,Any}, samples,
     qcdnum_params::QCDNUM.EvolutionParams,
-    splint_params::QCDNUM.SPLINTParams, quark_coeffs::QuarkCoefficients;
+    splint_params::QCDNUM.SPLINTParams, quark_coeffs::QuarkCoefficients, md::MetaData;
     ep_color=:firebrick, em_color=:teal, nsamples::Integer=100, plot_size=(1000, 500),
     args...)
 
@@ -100,15 +100,15 @@ function plot_data_space(pdf_params::AbstractPDFParams, sim_data::Dict{String,An
     sub_samples = BAT.bat_sample(samples, BAT.OrderedResampling(nsamples=nsamples)).result
 
     p1, p2 = plot_data_space_impl(pdf_params, sub_samples, qcdnum_params,
-        splint_params, quark_coeffs, p1, p2, nbins)
+        splint_params, quark_coeffs, md, p1, p2, nbins)
 
     plot(p1, p2, size=plot_size, xlabel="Bin number", bottom_margin=10Plots.mm, markerstrokewidth=0; args...)
 end
 
 
 function plot_data_space_impl(pdf_params::ValencePDFParams, samples, qcdnum_params::QCDNUM.EvolutionParams,
-    splint_params::QCDNUM.SPLINTParams, quark_coeffs::QuarkCoefficients,
-    p1, p2, nbins::Integer; ep_color=:firebrick, em_color=:teal, md::MetaData)
+    splint_params::QCDNUM.SPLINTParams, quark_coeffs::QuarkCoefficients, md::MetaData,
+    p1, p2, nbins::Integer; ep_color=:firebrick, em_color=:teal)
 
     for i in eachindex(samples)
 
@@ -160,8 +160,8 @@ end
 
 
 function plot_data_space_impl(pdf_params::DirichletPDFParams, samples, qcdnum_params::QCDNUM.EvolutionParams,
-    splint_params::QCDNUM.SPLINTParams, quark_coeffs::QuarkCoefficients,
-    p1, p2, nbins::Integer; ep_color=:firebrick, em_color=:teal, md::MetaData)
+    splint_params::QCDNUM.SPLINTParams, quark_coeffs::QuarkCoefficients, md::MetaData,
+    p1, p2, nbins::Integer; ep_color=:firebrick, em_color=:teal)
 
     for i in eachindex(samples)
 
@@ -272,33 +272,6 @@ function plot_model_space_impl(x_grid::StepRangeLen{Float64}, pdf_params::Bernst
 
     return p
 end
-
-
-function plot_data_space end
-
-
-function plot_data_space(pdf_params::AbstractPDFParams, sim_data::Dict{String,Any}, samples,
-    qcdnum_grid::QCDNUM.GridParams, qcdnum_params::QCDNUM.EvolutionParams,
-    splint_params::QCDNUM.SPLINTParams, quark_coeffs::QuarkCoefficients;
-    ep_color=:firebrick, em_color=:teal, nsamples::Integer=100, plot_size=(1000, 500))
-
-    forward_model_init(qcdnum_grid, qcdnum_params, splint_params)
-
-    nbins = sim_data["nbins"]
-
-    p1 = scatter(1:nbins, sim_data["counts_obs_ep"], label="Observed counts (eP)",
-        color=ep_color, lw=3)
-    p2 = scatter(1:nbins, sim_data["counts_obs_em"], label="Observed counts (eM)",
-        color=em_color, lw=3)
-
-    sub_samples = BAT.bat_sample(samples, BAT.OrderedResampling(nsamples=nsamples)).result
-
-    p1, p2 = plot_data_space_impl(pdf_params, sub_samples, qcdnum_params,
-        splint_params, quark_coeffs, p1, p2, nbins)
-
-    plot(p1, p2, size=plot_size, xlabel="Bin number")
-end
-
 
 function plot_data_space_impl(pdf_params::BernsteinPDFParams, samples, qcdnum_params::QCDNUM.EvolutionParams,
     splint_params::QCDNUM.SPLINTParams, quark_coeffs::QuarkCoefficients,

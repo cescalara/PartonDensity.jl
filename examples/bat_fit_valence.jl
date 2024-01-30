@@ -8,7 +8,7 @@ using PartonDensity
 using QCDNUM
 using Plots, Random, Distributions, ValueShapes, ParallelProcessingTools
 using StatsBase, LinearAlgebra
-include("../data/ZEUS_I1787035/ZEUS_I1787035.jl")
+include("../../data/ZEUS_I1787035/ZEUS_I1787035.jl")
 gr(fmt=:png);
 rng = MersenneTwister(42)
 
@@ -84,7 +84,7 @@ sim_data["counts_obs_ep"] = counts_obs_ep;
 sim_data["counts_obs_em"] = counts_obs_em;
 
 # write to file
-pd_write_sim("output/simulation.h5", pdf_params, sim_data)
+pd_write_sim("output/demo_simulation_valence.h5", pdf_params, sim_data, MD_ZEUS_I1787035)
 QCDNUM.save_params("output/params_val.h5", qcdnum_params)
 QCDNUM.save_params("output/params_val.h5", splint_params)
 
@@ -169,7 +169,7 @@ end
 #
 # First, let's load our simulation inputs and results
 
-pdf_params, sim_data = pd_read_sim("output/demo_simulation_valence.h5");
+pdf_params, sim_data = pd_read_sim("output/demo_simulation_valence.h5", MD_ZEUS_I1787035);
 samples = bat_read("output/demo_results_valence.h5").result;
 
 # We can use the same QCDNUM params as above
@@ -252,4 +252,4 @@ plot_model_space(pdf_params, samples, nsamples=500)
 # in the *data space*, as shown below. 
 
 plot_data_space(pdf_params, sim_data, samples, qcdnum_params,
-    splint_params, quark_coeffs, nsamples=500)
+    splint_params, quark_coeffs, MD_ZEUS_I1787035, nsamples=500)

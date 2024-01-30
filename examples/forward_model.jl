@@ -6,7 +6,7 @@
 
 using QCDNUM, PartonDensity
 using Plots, Printf, NaNMath, Parameters, Random, Distributions
-include("../data/ZEUS_I1787035/ZEUS_I1787035.jl")
+include("../../data/ZEUS_I1787035/ZEUS_I1787035.jl")
 
 const MD_DOCS = MD_ZEUS_I1787035
 
