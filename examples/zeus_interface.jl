@@ -7,7 +7,7 @@ using PartonDensity, CSV, DelimitedFiles
 include("../../data/ZEUS_I1787035/ZEUS_I1787035.jl")
 
 # Read in an example integrated cross section
-numbers_from_file = readdlm("data/EXAMPLE_1/HERAPDF20_NNLO_EIG_ePp.txt")
+numbers_from_file = readdlm("data/HERAPDF20_NNLO_EIG_ePp.txt")
 
 # List of integrated cross section values in 429 bins 
 integ_xsec_ePp = numbers_from_file[:, 3]
