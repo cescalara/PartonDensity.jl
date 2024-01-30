@@ -4,7 +4,8 @@
 
 using PartonDensity, CSV, DelimitedFiles
 
-include("../../data/ZEUS_I1787035/ZEUS_I1787035.jl")
+zeus_include_path = string(chop(pathof(PartonDensity), tail=20), "data/ZEUS_I1787035/ZEUS_I1787035.jl")
+include(zeus_include_path)
 
 # Read in an example integrated cross section
 numbers_from_file = readdlm("data/HERAPDF20_NNLO_EIG_ePp.txt")

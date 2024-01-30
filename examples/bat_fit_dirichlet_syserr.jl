@@ -11,7 +11,9 @@ using BAT, DensityInterface
 using QCDNUM
 using Plots, Random, Distributions, ValueShapes, ParallelProcessingTools
 using StatsBase, LinearAlgebra
-include("../../data/ZEUS_I1787035/ZEUS_I1787035.jl")
+
+zeus_include_path = string(chop(pathof(PartonDensity), tail=20), "data/ZEUS_I1787035/ZEUS_I1787035.jl")
+include(zeus_include_path)
 gr(fmt=:png);
 rng = MersenneTwister(42);
 
