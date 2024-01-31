@@ -134,6 +134,16 @@ likelihood = let d = sim_data
 
         ll_value = 0.0
         for i in 1:nbins
+
+            if counts_pred_ep[i] < 0
+                @debug "counts_pred_ep[i] < 0, setting to 0" i counts_pred_ep[i]
+                counts_pred_ep[i] = 0
+            end
+            if counts_pred_em[i] < 0
+                @debug "counts_pred_em[i] < 0, setting to 0" i counts_pred_em[i]
+                counts_pred_em[i] = 0
+            end
+
             ll_value += logpdf(Poisson(counts_pred_ep[i]), counts_obs_ep[i])
             ll_value += logpdf(Poisson(counts_pred_em[i]), counts_obs_em[i])
         end
@@ -145,13 +155,15 @@ end
 # We can now run the MCMC sampler. We will start by using the
 # Metropolis-Hastings algorithm as implemented in `BAT.jl`.
 # To get reasonable results, we need to run the sampler for a
-# long time (several hours). To save time in this demo, we will
+# long time (10s of min). To save time in this demo, we will
 # work with a ready-made results file. To actually run the sampler,
 # simply uncomment the code below.
 
 #posterior = PosteriorDensity(likelihood, prior);
 
-#samples = bat_sample(posterior, MCMCSampling(mcalg=MetropolisHastings(), nsteps=10^5, nchains=2)).result;
+#mcalg = MetropolisHastings(proposal=BAT.MvTDistProposal(10.0))
+#convergence = BrooksGelmanConvergence(threshold=1.3)
+#samples = bat_sample(posterior, MCMCSampling(mcalg=mcalg, nsteps=10^4, nchains=2, strict=false)).result;
 
 # Alternatively, we could also try a nested sampling approach
 # here for comparison. This is easily done thanks to the
@@ -248,10 +260,10 @@ plot!(x_grid, [log(xtotx(x, pdf_params)) for x in x_grid], color="black", lw=3,
 plot!(ylabel="log(xtotx)")
 
 # Using `PartonDensity.jl`
-plot_model_space(pdf_params, samples, nsamples=500)
+plot_model_space(pdf_params, samples, nsamples=200)
 
 # Alternatively, we can also visualise the implications of the fit
 # in the *data space*, as shown below. 
 
 plot_data_space(pdf_params, sim_data, samples, qcdnum_params,
-    splint_params, quark_coeffs, MD_ZEUS_I1787035, nsamples=500)
+    splint_params, quark_coeffs, MD_ZEUS_I1787035, nsamples=200)

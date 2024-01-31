@@ -106,6 +106,16 @@ likelihood = let d = sim_data
 
         ll_value = 0.0
         for i in 1:nbins
+
+            if counts_pred_ep[i] < 0
+                @debug "counts_pred_ep[i] < 0, setting to 0" i counts_pred_ep[i]
+                counts_pred_ep[i] = 0
+            end
+            if counts_pred_em[i] < 0
+                @debug "counts_pred_em[i] < 0, setting to 0" i counts_pred_em[i]
+                counts_pred_em[i] = 0
+            end
+
             ll_value += logpdf(Poisson(counts_pred_ep[i]), counts_obs_ep[i])
             ll_value += logpdf(Poisson(counts_pred_em[i]), counts_obs_em[i])
         end
@@ -125,7 +135,9 @@ BAT.checked_logdensityof(posterior, rand(prior))
 # simply uncomment the code below. To see how to work with 
 # demo output results, check out the other fit examples.
 
-#samples = bat_sample(posterior, MCMCSampling(mcalg=MetropolisHastings(), nsteps=10^4, nchains=2)).result;
+#mcalg = MetropolisHastings(proposal=BAT.MvTDistProposal(10.0))
+#convergence = BrooksGelmanConvergence(threshold=1.3)
+#samples = bat_sample(posterior, MCMCSampling(mcalg=mcalg, nsteps=100, nchains=2, strict=false)).result;
 
 #import HDF5
 #bat_write("output/results.h5", samples)
