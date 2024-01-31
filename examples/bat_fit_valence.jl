@@ -86,7 +86,7 @@ sim_data["counts_obs_ep"] = counts_obs_ep;
 sim_data["counts_obs_em"] = counts_obs_em;
 
 # write to file
-pd_write_sim("output/demo_simulation_valence.h5", pdf_params, sim_data, MD_ZEUS_I1787035)
+pd_write_sim("output/simulation_valence.h5", pdf_params, sim_data, MD_ZEUS_I1787035)
 QCDNUM.save_params("output/params_val.h5", qcdnum_params)
 QCDNUM.save_params("output/params_val.h5", splint_params)
 
