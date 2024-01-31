@@ -9,11 +9,11 @@ using Plots
 
 include("parton.jl")
 include("parametrisations/parametrisations.jl")
-include("MetaData.jl")
+include("metadata.jl")
 include("parameters_IO.jl")
 include("cross_section.jl")
 include("forward_model.jl")
-include("PDploting.jl")
+include("plotting.jl")
 
 using Requires
 function __init__()

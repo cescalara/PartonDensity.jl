@@ -11,7 +11,6 @@ gen_content_dir = joinpath(@__DIR__, "src")
 pdf_parametrisation_src = joinpath(@__DIR__, "..", "examples", "pdf_parametrisation.jl")
 zeus_interface_src = joinpath(@__DIR__, "..", "examples", "zeus_interface.jl")
 forward_model_src = joinpath(@__DIR__, "..", "examples", "forward_model.jl")
-prior_bat_src = joinpath(@__DIR__, "..", "examples", "prior_bat_implementation.jl")
 bat_valence_src = joinpath(@__DIR__, "..", "examples", "bat_fit_valence.jl")
 bat_dirichlet_src = joinpath(@__DIR__, "..", "examples", "bat_fit_dirichlet.jl")
 bat_dirichlet_syserr_src = joinpath(@__DIR__, "..", "examples", "bat_fit_dirichlet_syserr.jl")
@@ -19,7 +18,6 @@ bat_dirichlet_syserr_src = joinpath(@__DIR__, "..", "examples", "bat_fit_dirichl
 Literate.markdown(pdf_parametrisation_src, gen_content_dir, name="pdf_parametrisation")
 Literate.markdown(zeus_interface_src, gen_content_dir, name="zeus_interface")
 Literate.markdown(forward_model_src, gen_content_dir, name="forward_model")
-Literate.markdown(prior_bat_src, gen_content_dir, name="prior_bat_implementation")
 Literate.markdown(bat_valence_src, gen_content_dir, name="bat_fit_valence")
 Literate.markdown(bat_dirichlet_src, gen_content_dir, name="bat_fit_dirichlet")
 Literate.markdown(bat_dirichlet_syserr_src, gen_content_dir, name="bat_fit_dirichlet_syserr")
@@ -27,8 +25,7 @@ Literate.markdown(bat_dirichlet_syserr_src, gen_content_dir, name="bat_fit_diric
 Introduction = "Introduction" => "index.md"
 
 Examples = "Examples" => ["pdf_parametrisation.md",
-    "zeus_interface.md", "forward_model.md",
-    "prior_bat_implementation.md", "bat_fit_valence.md", "bat_fit_dirichlet.md",
+    "zeus_interface.md", "forward_model.md", "bat_fit_valence.md", "bat_fit_dirichlet.md",
     "bat_fit_dirichlet_syserr.md"]
 
 API = "API" => "api.md"

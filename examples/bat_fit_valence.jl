@@ -2,15 +2,15 @@
 #
 # In this example we show how to bring the PDF parametrisation and
 # forward model together with `BAT.jl` to perform a fit of simulated data.
-# This fit is a work in progress and just a starting point for verification
-# of the method.
 
 using BAT, DensityInterface
 using PartonDensity
 using QCDNUM
 using Plots, Random, Distributions, ValueShapes, ParallelProcessingTools
 using StatsBase, LinearAlgebra
-include("../data/ZEUS_I1787035/ZEUS_I1787035.jl")
+
+zeus_include_path = string(chop(pathof(PartonDensity), tail=20), "data/ZEUS_I1787035/ZEUS_I1787035.jl")
+include(zeus_include_path)
 gr(fmt=:png);
 rng = MersenneTwister(42)
 
@@ -58,7 +58,7 @@ quark_coeffs = QuarkCoefficients();
 forward_model_init(qcdnum_params, splint_params)
 
 # run forward model 
-counts_pred_ep, counts_pred_em = forward_model(pdf_params, qcdnum_params, splint_params, quark_coeffs,MD_ZEUS_I1787035);
+counts_pred_ep, counts_pred_em = forward_model(pdf_params, qcdnum_params, splint_params, quark_coeffs, MD_ZEUS_I1787035);
 
 #
 # take a poisson sample
@@ -86,7 +86,7 @@ sim_data["counts_obs_ep"] = counts_obs_ep;
 sim_data["counts_obs_em"] = counts_obs_em;
 
 # write to file
-pd_write_sim("output/simulation.h5", pdf_params, sim_data)
+pd_write_sim("output/demo_simulation_valence.h5", pdf_params, sim_data, MD_ZEUS_I1787035)
 QCDNUM.save_params("output/params_val.h5", qcdnum_params)
 QCDNUM.save_params("output/params_val.h5", splint_params)
 
@@ -130,10 +130,20 @@ likelihood = let d = sim_data
             K_d=params.K_d, λ_g1=params.λ_g1, λ_g2=params.λ_g2,
             K_g=params.K_g, λ_q=params.λ_q, K_q=params.K_q, θ=θ)
 
-        counts_pred_ep, counts_pred_em = @critical forward_model(pdf_params, qcdnum_params, splint_params, quark_coeffs,MD_ZEUS_I1787035)
+        counts_pred_ep, counts_pred_em = @critical forward_model(pdf_params, qcdnum_params, splint_params, quark_coeffs, MD_ZEUS_I1787035)
 
         ll_value = 0.0
         for i in 1:nbins
+
+            if counts_pred_ep[i] < 0
+                @debug "counts_pred_ep[i] < 0, setting to 0" i counts_pred_ep[i]
+                counts_pred_ep[i] = 0
+            end
+            if counts_pred_em[i] < 0
+                @debug "counts_pred_em[i] < 0, setting to 0" i counts_pred_em[i]
+                counts_pred_em[i] = 0
+            end
+
             ll_value += logpdf(Poisson(counts_pred_ep[i]), counts_obs_ep[i])
             ll_value += logpdf(Poisson(counts_pred_em[i]), counts_obs_em[i])
         end
@@ -145,13 +155,15 @@ end
 # We can now run the MCMC sampler. We will start by using the
 # Metropolis-Hastings algorithm as implemented in `BAT.jl`.
 # To get reasonable results, we need to run the sampler for a
-# long time (several hours). To save time in this demo, we will
+# long time (10s of min). To save time in this demo, we will
 # work with a ready-made results file. To actually run the sampler,
 # simply uncomment the code below.
 
 #posterior = PosteriorDensity(likelihood, prior);
 
-#samples = bat_sample(posterior, MCMCSampling(mcalg=MetropolisHastings(), nsteps=10^5, nchains=2)).result;
+#mcalg = MetropolisHastings(proposal=BAT.MvTDistProposal(10.0))
+#convergence = BrooksGelmanConvergence(threshold=1.3)
+#samples = bat_sample(posterior, MCMCSampling(mcalg=mcalg, nsteps=10^4, nchains=2, strict=false)).result;
 
 # Alternatively, we could also try a nested sampling approach
 # here for comparison. This is easily done thanks to the
@@ -171,7 +183,7 @@ end
 #
 # First, let's load our simulation inputs and results
 
-pdf_params, sim_data = pd_read_sim("output/demo_simulation_valence.h5");
+pdf_params, sim_data = pd_read_sim("output/demo_simulation_valence.h5", MD_ZEUS_I1787035);
 samples = bat_read("output/demo_results_valence.h5").result;
 
 # We can use the same QCDNUM params as above
@@ -248,13 +260,10 @@ plot!(x_grid, [log(xtotx(x, pdf_params)) for x in x_grid], color="black", lw=3,
 plot!(ylabel="log(xtotx)")
 
 # Using `PartonDensity.jl`
-plot_model_space(pdf_params, samples, nsamples=500)
+plot_model_space(pdf_params, samples, nsamples=200)
 
 # Alternatively, we can also visualise the implications of the fit
 # in the *data space*, as shown below. 
 
 plot_data_space(pdf_params, sim_data, samples, qcdnum_params,
-    splint_params, quark_coeffs, nsamples=500)
-
-# The first results seem promising, but these are really just first checks
-# and more work will have to be done to verify the method.
+    splint_params, quark_coeffs, MD_ZEUS_I1787035, nsamples=200)

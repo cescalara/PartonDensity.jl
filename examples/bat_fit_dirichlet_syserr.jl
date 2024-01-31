@@ -11,7 +11,9 @@ using BAT, DensityInterface
 using QCDNUM
 using Plots, Random, Distributions, ValueShapes, ParallelProcessingTools
 using StatsBase, LinearAlgebra
-include("../data/ZEUS_I1787035/ZEUS_I1787035.jl")
+
+zeus_include_path = string(chop(pathof(PartonDensity), tail=20), "data/ZEUS_I1787035/ZEUS_I1787035.jl")
+include(zeus_include_path)
 gr(fmt=:png);
 rng = MersenneTwister(42);
 
@@ -37,8 +39,9 @@ quark_coeffs = QuarkCoefficients();
 # These factors are then applied to a precomputed matrix in order to scale the 
 # expected counts accordingly.
 forward_model_init(qcdnum_params, splint_params)
-sys_err_params = rand(rng, MvNormal(zeros(PartonDensity.nsyst), ones(PartonDensity.nsyst)))
-counts_pred_ep, counts_pred_em = forward_model(pdf_params, qcdnum_params, splint_params, quark_coeffs,MD_ZEUS_I1787035, sys_err_params);
+
+sys_err_params = rand(rng, MvNormal(zeros(nsyst), ones(nsyst)))
+counts_pred_ep, counts_pred_em = forward_model(pdf_params, qcdnum_params, splint_params, quark_coeffs, MD_ZEUS_I1787035, sys_err_params);
 
 nbins = size(counts_pred_ep)[1]
 counts_obs_ep = zeros(UInt64, nbins)
@@ -60,7 +63,7 @@ sim_data["nbins"] = nbins;
 sim_data["counts_obs_ep"] = counts_obs_ep;
 sim_data["counts_obs_em"] = counts_obs_em;
 
-pd_write_sim("output/simulation.h5", pdf_params, sim_data)
+pd_write_sim("output/simulation.h5", pdf_params, sim_data, MD_ZEUS_I1787035)
 QCDNUM.save_params("output/params_dir_sys.h5", qcdnum_params)
 QCDNUM.save_params("output/params_dir_sys.h5", splint_params)
 
@@ -99,10 +102,20 @@ likelihood = let d = sim_data
         sys_err_params = [params.beta0_1, params.beta0_2, params.beta0_3, params.beta0_4,
             params.beta0_5, params.beta0_6, params.beta0_7, params.beta0_8]
 
-        counts_pred_ep, counts_pred_em = @critical forward_model(pdf_params, qcdnum_params, splint_params, quark_coeffs,MD_ZEUS_I1787035, sys_err_params)
+        counts_pred_ep, counts_pred_em = @critical forward_model(pdf_params, qcdnum_params, splint_params, quark_coeffs, MD_ZEUS_I1787035, sys_err_params)
 
         ll_value = 0.0
         for i in 1:nbins
+
+            if counts_pred_ep[i] < 0
+                @debug "counts_pred_ep[i] < 0, setting to 0" i counts_pred_ep[i]
+                counts_pred_ep[i] = 0
+            end
+            if counts_pred_em[i] < 0
+                @debug "counts_pred_em[i] < 0, setting to 0" i counts_pred_em[i]
+                counts_pred_em[i] = 0
+            end
+
             ll_value += logpdf(Poisson(counts_pred_ep[i]), counts_obs_ep[i])
             ll_value += logpdf(Poisson(counts_pred_em[i]), counts_obs_em[i])
         end
@@ -122,7 +135,13 @@ BAT.checked_logdensityof(posterior, rand(prior))
 # simply uncomment the code below. To see how to work with 
 # demo output results, check out the other fit examples.
 
-#samples = bat_sample(posterior, MCMCSampling(mcalg=MetropolisHastings(), nsteps=10^4, nchains=2)).result;
+#mcalg = MetropolisHastings(proposal=BAT.MvTDistProposal(10.0))
+#convergence = BrooksGelmanConvergence(threshold=1.3)
+#samples = bat_sample(posterior, MCMCSampling(mcalg=mcalg, nsteps=100, nchains=2, strict=false)).result;
 
 #import HDF5
 #bat_write("output/results.h5", samples)
+
+# Examples of how to analyse the results of the fit can be found in the 
+# *Fit with valence parametrisation* and  *Fit with Dirichlet parametrisation* 
+# sections of this documentation
