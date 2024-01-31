@@ -5,7 +5,7 @@
 using PartonDensity, CSV, DelimitedFiles
 
 zeus_include_path = string(chop(pathof(PartonDensity), tail=20), "data/ZEUS_I1787035/ZEUS_I1787035.jl")
-sample_data_include_path = string(chop(pathof(PartonDensity), tail=20), "docs/src/data/HERAPDF20_NNLO_EIG_ePp.txt")
+sample_data_include_path = string(chop(pathof(PartonDensity), tail=20), "data/EXAMPLE_1/HERAPDF20_NNLO_EIG_ePp.txt")
 include(zeus_include_path)
 
 # Read in an example integrated cross section
