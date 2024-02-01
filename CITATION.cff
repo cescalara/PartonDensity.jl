@@ -1,0 +1,22 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite it as below."
+authors:
+  - family-names: "Capel"
+    given-names: "Francesca"
+    orcid: "https://orcid.org/0000-0002-1153-2139"
+  - family-names: "Aggarwal"
+    given-names: "Ritu"
+  - family-names: "Botje"
+    given-names: "Michiel"
+  - family-names: "Caldwell"
+    given-names: "Allen"
+  - family-names: "Schulz"
+    given-names: "Oliver"
+  - family-names: "Andrii"
+    given-names: "Verbytskyi"
+title: "PartonDensity.jl: a novel parton density determination code"
+archivePrefix: "arXiv"
+eprint: "2401.17729"
+year: 2024
+primaryClass: "hep-ph"
+url: "https://github.com/cescalara/PartonDensity.jl"
