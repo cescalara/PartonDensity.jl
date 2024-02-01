@@ -6,8 +6,9 @@ Hadrons, such as protons and neutrons, are made up of quarks held together by th
 
 This package uses [QCDNUM.jl](https://github.com/cescalara/QCDNUM.jl) for fast PDF evolution and cross-section calculation and [BAT.jl](https://github.com/bat/BAT.jl) for Bayesian inference.
 
-PartonDensity.jl has been used in the following publication:
+PartonDensity.jl has been used in the following publications:
 * [arXiv:2209.06571](https://arxiv.org/abs/2209.06571)
+* [arXiv:2401.17729](https://arxiv.org/abs/2401.17729)
 
 ## Installation
 
