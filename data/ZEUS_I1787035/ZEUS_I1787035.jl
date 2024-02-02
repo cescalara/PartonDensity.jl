@@ -1,3 +1,4 @@
+let
 """
 Transfer matrix for ZEUS experiment 
 high-x data.
@@ -253,5 +254,6 @@ const MD_ZEUS_I1787035 = PartonDensity.MetaDataZEUS{typeof(f_cross_section_to_co
     m_Data_Events_ePp,
     f_cross_section_to_counts
 );
+ return (;MD_ZEUS_I1787035)
+end
 
-const MD_G = MD_ZEUS_I1787035
