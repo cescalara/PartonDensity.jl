@@ -145,7 +145,18 @@ doi:10.1103/PhysRevD.101.112009
 
 Reads various systematic errors and feeds them for further use
 """
-function Init_sys()
+
+#const 
+m_TM_elements_ePp = get_TM_elements(0);
+#const 
+m_TM_elements_eMp = get_TM_elements(1);
+#const 
+m_Tnm_sys_ePp = Tnm_sys_ePp
+#const 
+m_Tnm_sys_eMp = Tnm_sys_eMp
+
+
+#function Init_sys()
 
 
     println("Initialize the data for:")
@@ -154,15 +165,20 @@ function Init_sys()
     # NP2 153
     # nsyst 8
 
-    global TM_Elements_ePp = zeros(NP1, NP2)
-    global TM_Elements_eMp = zeros(NP1, NP2)
+    #global 
+    TM_Elements_ePp = zeros(NP1, NP2)
+    #global 
+    TM_Elements_eMp = zeros(NP1, NP2)
 
-    global TM_Elements_ePp = get_TM_elements(0)
-    global TM_Elements_eMp = get_TM_elements(1)
+    #global 
+    TM_Elements_ePp = get_TM_elements(0)
+    #global 
+    TM_Elements_eMp = get_TM_elements(1)
 
 
-    global Tnm_Ee_sys_ePp = zeros(NP1, NP2)
-    global Tnm_Eehigh_ePp
+    #global 
+    Tnm_Ee_sys_ePp = zeros(NP1, NP2)
+    #global Tnm_Eehigh_ePp
 
     Tnm_sys_ePp = zeros(NP1, NP2, nsyst)
     Tnm_sys_eMp = zeros(NP1, NP2, nsyst)
@@ -206,17 +222,9 @@ function Init_sys()
     println(Tnm_Ee_sys_ePp[NP1, NP2])
     println(Tnm_sys_ePp[NP1, NP2, 1])
 
-end
-#const 
-m_TM_elements_ePp = get_TM_elements(0);
-#const 
-m_TM_elements_eMp = get_TM_elements(1);
-#const 
-m_Tnm_sys_ePp = Tnm_sys_ePp
-#const 
-m_Tnm_sys_eMp = Tnm_sys_eMp
+#end
 
-Init_sys()
+#Init_sys()
 
 function f_cross_section_to_counts(LUMI_ePp::Float64, LUMI_eMp::Float64, integ_xsec_ep::Array{Float64}, integ_xsec_em::Array{Float64}, sys_err_params::Vector{Float64}=zeros(8))
 
