@@ -109,16 +109,13 @@ m_Binxlow = [0.054, 0.07, 0.088, 0.11, 0.14, 0.17, 0.21, 0.26, 0.044, 0.059, 0.0
 #const 
 m_Binxhigh = [0.07, 0.088, 0.11, 0.14, 0.17, 0.21, 0.26, 1, 0.059, 0.076, 0.096, 0.12, 0.15, 0.19, 0.23, 0.28, 1, 0.059, 0.076, 0.096, 0.12, 0.15, 0.18, 0.22, 0.32, 1, 0.063, 0.08, 0.1, 0.13, 0.16, 0.2, 0.24, 0.34, 1, 0.07, 0.088, 0.11, 0.14, 0.17, 0.21, 0.25, 0.36, 1, 0.059, 0.076, 0.096, 0.12, 0.15, 0.19, 0.23, 0.28, 0.39, 1, 0.07, 0.088, 0.11, 0.14, 0.17, 0.21, 0.26, 0.31, 0.43, 1, 0.063, 0.08, 0.1, 0.13, 0.16, 0.2, 0.24, 0.29, 0.34, 0.46, 1, 0.096, 0.12, 0.15, 0.18, 0.22, 0.27, 0.32, 0.38, 0.5, 1, 0.11, 0.14, 0.17, 0.21, 0.25, 0.3, 0.36, 0.42, 0.54, 1, 0.13, 0.16, 0.2, 0.24, 0.29, 0.34, 0.4, 0.46, 0.58, 1, 0.12, 0.15, 0.19, 0.23, 0.28, 0.33, 0.39, 0.45, 0.51, 0.63, 1, 0.12, 0.15, 0.18, 0.22, 0.27, 0.32, 0.38, 0.44, 0.5, 0.56, 0.69, 1, 0.13, 0.16, 0.2, 0.24, 0.29, 0.35, 0.41, 0.47, 0.53, 0.59, 0.73, 1, 0.19, 0.23, 0.28, 0.33, 0.39, 0.45, 0.51, 0.57, 0.64, 0.78, 1, 0.6, 1]
 
+    #global 
+    TM_Elements_ePp = zeros(NP1, NP2)
+    #global 
+    TM_Elements_eMp = zeros(NP1, NP2)
 
-function get_TM_elements(eMPp)
-
-    if eMPp == 1
-        TM_elements = copy(TM_Elements_eMp)
-        lumi_data = m_Ld_eMp
-    elseif eMPp == 0
         TM_elements = copy(TM_Elements_ePp)
         lumi_data = m_Ld_ePp
-    end
 
     for i in 1:429
         for j in 1:153
@@ -126,8 +123,21 @@ function get_TM_elements(eMPp)
         end
     end
 
-    return TM_elements
-end
+    get_TM_elements_0 = TM_elements
+
+
+
+        TM_elements = copy(TM_Elements_eMp)
+        lumi_data = m_Ld_eMp
+
+    for i in 1:429
+        for j in 1:153
+            TM_elements[i, j] = TM_elements[i, j] * lumi_data
+        end
+    end
+
+    get_TM_elements_1=TM_elements
+
 
 
 #const 
@@ -147,9 +157,9 @@ Reads various systematic errors and feeds them for further use
 """
 
 #const 
-m_TM_elements_ePp = get_TM_elements(0);
+m_TM_elements_ePp = get_TM_elements_0
 #const 
-m_TM_elements_eMp = get_TM_elements(1);
+m_TM_elements_eMp = get_TM_elements_1
 #const 
 m_Tnm_sys_ePp = Tnm_sys_ePp
 #const 
@@ -165,15 +175,12 @@ m_Tnm_sys_eMp = Tnm_sys_eMp
     # NP2 153
     # nsyst 8
 
-    #global 
-    TM_Elements_ePp = zeros(NP1, NP2)
-    #global 
-    TM_Elements_eMp = zeros(NP1, NP2)
+
 
     #global 
-    TM_Elements_ePp = get_TM_elements(0)
+    TM_Elements_ePp = get_TM_elements_0
     #global 
-    TM_Elements_eMp = get_TM_elements(1)
+    TM_Elements_eMp = get_TM_elements_1
 
 
     #global 
