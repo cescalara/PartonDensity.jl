@@ -3,7 +3,6 @@ using Test
 using Random, Distributions
 using Plots, ValueShapes
 import BAT
-include("../data/ZEUS_I1787035/ZEUS_I1787035.jl")
 @testset "Valence PDF parametrisation" begin
 
     local val_pdf_params
