@@ -111,32 +111,26 @@ m_Binxhigh = [0.07, 0.088, 0.11, 0.14, 0.17, 0.21, 0.26, 1, 0.059, 0.076, 0.096,
 
     #global 
     TM_Elements_ePp = zeros(NP1, NP2)
+    TM_elements_0 = copy(TM_Elements_ePp_orig)
+    lumi_data_0 = m_Ld_ePp
+    for i in 1:429
+        for j in 1:153
+            TM_elements_0[i, j] = TM_elements_0[i, j] * lumi_data_0
+        end
+    end
+    get_TM_elements_0 = TM_elements_0
+
+
     #global 
     TM_Elements_eMp = zeros(NP1, NP2)
-
-        TM_elements = copy(TM_Elements_ePp)
-        lumi_data = m_Ld_ePp
-
+    TM_elements_1 = copy(TM_Elements_eMp)
+    lumi_data_1 = m_Ld_eMp
     for i in 1:429
         for j in 1:153
-            TM_elements[i, j] = TM_elements[i, j] * lumi_data
+            TM_elements_1[i, j] = TM_elements_1[i, j] * lumi_data_1
         end
     end
-
-    get_TM_elements_0 = TM_elements
-
-
-
-        TM_elements = copy(TM_Elements_eMp)
-        lumi_data = m_Ld_eMp
-
-    for i in 1:429
-        for j in 1:153
-            TM_elements[i, j] = TM_elements[i, j] * lumi_data
-        end
-    end
-
-    get_TM_elements_1=TM_elements
+    get_TM_elements_1=TM_elements_1
 
 
 
@@ -148,12 +142,6 @@ Phys. Rev. D \textbf{101} (2020) no.11, 112009
 [erratum: Phys. Rev. D \textbf{106} (2022) no.7, 079901]
 doi:10.1103/PhysRevD.101.112009
 [arXiv:2003.08742 [hep-ex]].
-"""
-
-"""
-    Init_sys()
-
-Reads various systematic errors and feeds them for further use
 """
 
 #const 
