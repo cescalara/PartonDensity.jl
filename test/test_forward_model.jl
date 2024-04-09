@@ -88,10 +88,6 @@ using QCDNUM
             @test all(counts_pred_em .<= 1.0e3)
 
             counts_pred_gen = merge(counts_pred_gen, (counts_pred_ep_val=counts_pred_ep, counts_pred_em_val=counts_pred_em))
-            print(counts_pred_ep)
-            print(counts_pred_ref.counts_pred_ep_val)
-            print(counts_pred_em)
-            print(counts_pred_ref.counts_pred_em_val)
             @test all(counts_pred_ep .≈ counts_pred_ref.counts_pred_ep_val)
             @test all(counts_pred_em .≈ counts_pred_ref.counts_pred_em_val)
 
