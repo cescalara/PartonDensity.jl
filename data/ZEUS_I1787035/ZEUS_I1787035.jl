@@ -123,7 +123,7 @@ m_Binxhigh = [0.07, 0.088, 0.11, 0.14, 0.17, 0.21, 0.26, 1, 0.059, 0.076, 0.096,
 
     #global 
     TM_Elements_eMp = zeros(NP1, NP2)
-    TM_elements_1 = copy(TM_Elements_eMp)
+    TM_elements_1 = copy(TM_Elements_eMp_orig)
     lumi_data_1 = m_Ld_eMp
     for i in 1:429
         for j in 1:153
