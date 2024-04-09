@@ -9,7 +9,7 @@ using ArgParse
 import HDF5
  
 include("priors.jl")
-include(string(dirname(pathof(PartonDensity)),"/../data/ZEUS_I1787035/ZEUS_I1787035.jl"))
+const MD_G = include(string(dirname(pathof(PartonDensity)),"/../data/ZEUS_I1787035/ZEUS_I1787035.jl"))
 
 function parse_commandline()
     s = ArgParseSettings()

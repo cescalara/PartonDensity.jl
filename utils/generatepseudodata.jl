@@ -6,7 +6,7 @@ using Plots, Colors , Random, Distributions, ValueShapes, ParallelProcessingTool
 using StatsBase, LinearAlgebra
 
 using ArgParse
-include(string(dirname(pathof(PartonDensity)),"/../data/ZEUS_I1787035/ZEUS_I1787035.jl"))
+MD_ZEUS_I1787035=include(string(dirname(pathof(PartonDensity)),"/../data/ZEUS_I1787035/ZEUS_I1787035.jl"))
 
 function parse_commandline()
     s = ArgParseSettings()
