@@ -87,7 +87,7 @@ using QCDNUM
         end)
     end
 
-    posterior = PosteriorDensity(likelihood, prior)
+    posterior = lbqintegral(likelihood, prior)
 
     # Evaluate posterior for random samples of the prior
     for i in 1:100
@@ -187,7 +187,7 @@ end
         end)
     end
 
-    posterior = PosteriorDensity(likelihood, prior)
+    posterior = lbqintegral(likelihood, prior)
 
     # Evaluate posterior for random samples of the prior
     for i in 1:100

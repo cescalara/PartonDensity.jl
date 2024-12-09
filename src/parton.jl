@@ -19,7 +19,7 @@ const t_bar = Parton{:t̄}()
 const u_valence = Parton{:uv}()
 const d_valence = Parton{:dv}()
 
-export gluon, d_quark, d_bar, u_quark, u_bar, s_quark, s_bar, c_quark, c_bar, b_quark, b_bar, t_quark, t_bar, u_valence, d_valence, sea_quark, u_sea, d_sea
+export gluon, d_quark, d_bar, u_quark, u_bar, s_quark, s_bar, c_quark, c_bar, b_quark, b_bar, t_quark, t_bar, u_valence, d_valence
 
 
 function pdf_map_row end

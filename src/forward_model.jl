@@ -70,7 +70,7 @@ function forward_model(pdf_params::AbstractPDFParams,
 
     # Evolve PDFs
     iq0 = QCDNUM.iqfrmq(qcdnum_params.q0)
-    ϵ = QCDNUM.evolfg(qcdnum_params.output_pdf_loc, input_pdf.cfunc, input_pdf.map, iq0)
+    ϵ = QCDNUM.evolfg(qcdnum_params.output_pdf_loc, input_pdf, iq0)
 
     # Debugging
     if ϵ > 0.05
@@ -99,15 +99,13 @@ function forward_model(pdf_params::AbstractPDFParams,
 
     # Get input cross section function
     my_funcp = get_input_xsec_func(1, md)
-    input_xsecp = @cfunction($my_funcp, Float64, (Ref{Int32}, Ref{Int32}, Ref{UInt8}))
 
     my_funcm = get_input_xsec_func(-1, md)
-    input_xsecm = @cfunction($my_funcm, Float64, (Ref{Int32}, Ref{Int32}, Ref{UInt8}))
 
     # Make two cross section splines
-    QCDNUM.ssp_s2fill(iaF_eP, input_xsecp, splint_params.rscut)
+    QCDNUM.ssp_s2fill(iaF_eP, WrappedSpFun(my_funcp), splint_params.rscut)
 
-    QCDNUM.ssp_s2fill(iaF_eM, input_xsecm, splint_params.rscut)
+    QCDNUM.ssp_s2fill(iaF_eM, WrappedSpFun(my_funcm), splint_params.rscut)
 
     # Integrate over cross section
     nbins = size(md.m_xbins_M_begin)[1]

@@ -1,11 +1,10 @@
 #!/usr/bin/julia
-using BAT, DensityInterface
-using PartonDensity
-using QCDNUM
-using Random, Distributions, ValueShapes, ParallelProcessingTools
-using StatsBase, LinearAlgebra
+
+using PartonDensity, QCDNUM
+using Random, Distributions
 using Printf
 using ArgParse
+
 function parse_commandline()
     s = ArgParseSettings()
     @add_arg_table s begin
@@ -168,7 +167,7 @@ end
 
     # Evolve PDFs
      iq0 = QCDNUM.iqfrmq(qcdnum_params.q0)
-     ϵ = QCDNUM.evolfg(qcdnum_params.output_pdf_loc, input_pdf.cfunc, input_pdf.map, iq0)
+     ϵ = QCDNUM.evolfg(qcdnum_params.output_pdf_loc, input_pdf, iq0)
      itype=1
 
       open(string("CABCHSV2023nnlo/CABCHSV2023nnlo_", lpad(string(NN),4,"0"),".dat"), "w") do f

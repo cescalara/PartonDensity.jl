@@ -9,7 +9,12 @@ using ArgParse
 import HDF5
  
 include("priors.jl")
-const MD_G = include(string(dirname(pathof(PartonDensity)),"/../data/ZEUS_I1787035/ZEUS_I1787035.jl"))
+
+if !isdefined(Main, :MD_ZEUS_I1787035)
+  MD_ZEUS_I1787035=include(string(dirname(pathof(PartonDensity)),"/../data/ZEUS_I1787035/ZEUS_I1787035.jl"))
+end
+
+MD_G = MD_ZEUS_I1787035
 
 function parse_commandline()
     s = ArgParseSettings()
@@ -176,8 +181,8 @@ logfuncdensity(function (params)
 end
 
 
-posterior = PosteriorDensity(likelihood, prior);
-mcalg = MetropolisHastings(proposal=BAT.MvTDistProposal(10.0))
+posterior = lbqintegral(likelihood, prior);
+mcalg = MetropolisHastings()
 convergence = BrooksGelmanConvergence(threshold=1.3);
 burnin = MCMCMultiCycleBurnin(max_ncycles=parsed_args["max_ncycles"],nsteps_per_cycle=parsed_args["nsteps_per_cycle"],nsteps_final=parsed_args["nsteps_final"]);
 samples = bat_sample(posterior, MCMCSampling(mcalg=mcalg, nsteps=parsed_args["nsteps"], nchains=parsed_args["nchains"],strict=parsed_args["strict"])).result;

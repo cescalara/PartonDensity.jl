@@ -125,7 +125,7 @@ likelihood = let d = sim_data
 end
 
 # Check that we can evaluate the posterior:
-posterior = PosteriorDensity(likelihood, prior)
+posterior = lbqintegral(likelihood, prior)
 BAT.checked_logdensityof(posterior, rand(prior))
 
 # We can now run the MCMC sampler. We will start by using the
@@ -135,7 +135,7 @@ BAT.checked_logdensityof(posterior, rand(prior))
 # simply uncomment the code below. To see how to work with 
 # demo output results, check out the other fit examples.
 
-#mcalg = MetropolisHastings(proposal=BAT.MvTDistProposal(10.0))
+#mcalg = MetropolisHastings()
 #convergence = BrooksGelmanConvergence(threshold=1.3)
 #samples = bat_sample(posterior, MCMCSampling(mcalg=mcalg, nsteps=100, nchains=2, strict=false)).result;
 

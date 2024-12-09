@@ -106,10 +106,10 @@ QCDNUM.ssp_uwrite(splint_params.spline_addresses.FLup, Float64(iaFLup));
 QCDNUM.ssp_uwrite(splint_params.spline_addresses.FLdn, Float64(iaFLdn));
 
 my_funcp = get_input_xsec_func(1, MD_DOCS) # charge = 1
-input_xsecp = @cfunction(my_funcp, Float64, (Ref{Int32}, Ref{Int32}, Ref{UInt8}))
+wrapped_my_funcp = WrappedSpFun(my_funcp)
 
 my_funcm = get_input_xsec_func(-1, MD_DOCS) # charge = -1
-input_xsecm = @cfunction(my_funcm, Float64, (Ref{Int32}, Ref{Int32}, Ref{UInt8}))
+wrapped_my_funcm = WrappedSpFun(my_funcm)
 
 # plot
 g = qcdnum_params.grid_params
@@ -141,11 +141,11 @@ plot!(xaxis=:log, legend=:bottomleft, xlabel="x",
 
 iaF_eP = QCDNUM.isp_s2make(1, 2);
 QCDNUM.ssp_uwrite(splint_params.spline_addresses.F_eP, Float64(iaF_eP));
-QCDNUM.ssp_s2fill(iaF_eP, input_xsecp, splint_params.rscut);
+QCDNUM.ssp_s2fill(iaF_eP, wrapped_my_funcp, splint_params.rscut);
 
 iaF_eM = QCDNUM.isp_s2make(1, 2);
 QCDNUM.ssp_uwrite(splint_params.spline_addresses.F_eM, Float64(iaF_eM));
-QCDNUM.ssp_s2fill(iaF_eM, input_xsecm, splint_params.rscut);
+QCDNUM.ssp_s2fill(iaF_eM, wrapped_my_funcm, splint_params.rscut);
 
 # plot spline
 

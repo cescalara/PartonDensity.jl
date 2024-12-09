@@ -159,9 +159,9 @@ end
 # work with a ready-made results file. To actually run the sampler,
 # simply uncomment the code below.
 
-#posterior = PosteriorDensity(likelihood, prior);
+#posterior = lbqintegral(likelihood, prior);
 
-#mcalg = MetropolisHastings(proposal=BAT.MvTDistProposal(10.0))
+#mcalg = MetropolisHastings()
 #convergence = BrooksGelmanConvergence(threshold=1.3)
 #samples = bat_sample(posterior, MCMCSampling(mcalg=mcalg, nsteps=10^4, nchains=2, strict=false)).result;
 

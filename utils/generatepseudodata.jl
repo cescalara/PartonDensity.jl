@@ -1,12 +1,13 @@
 #!/usr/bin/julia
-using BAT, DensityInterface
-using PartonDensity
-using QCDNUM
-using Plots, Colors , Random, Distributions, ValueShapes, ParallelProcessingTools
-using StatsBase, LinearAlgebra
 
+using PartonDensity, QCDNUM
+using Random, Distributions
 using ArgParse
-MD_ZEUS_I1787035=include(string(dirname(pathof(PartonDensity)),"/../data/ZEUS_I1787035/ZEUS_I1787035.jl"))
+
+
+if !isdefined(Main, :MD_ZEUS_I1787035)
+    MD_ZEUS_I1787035=include(string(dirname(pathof(PartonDensity)),"/../data/ZEUS_I1787035/ZEUS_I1787035.jl"))
+end
 
 function parse_commandline()
     s = ArgParseSettings()
