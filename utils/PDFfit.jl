@@ -160,7 +160,7 @@ logfuncdensity(function (params)
        pdf_params, ParErrs = params_to_pdfparams(params)
        #println("1OK")
        for k in 1:length(d_v)
-            counts_pred_ep, counts_pred_em = @critical  forward_model(pdf_params, qcdnum_params, splint_params, quark_coeffs, d_v[k],ParErrs );
+            counts_pred_ep, counts_pred_em =  forward_model(pdf_params, qcdnum_params, splint_params, quark_coeffs, d_v[k],ParErrs );
             for i in 1:length(counts_pred_ep)
                 if counts_pred_ep[i] < 0
                    @debug "counts_pred_ep[i] < 0, setting to 0" i counts_pred_ep[i]

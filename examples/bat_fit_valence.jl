@@ -130,7 +130,7 @@ likelihood = let d = sim_data
             K_d=params.K_d, λ_g1=params.λ_g1, λ_g2=params.λ_g2,
             K_g=params.K_g, λ_q=params.λ_q, K_q=params.K_q, θ=θ)
 
-        counts_pred_ep, counts_pred_em = @critical forward_model(pdf_params, qcdnum_params, splint_params, quark_coeffs, MD_ZEUS_I1787035)
+        counts_pred_ep, counts_pred_em = forward_model(pdf_params, qcdnum_params, splint_params, quark_coeffs, MD_ZEUS_I1787035)
 
         ll_value = 0.0
         for i in 1:nbins
