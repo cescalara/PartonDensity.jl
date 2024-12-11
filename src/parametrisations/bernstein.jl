@@ -253,30 +253,6 @@ function int_xtotx(pdf_params::Union{BernsteinPDFParams,BernsteinDirichletPDFPar
     return I_u + I_d + I_g + I_q
 end
 
-function plot_input_pdfs(pdf_params::Union{BernsteinPDFParams,BernsteinDirichletPDFParams};
-    xmin::Float64=1.0e-2, xmax::Float64=1.0, nx::Integer=1000)
-
-    x_grid = range(xmin, stop=xmax, length=nx)
-    pdf = pdf_params
-
-    p = plot(x_grid, [x_uv_x(x, pdf.U_list, pdf.bspoly_params) for x in x_grid], label="x uv(x)", lw=3)
-    p = plot!(x_grid, [x_dv_x(x, pdf.D_list, pdf.bspoly_params_d) for x in x_grid], label="x dv(x)", lw=3)
-
-    p = plot!(x_grid, [x_g_x(x, pdf.λ_g1, pdf.λ_g2, pdf.K_g, pdf.K_q, pdf.θ[1], pdf.θ[2])
-                       for x in x_grid], label="x g(x)", lw=3)
-    p = plot!(x_grid, [x_q_x(x, pdf.λ_q, pdf.K_q, pdf.θ[3]) for x in x_grid], label="x ubar(x)", lw=3)
-    p = plot!(x_grid, [x_q_x(x, pdf.λ_q, pdf.K_q, pdf.θ[4]) for x in x_grid], label="x dbar(x)", lw=3)
-    p = plot!(x_grid, [x_q_x(x, pdf.λ_q, pdf.K_q, pdf.θ[5]) for x in x_grid], label="x s(x)", lw=3)
-    p = plot!(x_grid, [x_q_x(x, pdf.λ_q, pdf.K_q, pdf.θ[6]) for x in x_grid], label="x c(x)", lw=3)
-    p = plot!(x_grid, [x_q_x(x, pdf.λ_q, pdf.K_q, pdf.θ[7]) for x in x_grid], label="x b(x)", lw=3)
-
-    p = plot!(xlabel="x")
-    p = plot!(xaxis=:log, yaxis=:log, legend=:outertopright)
-    p = ylims!(1e-8, 30)
-
-    return p
-
-end
 
 function get_input_pdf_func(pdf_params::Union{BernsteinPDFParams,BernsteinDirichletPDFParams})::Function
 

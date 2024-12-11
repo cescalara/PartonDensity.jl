@@ -2,7 +2,9 @@ push!(LOAD_PATH, "../src/")
 
 using Documenter, PartonDensity
 using Literate
+
 import BAT
+import Plots
 
 # Doctest setup
 DocMeta.setdocmeta!(

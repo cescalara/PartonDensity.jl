@@ -1,21 +1,94 @@
-using ValueShapes
-using ParallelProcessingTools
-using DensityInterface
+# This file is a part of PartonDensity.jl, licensed under the MIT License (MIT).
+
+module PartonDensityPlotsExt
+
+using PartonDensity
+
+using Plots
+
+using PartonDensity: AbstractPDFParams
+using QCDNUM
+
+using PartonDensity: x_uv_x, x_dv_x, x_g_x, x_q_x, x_q_x, x_q_x, x_q_x, x_q_x
 
 
-export plot_model_space, plot_data_space
+function PartonDensity.plot_input_pdfs(pdf_params::Union{BernsteinPDFParams,BernsteinDirichletPDFParams};
+    xmin::Real=1.0e-2, xmax::Real=1.0, nx::Integer=1000)
+
+    x_grid = range(xmin, stop=xmax, length=nx)
+    pdf = pdf_params
+
+    p = plot(x_grid, [x_uv_x(x, pdf.U_list, pdf.bspoly_params) for x in x_grid], label="x uv(x)", lw=3)
+    p = plot!(x_grid, [x_dv_x(x, pdf.D_list, pdf.bspoly_params_d) for x in x_grid], label="x dv(x)", lw=3)
+
+    p = plot!(x_grid, [x_g_x(x, pdf.λ_g1, pdf.λ_g2, pdf.K_g, pdf.K_q, pdf.θ[1], pdf.θ[2])
+                       for x in x_grid], label="x g(x)", lw=3)
+    p = plot!(x_grid, [x_q_x(x, pdf.λ_q, pdf.K_q, pdf.θ[3]) for x in x_grid], label="x ubar(x)", lw=3)
+    p = plot!(x_grid, [x_q_x(x, pdf.λ_q, pdf.K_q, pdf.θ[4]) for x in x_grid], label="x dbar(x)", lw=3)
+    p = plot!(x_grid, [x_q_x(x, pdf.λ_q, pdf.K_q, pdf.θ[5]) for x in x_grid], label="x s(x)", lw=3)
+    p = plot!(x_grid, [x_q_x(x, pdf.λ_q, pdf.K_q, pdf.θ[6]) for x in x_grid], label="x c(x)", lw=3)
+    p = plot!(x_grid, [x_q_x(x, pdf.λ_q, pdf.K_q, pdf.θ[7]) for x in x_grid], label="x b(x)", lw=3)
+
+    p = plot!(xlabel="x")
+    p = plot!(xaxis=:log, yaxis=:log, legend=:outertopright)
+    p = ylims!(1e-8, 30)
+
+    return p
+
+end
 
 
+function PartonDensity.plot_input_pdfs(pdf_params::ValencePDFParams; xmin::Float64=1.0e-2,
+    xmax::Float64=1.0, nx::Integer=1000)
 
-"""
-    plot_model_space(pdf_params, samples)
+    x_grid = range(xmin, stop=xmax, length=nx)
+    pdf = pdf_params
 
-Compare truth and posterior samples in the model space.
-"""
-function plot_model_space end
+    p = plot(x_grid, [x_uv_x(x, pdf.λ_u, pdf.K_u) for x in x_grid], label="x uv(x)", lw=3)
+    p = plot!(x_grid, [x_dv_x(x, pdf.λ_d, pdf.K_d) for x in x_grid], label="x dv(x)", lw=3)
+
+    p = plot!(x_grid, [x_g_x(x, pdf.λ_g1, pdf.λ_g2, pdf.K_g, pdf.K_q, pdf.θ[1], pdf.θ[2])
+                       for x in x_grid], label="x g(x)", lw=3)
+    p = plot!(x_grid, [x_q_x(x, pdf.λ_q, pdf.K_q, pdf.θ[3]) for x in x_grid], label="x ubar(x)", lw=3)
+    p = plot!(x_grid, [x_q_x(x, pdf.λ_q, pdf.K_q, pdf.θ[4]) for x in x_grid], label="x dbar(x)", lw=3)
+    p = plot!(x_grid, [x_q_x(x, pdf.λ_q, pdf.K_q, pdf.θ[5]) for x in x_grid], label="x s(x)", lw=3)
+    p = plot!(x_grid, [x_q_x(x, pdf.λ_q, pdf.K_q, pdf.θ[6]) for x in x_grid], label="x c(x)", lw=3)
+    p = plot!(x_grid, [x_q_x(x, pdf.λ_q, pdf.K_q, pdf.θ[7]) for x in x_grid], label="x b(x)", lw=3)
+
+    p = plot!(xlabel="x")
+    p = plot!(xaxis=:log, yaxis=:log, legend=:outertopright)
+    p = ylims!(1e-8, 30)
+
+    return p
+end
 
 
-function plot_model_space(pdf_params::AbstractPDFParams, samples; xmin::Float64=1e-3,
+function PartonDensity.plot_input_pdfs(pdf_params::DirichletPDFParams; xmin::Real=1.0e-2,
+    xmax::Real=1.0, nx::Integer=1000)
+
+    x_grid = range(xmin, stop=xmax, length=nx)
+    pdf = pdf_params
+
+    p = plot(x_grid, [x_uv_x(x, pdf.λ_u, pdf.K_u) for x in x_grid], label="x uv(x)", lw=3)
+    p = plot!(x_grid, [x_dv_x(x, pdf.λ_d, pdf.K_d) for x in x_grid], label="x dv(x)", lw=3)
+
+    p = plot!(x_grid, [x_g_x(x, pdf.λ_g1, pdf.λ_g2, pdf.K_g, pdf.K_q, pdf.θ[3], pdf.θ[4])
+                       for x in x_grid], label="x g(x)", lw=3)
+    p = plot!(x_grid, [x_q_x(x, pdf.λ_q, pdf.K_q, pdf.θ[5]) for x in x_grid], label="x ubar(x)", lw=3)
+    p = plot!(x_grid, [x_q_x(x, pdf.λ_q, pdf.K_q, pdf.θ[6]) for x in x_grid], label="x dbar(x)", lw=3)
+    p = plot!(x_grid, [x_q_x(x, pdf.λ_q, pdf.K_q, pdf.θ[7]) for x in x_grid], label="x s(x)", lw=3)
+    p = plot!(x_grid, [x_q_x(x, pdf.λ_q, pdf.K_q, pdf.θ[8]) for x in x_grid], label="x c(x)", lw=3)
+    p = plot!(x_grid, [x_q_x(x, pdf.λ_q, pdf.K_q, pdf.θ[9]) for x in x_grid], label="x b(x)", lw=3)
+
+    p = plot!(xlabel="x")
+    p = plot!(xaxis=:log, yaxis=:log, legend=:outertopright)
+    p = ylims!(1e-8, 30)
+
+    return p
+end
+
+
+function PartonDensity.plot_model_space(pdf_params::AbstractPDFParams, samples; xmin::Float64=1e-3,
     xmax::Float64=1.0, nx::Integer=50, nsamples::Integer=200,
     truth_color=:black, sample_color=:skyblue3)
 
@@ -73,16 +146,7 @@ function plot_model_space_impl(x_grid::StepRangeLen{Float64}, pdf_params::Dirich
 end
 
 
-"""
-    plot_data_space(pdf_params, sim_data, samples,
-                    qcdnum_params, splint_params, quark_coeffs, md)
-
-Compare truth and posterior samples in the data space.
-"""
-function plot_data_space end
-
-
-function plot_data_space(pdf_params::AbstractPDFParams, sim_data::Dict{String,Any}, samples,
+function PartonDensity.plot_data_space(pdf_params::AbstractPDFParams, sim_data::Dict{String,Any}, samples,
     qcdnum_params::QCDNUM.EvolutionParams,
     splint_params::QCDNUM.SPLINTParams, quark_coeffs::QuarkCoefficients, md::MetaData;
     ep_color=:firebrick, em_color=:teal, nsamples::Integer=100, plot_size=(1000, 500),
@@ -400,3 +464,11 @@ function plot_data_space_impl(pdf_params::BernsteinDirichletPDFParams, samples, 
     return p1, p2
 end
 
+
+
+
+
+
+
+
+end # module PartonDensityPlotsExt

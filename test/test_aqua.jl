@@ -11,6 +11,7 @@ end # testset
 Test.@testset "Aqua tests" begin
     Aqua.test_all(
         PartonDensity,
-        ambiguities = true
+        ambiguities = true,
+        stale_deps=(ignore=[:ValueShapes, :DensityInterface],)
     )
 end # testset

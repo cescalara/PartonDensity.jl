@@ -1,14 +1,4 @@
-using ValueShapes
-using ParallelProcessingTools
-using DensityInterface
-
-export get_prior, get_likelihood
-
-
-function get_prior end
-
-
-function get_prior(pdf_params::BernsteinPDFParams)
+function PartonDensity.get_prior(pdf_params::BernsteinPDFParams)
 
     prior = NamedTupleDist(
         θ_tmp=Dirichlet(pdf_params.weights),
@@ -32,7 +22,7 @@ since NamedTupleDist() cannot work with Vector{Vector{Int64}}
 """
 
 
-function get_prior(pdf_params::BernsteinDirichletPDFParams)
+function PartonDensity.get_prior(pdf_params::BernsteinDirichletPDFParams)
 
     prior = NamedTupleDist(
         θ=Dirichlet(pdf_params.weights),
@@ -50,7 +40,7 @@ function get_prior(pdf_params::BernsteinDirichletPDFParams)
 end
 
 
-function get_likelihood(pdf_params::BernsteinPDFParams, sim_data::Dict{String,Any},
+function PartonDensity.get_likelihood(pdf_params::BernsteinPDFParams, sim_data::Dict{String,Any},
     qcdnum_params::QCDNUM.EvolutionParams, splint_params::QCDNUM.SPLINTParams,
     quark_coeffs::QuarkCoefficients, md::MetaData)
 
@@ -101,7 +91,7 @@ function get_likelihood(pdf_params::BernsteinPDFParams, sim_data::Dict{String,An
 end
 
 
-function get_likelihood(pdf_params::BernsteinDirichletPDFParams, sim_data::Dict{String,Any},
+function PartonDensity.get_likelihood(pdf_params::BernsteinDirichletPDFParams, sim_data::Dict{String,Any},
     qcdnum_params::QCDNUM.EvolutionParams, splint_params::QCDNUM.SPLINTParams,
     quark_coeffs::QuarkCoefficients, pos_init_u_only::Bool,md::MetaData)
 
@@ -168,5 +158,3 @@ function get_likelihood(pdf_params::BernsteinDirichletPDFParams, sim_data::Dict{
 
     return likelihood
 end
-
-

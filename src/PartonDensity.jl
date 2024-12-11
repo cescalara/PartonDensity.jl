@@ -5,7 +5,6 @@ using Distributions
 using DocStringExtensions
 using Random
 using Parameters
-using Plots
 
 include("parton.jl")
 include("parametrisations/parametrisations.jl")
@@ -13,12 +12,20 @@ include("metadata.jl")
 include("parameters_IO.jl")
 include("cross_section.jl")
 include("forward_model.jl")
-include("plotting.jl")
 
-using Requires
+include("extdefs_BAT.jl")
+include("extdefs_Plots.jl")
+
+include("register_extdeps.jl")
+
 function __init__()
-    @require BAT = "c0cd4b16-88b7-57fa-983b-ab80aecada7e" include("fit.jl")
-    @require BAT = "c0cd4b16-88b7-57fa-983b-ab80aecada7e" include("bernstein_fit.jl")
+    _register_extension_deps(
+        get_prior => :BAT,
+        get_likelihood => :BAT,
+        plot_input_pdfs => :Plots,
+        plot_model_space => :Plots,
+        plot_data_space => :Plots,
+    )
 end
 
 end

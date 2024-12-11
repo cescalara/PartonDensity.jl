@@ -99,29 +99,6 @@ function int_xtotx_dirichlet(λ_u::Real, K_u::Real, λ_d::Real,
     I_tot
 end
 
-function plot_input_pdfs(pdf_params::DirichletPDFParams; xmin::Real=1.0e-2,
-    xmax::Real=1.0, nx::Integer=1000)
-
-    x_grid = range(xmin, stop=xmax, length=nx)
-    pdf = pdf_params
-
-    p = plot(x_grid, [x_uv_x(x, pdf.λ_u, pdf.K_u) for x in x_grid], label="x uv(x)", lw=3)
-    p = plot!(x_grid, [x_dv_x(x, pdf.λ_d, pdf.K_d) for x in x_grid], label="x dv(x)", lw=3)
-
-    p = plot!(x_grid, [x_g_x(x, pdf.λ_g1, pdf.λ_g2, pdf.K_g, pdf.K_q, pdf.θ[3], pdf.θ[4])
-                       for x in x_grid], label="x g(x)", lw=3)
-    p = plot!(x_grid, [x_q_x(x, pdf.λ_q, pdf.K_q, pdf.θ[5]) for x in x_grid], label="x ubar(x)", lw=3)
-    p = plot!(x_grid, [x_q_x(x, pdf.λ_q, pdf.K_q, pdf.θ[6]) for x in x_grid], label="x dbar(x)", lw=3)
-    p = plot!(x_grid, [x_q_x(x, pdf.λ_q, pdf.K_q, pdf.θ[7]) for x in x_grid], label="x s(x)", lw=3)
-    p = plot!(x_grid, [x_q_x(x, pdf.λ_q, pdf.K_q, pdf.θ[8]) for x in x_grid], label="x c(x)", lw=3)
-    p = plot!(x_grid, [x_q_x(x, pdf.λ_q, pdf.K_q, pdf.θ[9]) for x in x_grid], label="x b(x)", lw=3)
-
-    p = plot!(xlabel="x")
-    p = plot!(xaxis=:log, yaxis=:log, legend=:outertopright)
-    p = ylims!(1e-8, 30)
-
-    return p
-end
 
 function get_input_pdf_func(pdf_params::DirichletPDFParams)::Function
     return function _input_pdfs(i::Integer, x::T)::T where {T<:Real}

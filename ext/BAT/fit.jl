@@ -1,18 +1,4 @@
-using ValueShapes
-using ParallelProcessingTools
-using DensityInterface
-
-export get_prior, get_likelihood
-
-"""
-    get_prior(pdf_params)
-
-Get a suitable prior for a given PDF parametrisation.
-"""
-function get_prior end
-
-
-function get_prior(pdf_params::ValencePDFParams)
+function PartonDensity.get_prior(pdf_params::ValencePDFParams)
 
     prior = NamedTupleDist(
         θ_tmp=Dirichlet(ones(7)),
@@ -31,7 +17,7 @@ function get_prior(pdf_params::ValencePDFParams)
 end
 
 
-function get_prior(pdf_params::DirichletPDFParams)
+function PartonDensity.get_prior(pdf_params::DirichletPDFParams)
 
     prior = NamedTupleDist(
         θ=Dirichlet(ones(9)),
@@ -48,15 +34,7 @@ function get_prior(pdf_params::DirichletPDFParams)
 end
 
 
-"""
-    get_likelihood(pdf_params)
-
-Get a suitable likelihood for a given PDF parametrisation.
-"""
-function get_likelihood end
-
-
-function get_likelihood(pdf_params::ValencePDFParams, sim_data::Dict{String,Any},
+function PartonDensity.get_likelihood(pdf_params::ValencePDFParams, sim_data::Dict{String,Any},
     qcdnum_params::QCDNUM.EvolutionParams, splint_params::QCDNUM.SPLINTParams,
     quark_coeffs::QuarkCoefficients
         ,md::MetaData
@@ -105,7 +83,7 @@ function get_likelihood(pdf_params::ValencePDFParams, sim_data::Dict{String,Any}
 end
 
 
-function get_likelihood(pdf_params::DirichletPDFParams, sim_data::Dict{String,Any},
+function PartonDensity.get_likelihood(pdf_params::DirichletPDFParams, sim_data::Dict{String,Any},
     qcdnum_params::QCDNUM.EvolutionParams, splint_params::QCDNUM.SPLINTParams,
     quark_coeffs::QuarkCoefficients
     ,md::MetaData
