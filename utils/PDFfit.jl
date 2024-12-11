@@ -2,7 +2,7 @@
 using BAT, DensityInterface
 using PartonDensity
 using QCDNUM
-using Random, Distributions, ValueShapes, ParallelProcessingTools
+using Random, Distributions, ValueShapes
 using StatsBase, LinearAlgebra
 using DelimitedFiles
 using ArgParse

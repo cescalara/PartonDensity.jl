@@ -6,7 +6,7 @@
 using BAT, DensityInterface
 using PartonDensity
 using QCDNUM
-using Plots, Random, Distributions, ValueShapes, ParallelProcessingTools
+using Plots, Random, Distributions, ValueShapes
 using StatsBase, LinearAlgebra
 
 zeus_include_path = string(chop(pathof(PartonDensity), tail=20), "data/ZEUS_I1787035/ZEUS_I1787035.jl")

@@ -1,5 +1,5 @@
 using PartonDensity
-using BAT, DensityInterface, ParallelProcessingTools
+using BAT, DensityInterface
 using Random, Distributions, ValueShapes
 using Test
 using QCDNUM
