@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/><title>Forward model · PartonDensity.jl</title><meta name="title" content="Forward model · PartonDensity.jl"/><meta property="og:title" content="Forward model · PartonDensity.jl"/><meta property="twitter:title" content="Forward model · PartonDensity.jl"/><meta name="description" content="Documentation for PartonDensity.jl."/><meta property="og:description" content="Documentation for PartonDensity.jl."/><meta property="twitter:description" content="Documentation for PartonDensity.jl."/><meta property="og:url" content="https://cescalara.github.io/PartonDensity.jl/stable/forward_model/"/><meta property="twitter:url" content="https://cescalara.github.io/PartonDensity.jl/stable/forward_model/"/><link rel="canonical" href="https://cescalara.github.io/PartonDensity.jl/stable/forward_model/"/><script data-outdated-warner src="../assets/warner.js"></script><link href="https://cdnjs.cloudflare.com/ajax/libs/lato-font/3.0.0/css/lato-font.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/juliamono/0.050/juliamono.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/fontawesome.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/solid.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/brands.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.8/katex.min.css" rel="stylesheet" type="text/css"/><script>documenterBaseURL=".."</script><script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.6/require.min.js" data-main="../assets/documenter.js"></script><script src="../search_index.js"></script><script src="../siteinfo.js"></script><script src="../../versions.js"></script><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../assets/themes/catppuccin-mocha.css" data-theme-name="catppuccin-mocha"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../assets/themes/catppuccin-macchiato.css" data-theme-name="catppuccin-macchiato"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../assets/themes/catppuccin-frappe.css" data-theme-name="catppuccin-frappe"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../assets/themes/catppuccin-latte.css" data-theme-name="catppuccin-latte"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../assets/themes/documenter-dark.css" data-theme-name="documenter-dark" data-theme-primary-dark/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../assets/themes/documenter-light.css" data-theme-name="documenter-light" data-theme-primary/><script src="../assets/themeswap.js"></script></head><body><div id="documenter"><nav class="docs-sidebar"><div class="docs-package-name"><span class="docs-autofit"><a href="../">PartonDensity.jl</a></span></div><button class="docs-search-query input is-rounded is-small is-clickable my-2 mx-auto py-1 px-2" id="documenter-search-query">Search docs (Ctrl + /)</button><ul class="docs-menu"><li><a class="tocitem" href="../">Introduction</a></li><li><span class="tocitem">Examples</span><ul><li><a class="tocitem" href="../pdf_parametrisation/">Input PDF parametrisation and priors</a></li><li><a class="tocitem" href="../zeus_interface/">ZEUS interface</a></li><li class="is-active"><a class="tocitem" href>Forward model</a><ul class="internal"><li><a class="tocitem" href="#Define-input-PDFs"><span>Define input PDFs</span></a></li><li><a class="tocitem" href="#Define-QCDNUM-grids,-weights-and-settings"><span>Define QCDNUM grids, weights and settings</span></a></li><li><a class="tocitem" href="#Evolve-the-PDFs-using-QCDNUM"><span>Evolve the PDFs using QCDNUM</span></a></li><li><a class="tocitem" href="#Integrate-over-the-cross-section-spline-and-find-expected-events-numbers"><span>Integrate over the cross section spline and find expected events numbers</span></a></li></ul></li></ul></li><li><a class="tocitem" href="../api/">API</a></li></ul><div class="docs-version-selector field has-addons"><div class="control"><span class="docs-label button is-static is-size-7">Version</span></div><div class="docs-selector control is-expanded"><div class="select is-fullwidth is-size-7"><select id="documenter-version-selector"></select></div></div></div></nav><div class="docs-main"><header class="docs-navbar"><a class="docs-sidebar-button docs-navbar-link fa-solid fa-bars is-hidden-desktop" id="documenter-sidebar-button" href="#"></a><nav class="breadcrumb"><ul class="is-hidden-mobile"><li><a class="is-disabled">Examples</a></li><li class="is-active"><a href>Forward model</a></li></ul><ul class="is-hidden-tablet"><li class="is-active"><a href>Forward model</a></li></ul></nav><div class="docs-right"><a class="docs-navbar-link" href="https://github.com/cescalara/PartonDensity.jl" title="View the repository on GitHub"><span class="docs-icon fa-brands"></span><span class="docs-label is-hidden-touch">GitHub</span></a><a class="docs-navbar-link" href="https://github.com/cescalara/PartonDensity.jl/blob/main/examples/forward_model.jl" title="Edit source on GitHub"><span class="docs-icon fa-solid"></span></a><a class="docs-settings-button docs-navbar-link fa-solid fa-gear" id="documenter-settings-button" href="#" title="Settings"></a><a class="docs-article-toggle-button fa-solid fa-chevron-up" id="documenter-article-toggle-button" href="javascript:;" title="Collapse all docstrings"></a></div></header><article class="content" id="documenter-page"><h1 id="Forward-model"><a class="docs-heading-anchor" href="#Forward-model">Forward model</a><a id="Forward-model-1"></a><a class="docs-heading-anchor-permalink" href="#Forward-model" title="Permalink"></a></h1><p>Here, we go through an example of simulating the full forward model, from the prior definition to the expected number of events in different bins of the detector response.</p><pre><code class="language-julia hljs">using QCDNUM, PartonDensity
+using Plots, Printf, NaNMath, Parameters, Random, Distributions
+
+zeus_include_path = string(chop(pathof(PartonDensity), tail=20), &quot;data/ZEUS_I1787035/ZEUS_I1787035.jl&quot;)
+
+const MD_DOCS = include(zeus_include_path)</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">PartonDensity.MetaDataZEUS{Main.var&quot;#f_cross_section_to_counts#1&quot;{Array{Float64, 3}, Array{Float64, 3}, Matrix{Float64}, Matrix{Float64}, Float64, Float64, Vector{Float64}, Vector{Float64}}}(&quot;ZEUS_I1787035&quot;, 141.44, 185.018, 0.018, 0.018, 318.0, [400.0, 400.0, 400.0, 400.0, 400.0, 400.0, 400.0, 400.0, 400.0, 400.0  …  8000.0, 8000.0, 8000.0, 8000.0, 8000.0, 11000.0, 11000.0, 11000.0, 20000.0, 20000.0], [650.0, 650.0, 650.0, 650.0, 650.0, 650.0, 650.0, 650.0, 650.0, 650.0  …  11000.0, 11000.0, 11000.0, 11000.0, 11000.0, 20000.0, 20000.0, 20000.0, 30000.0, 30000.0], [0.0035, 0.007, 0.01, 0.012, 0.015, 0.017, 0.019, 0.022, 0.024, 0.026  …  0.45, 0.51, 0.57, 0.64, 0.78, 0.13, 0.256, 0.6, 0.25, 0.6], [0.007, 0.01, 0.012, 0.015, 0.017, 0.019, 0.022, 0.024, 0.026, 0.028  …  0.51, 0.57, 0.64, 0.78, 0.99999, 0.256, 0.6, 0.99999, 0.6, 0.99999], [743, 580, 441, 416, 283, 248, 227, 504, 789, 681  …  27, 19, 12, 8, 5, 4, 1, 1, 120, 8], [567, 418, 321, 274, 207, 176, 152, 371, 599, 497  …  15, 14, 9, 8, 7, 2, 0, 0, 41, 3], Main.var&quot;#f_cross_section_to_counts#1&quot;{Array{Float64, 3}, Array{Float64, 3}, Matrix{Float64}, Matrix{Float64}, Float64, Float64, Vector{Float64}, Vector{Float64}}([0.0 0.0 … 0.0 0.0; 0.0 0.0 … 0.0 0.0; … ; 0.0 0.0 … 0.0 0.0; 0.0 0.0 … 0.0 0.0;;; 0.0 0.0 … 0.0 0.0; 0.0 0.0 … 0.0 0.0; … ; 0.0 0.0 … 0.0 0.0; 0.0 0.0 … 0.0 0.0;;; 0.0 0.0 … 0.0 0.0; 0.0 0.0 … 0.0 0.0; … ; 0.0 0.0 … 0.0 0.0; 0.0 0.0 … 0.0 0.0;;; 0.0 0.0 … 0.0 0.0; 0.0 0.0 … 0.0 0.0; … ; 0.0 0.0 … 0.0 0.0; 0.0 0.0 … 0.0 0.0;;; 0.0 0.0 … 0.0 0.0; 0.0 0.0 … 0.0 0.0; … ; 0.0 0.0 … 0.0 0.0; 0.0 0.0 … 0.0 0.0;;; 0.0 0.0 … 0.0 0.0; 0.0 0.0 … 0.0 0.0; … ; 0.0 0.0 … 0.0 0.0; 0.0 0.0 … 0.0 0.0;;; 0.0 0.0 … 0.0 0.0; 0.0 0.0 … 0.0 0.0; … ; 0.0 0.0 … 0.0 0.0; 0.0 0.0 … 0.0 0.0;;; 0.0 0.0 … 0.0 0.0; 0.0 0.0 … 0.0 0.0; … ; 0.0 0.0 … 0.0 0.0; 0.0 0.0 … 0.0 0.0], [0.0 0.0 … 0.0 0.0; 0.0 0.0 … 0.0 0.0; … ; 0.0 0.0 … 0.0 0.0; 0.0 0.0 … 0.0 0.0;;; 0.0 0.0 … 0.0 0.0; 0.0 0.0 … 0.0 0.0; … ; 0.0 0.0 … 0.0 0.0; 0.0 0.0 … 0.0 0.0;;; 0.0 0.0 … 0.0 0.0; 0.0 0.0 … 0.0 0.0; … ; 0.0 0.0 … 0.0 0.0; 0.0 0.0 … 0.0 0.0;;; 0.0 0.0 … 0.0 0.0; 0.0 0.0 … 0.0 0.0; … ; 0.0 0.0 … 0.0 0.0; 0.0 0.0 … 0.0 0.0;;; 0.0 0.0 … 0.0 0.0; 0.0 0.0 … 0.0 0.0; … ; 0.0 0.0 … 0.0 0.0; 0.0 0.0 … 0.0 0.0;;; 0.0 0.0 … 0.0 0.0; 0.0 0.0 … 0.0 0.0; … ; 0.0 0.0 … 0.0 0.0; 0.0 0.0 … 0.0 0.0;;; 0.0 0.0 … 0.0 0.0; 0.0 0.0 … 0.0 0.0; … ; 0.0 0.0 … 0.0 0.0; 0.0 0.0 … 0.0 0.0;;; 0.0 0.0 … 0.0 0.0; 0.0 0.0 … 0.0 0.0; … ; 0.0 0.0 … 0.0 0.0; 0.0 0.0 … 0.0 0.0], [0.0 0.0 … 0.0 0.0; 0.003688148812 0.0018500689892 … 0.0 0.0; … ; 0.0 0.0 … 1.0453516999999999 0.0005606785471999999; 0.0 0.0 … 0.0046826205620000005 0.065218845], [0.0 0.0 … 0.0 0.0; 0.00234097344 0.0 … 0.0 0.0; … ; 0.0 0.0 … 0.94503136 0.000449623616; 0.0 0.0 … 0.08914963199999999 0.0282215232], 185.018, 141.44, [1.07559, 1.00494, 0.997145, 0.994087, 0.991775, 0.990224, 0.98391, 0.991145, 0.993283, 0.976963  …  0.897826, 0.889232, 0.890147, 0.892718, 0.88395, 0.921764, 0.882477, 0.891006, 0.911363, 0.877797], [1.07535, 1.00332, 1.0004, 0.990515, 0.982716, 0.991055, 0.988341, 0.981917, 0.980651, 0.98678  …  0.857518, 0.837175, 0.875777, 0.897924, 0.935441, 0.933215, 0.899119, 0.910332, 1.1251, 1.12007]))</code></pre><h2 id="Define-input-PDFs"><a class="docs-heading-anchor" href="#Define-input-PDFs">Define input PDFs</a><a id="Define-input-PDFs-1"></a><a class="docs-heading-anchor-permalink" href="#Define-input-PDFs" title="Permalink"></a></h2><p>We can use <code>DirichletPDFParams</code> or <code>ValencePDFParams</code>, as long as we do so according to the <em>PDF parametrisation and priors</em> docs.</p><pre><code class="language-julia hljs">random_seed = 42
+
+weights = [3.0, 1.0, 5.0, 5.0, 1.0, 1.0, 1.0, 0.5, 0.5]
+θ = rand(MersenneTwister(random_seed), Dirichlet(weights))
+pdf_params = DirichletPDFParams(K_u=4.0, K_d=6.0, λ_g1=0.7, λ_g2=-0.4,
+    K_g=6.0, λ_q=-0.5, K_q=5.0, θ=θ);</code></pre><p>Plot the input PDFs</p><pre><code class="language-julia hljs">plot_input_pdfs(pdf_params)</code></pre><img src="e6bebfdf.svg" alt="Example block output"/><p>Sanity check that sum = 1</p><pre><code class="language-julia hljs">int_xtotx(pdf_params) ≈ 1</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">true</code></pre><h2 id="Define-QCDNUM-grids,-weights-and-settings"><a class="docs-heading-anchor" href="#Define-QCDNUM-grids,-weights-and-settings">Define QCDNUM grids, weights and settings</a><a id="Define-QCDNUM-grids,-weights-and-settings-1"></a><a class="docs-heading-anchor-permalink" href="#Define-QCDNUM-grids,-weights-and-settings" title="Permalink"></a></h2><pre><code class="language-julia hljs">grid = QCDNUM.GridParams(x_min=[1.0e-3], x_weights=[1], nx=100,
+    qq_bounds=[1.0e2, 3.0e4], qq_weights=[1.0, 1.0], nq=50, spline_interp=3)
+
+qcdnum_params = QCDNUM.EvolutionParams(order=2, α_S=0.118, q0=100.0, grid_params=grid,
+    n_fixed_flav=5, iqc=1, iqb=1, iqt=1, weight_type=1);</code></pre><p>Initialise</p><pre><code class="language-julia hljs">QCDNUM.init()</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">  +---------------------------------------------------------------------+
+  |                                                                     |
+  |    If you use QCDNUM, please refer to:                              |
+  |                                                                     |
+  |    M. Botje, Comput. Phys. Commun. 182(2011)490, arXiV:1005.1481    |
+  |                                                                     |
+  +---------------------------------------------------------------------+</code></pre><h2 id="Evolve-the-PDFs-using-QCDNUM"><a class="docs-heading-anchor" href="#Evolve-the-PDFs-using-QCDNUM">Evolve the PDFs using QCDNUM</a><a id="Evolve-the-PDFs-using-QCDNUM-1"></a><a class="docs-heading-anchor-permalink" href="#Evolve-the-PDFs-using-QCDNUM" title="Permalink"></a></h2><p>Define input PDF function</p><ul><li>See QCDNUM docs under <code>evolfg</code></li></ul><p>There are functions available to generate the necessary input PDF function in the correct format for <code>QCDNUM.jl</code> (see <code>get_input_pdf_func()</code>), along with the mapping between this input function and quark species (see <code>input_pdf_map</code>).</p><p>Get function and PDF input map to fully describe the <code>QCDNUM.InputPDF</code></p><pre><code class="language-julia hljs">my_func = get_input_pdf_func(pdf_params)
+input_pdf = QCDNUM.InputPDF(func=my_func, map=input_pdf_map)</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">QCDNUM.InputPDF{PartonDensity.var&quot;#_input_pdfs#5&quot;{DirichletPDFParams{Float64, Vector{Float64}}}}(PartonDensity.var&quot;#_input_pdfs#5&quot;{DirichletPDFParams{Float64, Vector{Float64}}}(DirichletPDFParams{Float64, Vector{Float64}}
+  param_type: Int64 2
+  θ: Array{Float64}((9,)) [0.2745973958566868, 0.025185923177617916, 0.2825598049878557, 0.32510010540329737, 0.0020777472167062432, 0.04138990134526421, 0.029934447732697145, 0.011802190648531188, 0.007352483631343595]
+  K_u: Float64 4.0
+  λ_u: Float64 0.7957487579921333
+  K_d: Float64 6.0
+  λ_d: Float64 0.18085650016259333
+  λ_g1: Float64 0.7
+  λ_g2: Float64 -0.4
+  K_g: Float64 6.0
+  λ_q: Float64 -0.5
+  K_q: Float64 5.0
+), [0.0, 0.0, 0.0, 0.0, -1.0, 0.0, 0.0, 0.0, 1.0, 0.0  …  0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0], FunctionWrappers.FunctionWrapper{Float64, Tuple{Int32, Float64}}(Ptr{Nothing} @0x00007fec8bb75630, Ptr{Nothing} @0x00007fec29acba30, Base.RefValue{PartonDensity.var&quot;#_input_pdfs#5&quot;{DirichletPDFParams{Float64, Vector{Float64}}}}(PartonDensity.var&quot;#_input_pdfs#5&quot;{DirichletPDFParams{Float64, Vector{Float64}}}(DirichletPDFParams{Float64, Vector{Float64}}
+  param_type: Int64 2
+  θ: Array{Float64}((9,)) [0.2745973958566868, 0.025185923177617916, 0.2825598049878557, 0.32510010540329737, 0.0020777472167062432, 0.04138990134526421, 0.029934447732697145, 0.011802190648531188, 0.007352483631343595]
+  K_u: Float64 4.0
+  λ_u: Float64 0.7957487579921333
+  K_d: Float64 6.0
+  λ_d: Float64 0.18085650016259333
+  λ_g1: Float64 0.7
+  λ_g2: Float64 -0.4
+  K_g: Float64 6.0
+  λ_q: Float64 -0.5
+  K_q: Float64 5.0
+)), PartonDensity.var&quot;#_input_pdfs#5&quot;{DirichletPDFParams{Float64, Vector{Float64}}}))</code></pre><p>Evolve the PDF over the specified grid</p><pre><code class="language-julia hljs">ϵ = QCDNUM.evolve(input_pdf, qcdnum_params)</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">0.0011451779088437232</code></pre><p>For splines</p><pre><code class="language-julia hljs">nw = QCDNUM.zmfillw()
+splint_params = QCDNUM.SPLINTParams();
+quark_coeffs = QuarkCoefficients();</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">
+ ZMFILLW: start weight calculations   4  38   0   0
+ ZMFILLW: calculations completed</code></pre><p>Define initial spline</p><pre><code class="language-julia hljs">QCDNUM.ssp_spinit(splint_params.nuser)
+
+ia = QCDNUM.isp_s2make(splint_params.nsteps_x, splint_params.nsteps_q);
+xnd = QCDNUM.ssp_unodes(ia, splint_params.nnodes_x, 0);
+qnd = QCDNUM.ssp_vnodes(ia, splint_params.nnodes_q, 0);</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">
+  +---------------------------------------+
+  | You are using SPLINT version 20220308 |
+  +---------------------------------------+</code></pre><p>Check nodes and erase</p><pre><code class="language-julia hljs">QCDNUM.ssp_nprint(ia);
+QCDNUM.ssp_erase(ia);</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">
+  N   IX     XNODE    NQMA      IQ     QNODE    NXMI
+  1    1  0.10000E-02    0       1  0.10000E+03    0
+  2    5  0.13183E-02    0       2  0.11234E+03    0
+  3   10  0.18621E-02    0      12  0.35982E+03    0
+  4   15  0.26303E-02    0      22  0.11525E+04    0
+  5   20  0.37154E-02    0      32  0.36911E+04    0
+  6   25  0.52481E-02    0      42  0.11822E+05    0
+  7   30  0.74131E-02    0      50  0.30000E+05    0
+  8   35  0.10471E-01    0       -       -         -
+  9   40  0.14791E-01    0       -       -         -
+ 10   45  0.20893E-01    0       -       -         -
+ 11   50  0.29512E-01    0       -       -         -
+ 12   55  0.41687E-01    0       -       -         -
+ 13   60  0.58884E-01    0       -       -         -
+ 14   65  0.83176E-01    0       -       -         -
+ 15   70  0.11749E+00    0       -       -         -
+ 16   75  0.16596E+00    0       -       -         -
+ 17   80  0.23442E+00    0       -       -         -
+ 18   85  0.33113E+00    0       -       -         -
+ 19   90  0.46774E+00    0       -       -         -
+ 20   95  0.66069E+00    0       -       -         -
+ 21  100  0.93325E+00    0       -       -         -
+ 22  101  0.10000E+01    0       -       -         -</code></pre><p>Set nodes and fill spline with structure function</p><pre><code class="language-julia hljs">iaFLup = QCDNUM.isp_s2user(xnd, splint_params.nnodes_x, qnd, splint_params.nnodes_q);
+QCDNUM.ssp_s2f123(iaFLup, qcdnum_params.output_pdf_loc, quark_coeffs.proup, 1, 0.0);
+
+iaF2up = QCDNUM.isp_s2user(xnd, splint_params.nnodes_x, qnd, splint_params.nnodes_q);
+QCDNUM.ssp_s2f123(iaF2up, qcdnum_params.output_pdf_loc, quark_coeffs.proup, 2, 0.0);
+
+iaF3up = QCDNUM.isp_s2user(xnd, splint_params.nnodes_x, qnd, splint_params.nnodes_q);
+QCDNUM.ssp_s2f123(iaF3up, qcdnum_params.output_pdf_loc, quark_coeffs.valup, 3, 0.0);
+
+iaFLdn = QCDNUM.isp_s2user(xnd, splint_params.nnodes_x, qnd, splint_params.nnodes_q);
+QCDNUM.ssp_s2f123(iaFLdn, qcdnum_params.output_pdf_loc, quark_coeffs.prodn, 1, 0.0);
+
+iaF2dn = QCDNUM.isp_s2user(xnd, splint_params.nnodes_x, qnd, splint_params.nnodes_q);
+QCDNUM.ssp_s2f123(iaF2dn, qcdnum_params.output_pdf_loc, quark_coeffs.prodn, 2, 0.0);
+
+iaF3dn = QCDNUM.isp_s2user(xnd, splint_params.nnodes_x, qnd, splint_params.nnodes_q);
+QCDNUM.ssp_s2f123(iaF3dn, qcdnum_params.output_pdf_loc, quark_coeffs.valdn, 3, 0.0);</code></pre><p>store spline addresses</p><pre><code class="language-julia hljs">QCDNUM.ssp_uwrite(splint_params.spline_addresses.F2up, Float64(iaF2up));
+QCDNUM.ssp_uwrite(splint_params.spline_addresses.F2dn, Float64(iaF2dn));
+QCDNUM.ssp_uwrite(splint_params.spline_addresses.F3up, Float64(iaF3up));
+QCDNUM.ssp_uwrite(splint_params.spline_addresses.F3dn, Float64(iaF3dn));
+QCDNUM.ssp_uwrite(splint_params.spline_addresses.FLup, Float64(iaFLup));
+QCDNUM.ssp_uwrite(splint_params.spline_addresses.FLdn, Float64(iaFLdn));
+
+my_funcp = get_input_xsec_func(1, MD_DOCS) # charge = 1
+wrapped_my_funcp = WrappedSpFun(my_funcp)
+
+my_funcm = get_input_xsec_func(-1, MD_DOCS) # charge = -1
+wrapped_my_funcm = WrappedSpFun(my_funcm)</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">FunctionWrappers.FunctionWrapper{Float64, Tuple{Int32, Int32, UInt8}}(Ptr{Nothing} @0x00007fec8bb81060, Ptr{Nothing} @0x00007fec28708c20, Base.RefValue{PartonDensity.var&quot;#_my_fun_xsec_im#40&quot;{PartonDensity.MetaDataZEUS{Main.var&quot;#f_cross_section_to_counts#1&quot;{Array{Float64, 3}, Array{Float64, 3}, Matrix{Float64}, Matrix{Float64}, Float64, Float64, Vector{Float64}, Vector{Float64}}}}}(PartonDensity.var&quot;#_my_fun_xsec_im#40&quot;{PartonDensity.MetaDataZEUS{Main.var&quot;#f_cross_section_to_counts#1&quot;{Array{Float64, 3}, Array{Float64, 3}, Matrix{Float64}, Matrix{Float64}, Float64, Float64, Vector{Float64}, Vector{Float64}}}}(PartonDensity.MetaDataZEUS{Main.var&quot;#f_cross_section_to_counts#1&quot;{Array{Float64, 3}, Array{Float64, 3}, Matrix{Float64}, Matrix{Float64}, Float64, Float64, Vector{Float64}, Vector{Float64}}}(&quot;ZEUS_I1787035&quot;, 141.44, 185.018, 0.018, 0.018, 318.0, [400.0, 400.0, 400.0, 400.0, 400.0, 400.0, 400.0, 400.0, 400.0, 400.0  …  8000.0, 8000.0, 8000.0, 8000.0, 8000.0, 11000.0, 11000.0, 11000.0, 20000.0, 20000.0], [650.0, 650.0, 650.0, 650.0, 650.0, 650.0, 650.0, 650.0, 650.0, 650.0  …  11000.0, 11000.0, 11000.0, 11000.0, 11000.0, 20000.0, 20000.0, 20000.0, 30000.0, 30000.0], [0.0035, 0.007, 0.01, 0.012, 0.015, 0.017, 0.019, 0.022, 0.024, 0.026  …  0.45, 0.51, 0.57, 0.64, 0.78, 0.13, 0.256, 0.6, 0.25, 0.6], [0.007, 0.01, 0.012, 0.015, 0.017, 0.019, 0.022, 0.024, 0.026, 0.028  …  0.51, 0.57, 0.64, 0.78, 0.99999, 0.256, 0.6, 0.99999, 0.6, 0.99999], [743, 580, 441, 416, 283, 248, 227, 504, 789, 681  …  27, 19, 12, 8, 5, 4, 1, 1, 120, 8], [567, 418, 321, 274, 207, 176, 152, 371, 599, 497  …  15, 14, 9, 8, 7, 2, 0, 0, 41, 3], Main.var&quot;#f_cross_section_to_counts#1&quot;{Array{Float64, 3}, Array{Float64, 3}, Matrix{Float64}, Matrix{Float64}, Float64, Float64, Vector{Float64}, Vector{Float64}}([0.0 0.0 … 0.0 0.0; 0.0 0.0 … 0.0 0.0; … ; 0.0 0.0 … 0.0 0.0; 0.0 0.0 … 0.0 0.0;;; 0.0 0.0 … 0.0 0.0; 0.0 0.0 … 0.0 0.0; … ; 0.0 0.0 … 0.0 0.0; 0.0 0.0 … 0.0 0.0;;; 0.0 0.0 … 0.0 0.0; 0.0 0.0 … 0.0 0.0; … ; 0.0 0.0 … 0.0 0.0; 0.0 0.0 … 0.0 0.0;;; 0.0 0.0 … 0.0 0.0; 0.0 0.0 … 0.0 0.0; … ; 0.0 0.0 … 0.0 0.0; 0.0 0.0 … 0.0 0.0;;; 0.0 0.0 … 0.0 0.0; 0.0 0.0 … 0.0 0.0; … ; 0.0 0.0 … 0.0 0.0; 0.0 0.0 … 0.0 0.0;;; 0.0 0.0 … 0.0 0.0; 0.0 0.0 … 0.0 0.0; … ; 0.0 0.0 … 0.0 0.0; 0.0 0.0 … 0.0 0.0;;; 0.0 0.0 … 0.0 0.0; 0.0 0.0 … 0.0 0.0; … ; 0.0 0.0 … 0.0 0.0; 0.0 0.0 … 0.0 0.0;;; 0.0 0.0 … 0.0 0.0; 0.0 0.0 … 0.0 0.0; … ; 0.0 0.0 … 0.0 0.0; 0.0 0.0 … 0.0 0.0], [0.0 0.0 … 0.0 0.0; 0.0 0.0 … 0.0 0.0; … ; 0.0 0.0 … 0.0 0.0; 0.0 0.0 … 0.0 0.0;;; 0.0 0.0 … 0.0 0.0; 0.0 0.0 … 0.0 0.0; … ; 0.0 0.0 … 0.0 0.0; 0.0 0.0 … 0.0 0.0;;; 0.0 0.0 … 0.0 0.0; 0.0 0.0 … 0.0 0.0; … ; 0.0 0.0 … 0.0 0.0; 0.0 0.0 … 0.0 0.0;;; 0.0 0.0 … 0.0 0.0; 0.0 0.0 … 0.0 0.0; … ; 0.0 0.0 … 0.0 0.0; 0.0 0.0 … 0.0 0.0;;; 0.0 0.0 … 0.0 0.0; 0.0 0.0 … 0.0 0.0; … ; 0.0 0.0 … 0.0 0.0; 0.0 0.0 … 0.0 0.0;;; 0.0 0.0 … 0.0 0.0; 0.0 0.0 … 0.0 0.0; … ; 0.0 0.0 … 0.0 0.0; 0.0 0.0 … 0.0 0.0;;; 0.0 0.0 … 0.0 0.0; 0.0 0.0 … 0.0 0.0; … ; 0.0 0.0 … 0.0 0.0; 0.0 0.0 … 0.0 0.0;;; 0.0 0.0 … 0.0 0.0; 0.0 0.0 … 0.0 0.0; … ; 0.0 0.0 … 0.0 0.0; 0.0 0.0 … 0.0 0.0], [0.0 0.0 … 0.0 0.0; 0.003688148812 0.0018500689892 … 0.0 0.0; … ; 0.0 0.0 … 1.0453516999999999 0.0005606785471999999; 0.0 0.0 … 0.0046826205620000005 0.065218845], [0.0 0.0 … 0.0 0.0; 0.00234097344 0.0 … 0.0 0.0; … ; 0.0 0.0 … 0.94503136 0.000449623616; 0.0 0.0 … 0.08914963199999999 0.0282215232], 185.018, 141.44, [1.07559, 1.00494, 0.997145, 0.994087, 0.991775, 0.990224, 0.98391, 0.991145, 0.993283, 0.976963  …  0.897826, 0.889232, 0.890147, 0.892718, 0.88395, 0.921764, 0.882477, 0.891006, 0.911363, 0.877797], [1.07535, 1.00332, 1.0004, 0.990515, 0.982716, 0.991055, 0.988341, 0.981917, 0.980651, 0.98678  …  0.857518, 0.837175, 0.875777, 0.897924, 0.935441, 0.933215, 0.899119, 0.910332, 1.1251, 1.12007])))), PartonDensity.var&quot;#_my_fun_xsec_im#40&quot;{PartonDensity.MetaDataZEUS{Main.var&quot;#f_cross_section_to_counts#1&quot;{Array{Float64, 3}, Array{Float64, 3}, Matrix{Float64}, Matrix{Float64}, Float64, Float64, Vector{Float64}, Vector{Float64}}}})</code></pre><p>plot</p><pre><code class="language-julia hljs">g = qcdnum_params.grid_params
+xsec_on_grid = zeros(g.nx, g.nq);
+
+for ix = 1:g.nx
+    for iq = 1:g.nq
+        xsec_on_grid[ix, iq] = _fun_xsec_i(1, MD_DOCS, ix, iq) # charge = 1
+    end
+end
+
+qcdnum_x_grid = QCDNUM.gxcopy(g.nx)
+qcdnum_qq_grid = QCDNUM.gqcopy(g.nq)
+p1 = heatmap(qcdnum_x_grid, qcdnum_qq_grid, NaNMath.log10.(xsec_on_grid[:, :]&#39;))
+plot(p1, xlabel=&quot;x&quot;, ylabel=&quot;q2&quot;,
+    xaxis=:log, yaxis=:log)</code></pre><img src="fca9f61d.svg" alt="Example block output"/><pre><code class="language-julia hljs">plot(qcdnum_x_grid, NaNMath.log10.(xsec_on_grid[:, 4]),
+    label=&quot;Q2=141 (input scale)&quot;, lw=3)
+plot!(qcdnum_x_grid, NaNMath.log10.(xsec_on_grid[:, 22]), label=&quot;Q2=1152&quot;, lw=3)
+plot!(qcdnum_x_grid, NaNMath.log10.(xsec_on_grid[:, 35]), label=&quot;Q2=5233&quot;, lw=3)
+plot!(qcdnum_x_grid, NaNMath.log10.(xsec_on_grid[:, 41]), label=&quot;Q2=10523&quot;, lw=3)
+plot!(xaxis=:log, legend=:bottomleft, xlabel=&quot;x&quot;,
+    ylabel=&quot;log10(cross section spline input)&quot;, ylims=(-7, 5))</code></pre><img src="0b161618.svg" alt="Example block output"/><pre><code class="language-julia hljs">iaF_eP = QCDNUM.isp_s2make(1, 2);
+QCDNUM.ssp_uwrite(splint_params.spline_addresses.F_eP, Float64(iaF_eP));
+QCDNUM.ssp_s2fill(iaF_eP, wrapped_my_funcp, splint_params.rscut);
+
+iaF_eM = QCDNUM.isp_s2make(1, 2);
+QCDNUM.ssp_uwrite(splint_params.spline_addresses.F_eM, Float64(iaF_eM));
+QCDNUM.ssp_s2fill(iaF_eM, wrapped_my_funcm, splint_params.rscut);</code></pre><p>plot spline</p><pre><code class="language-julia hljs">spline = zeros(g.nx, g.nq);
+
+for ix = 1:g.nx
+    for iq = 1:g.nq
+        spline[ix, iq] = QCDNUM.dsp_funs2(iaF_eP, qcdnum_x_grid[ix],
+            qcdnum_qq_grid[iq], 1)
+    end
+end
+
+p1 = heatmap(qcdnum_x_grid, qcdnum_qq_grid, NaNMath.log10.(spline[:, :]&#39;))
+plot(p1, xlabel=&quot;x&quot;, ylabel=&quot;q2&quot;,
+    xaxis=:log, yaxis=:log)</code></pre><img src="18efb120.svg" alt="Example block output"/><h2 id="Integrate-over-the-cross-section-spline-and-find-expected-events-numbers"><a class="docs-heading-anchor" href="#Integrate-over-the-cross-section-spline-and-find-expected-events-numbers">Integrate over the cross section spline and find expected events numbers</a><a id="Integrate-over-the-cross-section-spline-and-find-expected-events-numbers-1"></a><a class="docs-heading-anchor-permalink" href="#Integrate-over-the-cross-section-spline-and-find-expected-events-numbers" title="Permalink"></a></h2><p>Here, we neglect any possible contribution from systematic errors</p><pre><code class="language-julia hljs">nbins = size(MD_DOCS.m_xbins_M_begin)[1]
+IntXsec_eP = zeros(nbins);
+IntXsec_eM = zeros(nbins);
+for i in 1:nbins
+    IntXsec_eP[i] = QCDNUM.dsp_ints2(iaF_eP, MD_DOCS.m_xbins_M_begin[i], MD_DOCS.m_xbins_M_end[i], MD_DOCS.m_q2bins_M_begin[i], MD_DOCS.m_q2bins_M_end[i], MD_DOCS.sqrtS, 4)
+    IntXsec_eM[i] = QCDNUM.dsp_ints2(iaF_eM, MD_DOCS.m_xbins_M_begin[i], MD_DOCS.m_xbins_M_end[i], MD_DOCS.m_q2bins_M_begin[i], MD_DOCS.m_q2bins_M_end[i], MD_DOCS.sqrtS, 4)
+end
+
+counts_pred_eP, counts_pred_eM = MD_DOCS.f_cross_section_to_counts(MD_DOCS.Ld_ePp, MD_DOCS.Ld_eMp, IntXsec_eP, IntXsec_eM)
+
+counts_pred_eM</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">153-element Vector{Float64}:
+ 478.41804649796075
+ 390.76785310439396
+ 341.6324069114049
+ 337.32460588865627
+ 254.03967035417736
+ 258.79982556401876
+ 215.8321871759256
+ 599.2632932930815
+ 479.7250876958852
+ 460.43244799295934
+   ⋮
+  32.48315357194824
+  20.646253094605395
+  12.831049836479904
+   7.4168947133060925
+   4.777909927948819
+   3.366194038512707
+   0.4188838031388788
+ 119.47605662632031
+   6.802343970070724</code></pre><hr/><p><em>This page was generated using <a href="https://github.com/fredrikekre/Literate.jl">Literate.jl</a>.</em></p></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="../zeus_interface/">« ZEUS interface</a><a class="docs-footer-nextpage" href="../api/">API »</a><div class="flexbox-break"></div><p class="footer-message">Powered by <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> and the <a href="https://julialang.org/">Julia Programming Language</a>.</p></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="auto">Automatic (OS)</option><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option><option value="catppuccin-latte">catppuccin-latte</option><option value="catppuccin-frappe">catppuccin-frappe</option><option value="catppuccin-macchiato">catppuccin-macchiato</option><option value="catppuccin-mocha">catppuccin-mocha</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> version 1.8.0 on <span class="colophon-date" title="Thursday 12 December 2024 08:33">Thursday 12 December 2024</span>. Using Julia version 1.11.2.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>

@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/><title>ZEUS interface · PartonDensity.jl</title><script data-outdated-warner src="../assets/warner.js"></script><link href="https://cdnjs.cloudflare.com/ajax/libs/lato-font/3.0.0/css/lato-font.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/juliamono/0.045/juliamono.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/fontawesome.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/solid.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/brands.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.13.24/katex.min.css" rel="stylesheet" type="text/css"/><script>documenterBaseURL=".."</script><script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.6/require.min.js" data-main="../assets/documenter.js"></script><script src="../siteinfo.js"></script><script src="../../versions.js"></script><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../assets/themes/documenter-dark.css" data-theme-name="documenter-dark" data-theme-primary-dark/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../assets/themes/documenter-light.css" data-theme-name="documenter-light" data-theme-primary/><script src="../assets/themeswap.js"></script></head><body><div id="documenter"><nav class="docs-sidebar"><div class="docs-package-name"><span class="docs-autofit"><a href="../">PartonDensity.jl</a></span></div><form class="docs-search" action="../search/"><input class="docs-search-query" id="documenter-search-query" name="q" type="text" placeholder="Search docs"/></form><ul class="docs-menu"><li><a class="tocitem" href="../">Introduction</a></li><li><span class="tocitem">Examples</span><ul><li><a class="tocitem" href="../pdf_parametrisation/">Input PDF parametrisation and priors</a></li><li class="is-active"><a class="tocitem" href>ZEUS interface</a><ul class="internal"><li><a class="tocitem" href="#Transfer-matrix"><span>Transfer matrix</span></a></li><li><a class="tocitem" href="#Bins-in-detector-space"><span>Bins in detector space</span></a></li></ul></li><li><a class="tocitem" href="../forward_model/">Forward model</a></li><li><a class="tocitem" href="../prior_bat_implementation/">Prior model implementation in BAT.jl</a></li><li><a class="tocitem" href="../bat_fit_valence/">Fit with valence parametrisation</a></li><li><a class="tocitem" href="../bat_fit_dirichlet/">Fit with Dirichlet parametrisation</a></li><li><a class="tocitem" href="../bat_fit_dirichlet_syserr/">Fit with Dirichlet parametrisation and systematic errors</a></li></ul></li><li><a class="tocitem" href="../api/">API</a></li></ul><div class="docs-version-selector field has-addons"><div class="control"><span class="docs-label button is-static is-size-7">Version</span></div><div class="docs-selector control is-expanded"><div class="select is-fullwidth is-size-7"><select id="documenter-version-selector"></select></div></div></div></nav><div class="docs-main"><header class="docs-navbar"><nav class="breadcrumb"><ul class="is-hidden-mobile"><li><a class="is-disabled">Examples</a></li><li class="is-active"><a href>ZEUS interface</a></li></ul><ul class="is-hidden-tablet"><li class="is-active"><a href>ZEUS interface</a></li></ul></nav><div class="docs-right"><a class="docs-edit-link" href="https://github.com/cescalara/PartonDensity.jl/blob/main/examples/zeus_interface.jl" title="Edit on GitHub"><span class="docs-icon fab"></span><span class="docs-label is-hidden-touch">Edit on GitHub</span></a><a class="docs-settings-button fas fa-cog" id="documenter-settings-button" href="#" title="Settings"></a><a class="docs-sidebar-button fa fa-bars is-hidden-desktop" id="documenter-sidebar-button" href="#"></a></div></header><article class="content" id="documenter-page"><h1 id="ZEUS-interface"><a class="docs-heading-anchor" href="#ZEUS-interface">ZEUS interface</a><a id="ZEUS-interface-1"></a><a class="docs-heading-anchor-permalink" href="#ZEUS-interface" title="Permalink"></a></h1><p>Here is a short demonstration of how to access the ZEUS transfer matrix and bin interface.</p><pre><code class="language-julia hljs">using PartonDensity, CSV, DelimitedFiles</code></pre><h2 id="Transfer-matrix"><a class="docs-heading-anchor" href="#Transfer-matrix">Transfer matrix</a><a id="Transfer-matrix-1"></a><a class="docs-heading-anchor-permalink" href="#Transfer-matrix" title="Permalink"></a></h2><pre><code class="language-julia hljs">eMPp = 1 # e+/e- switch 0/1</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">1</code></pre><p>Read in an example integrated cross section</p><pre><code class="language-julia hljs">numbers_from_file = readdlm(&quot;data/HERAPDF20_NNLO_EIG_ePp.txt&quot;)</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">429×3 Matrix{Float64}:
+   400.0    650.0  49.414
+   400.0    650.0  52.149
+   400.0    650.0  27.263
+   400.0    650.0  33.421
+   400.0    650.0  18.594
+   400.0    650.0  16.348
+   400.0    650.0  21.211
+   400.0    650.0  12.374
+   400.0    650.0  11.224
+   400.0    650.0  10.247
+     ⋮             
+  8000.0  11000.0   0.035885
+  8000.0  11000.0   0.020569
+  8000.0  11000.0   0.010562
+  8000.0  11000.0   0.00056915
+ 11000.0  20000.0   0.6079
+ 11000.0  20000.0   0.60542
+ 11000.0  20000.0   0.020995
+ 20000.0  30000.0   0.13832
+ 20000.0  30000.0   0.0061146</code></pre><p>List of integrated cross section values in 429 bins</p><pre><code class="language-julia hljs">integ_xsec = numbers_from_file[:,3]</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">429-element Vector{Float64}:
+ 49.414
+ 52.149
+ 27.263
+ 33.421
+ 18.594
+ 16.348
+ 21.211
+ 12.374
+ 11.224
+ 10.247
+  ⋮
+  0.035885
+  0.020569
+  0.010562
+  0.00056915
+  0.6079
+  0.60542
+  0.020995
+  0.13832
+  0.0061146</code></pre><p>Corresponding list of expected event numbers</p><pre><code class="language-julia hljs">prediction = get_pred_N(integ_xsec, eMPp);
+
+integ_xsec[153]
+
+prediction[151]</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">0.15272861711226063</code></pre><h2 id="Bins-in-detector-space"><a class="docs-heading-anchor" href="#Bins-in-detector-space">Bins in detector space</a><a id="Bins-in-detector-space-1"></a><a class="docs-heading-anchor-permalink" href="#Bins-in-detector-space" title="Permalink"></a></h2><p>The transfer matrix projects into a list of 153 bins with irregular x and Q2 spacing. The bin edges are provided in <code>data/zeus_bin_edges.jl</code> but can also be quickly and easily accessed with the helper function <code>get_bin_info</code> as shown below.</p><pre><code class="language-julia hljs">get_bin_info(10)</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">([800, 950], [0.059, 0.076])</code></pre><hr/><p><em>This page was generated using <a href="https://github.com/fredrikekre/Literate.jl">Literate.jl</a>.</em></p></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="../pdf_parametrisation/">« Input PDF parametrisation and priors</a><a class="docs-footer-nextpage" href="../forward_model/">Forward model »</a><div class="flexbox-break"></div><p class="footer-message">Powered by <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> and the <a href="https://julialang.org/">Julia Programming Language</a>.</p></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> version 0.27.24 on <span class="colophon-date" title="Tuesday 9 May 2023 15:27">Tuesday 9 May 2023</span>. Using Julia version 1.7.3.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>

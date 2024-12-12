@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/><title>Input PDF parametrisation and priors · PartonDensity.jl</title><meta name="title" content="Input PDF parametrisation and priors · PartonDensity.jl"/><meta property="og:title" content="Input PDF parametrisation and priors · PartonDensity.jl"/><meta property="twitter:title" content="Input PDF parametrisation and priors · PartonDensity.jl"/><meta name="description" content="Documentation for PartonDensity.jl."/><meta property="og:description" content="Documentation for PartonDensity.jl."/><meta property="twitter:description" content="Documentation for PartonDensity.jl."/><meta property="og:url" content="https://cescalara.github.io/PartonDensity.jl/stable/pdf_parametrisation/"/><meta property="twitter:url" content="https://cescalara.github.io/PartonDensity.jl/stable/pdf_parametrisation/"/><link rel="canonical" href="https://cescalara.github.io/PartonDensity.jl/stable/pdf_parametrisation/"/><script data-outdated-warner src="../assets/warner.js"></script><link href="https://cdnjs.cloudflare.com/ajax/libs/lato-font/3.0.0/css/lato-font.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/juliamono/0.050/juliamono.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/fontawesome.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/solid.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/brands.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.8/katex.min.css" rel="stylesheet" type="text/css"/><script>documenterBaseURL=".."</script><script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.6/require.min.js" data-main="../assets/documenter.js"></script><script src="../search_index.js"></script><script src="../siteinfo.js"></script><script src="../../versions.js"></script><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../assets/themes/catppuccin-mocha.css" data-theme-name="catppuccin-mocha"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../assets/themes/catppuccin-macchiato.css" data-theme-name="catppuccin-macchiato"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../assets/themes/catppuccin-frappe.css" data-theme-name="catppuccin-frappe"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../assets/themes/catppuccin-latte.css" data-theme-name="catppuccin-latte"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../assets/themes/documenter-dark.css" data-theme-name="documenter-dark" data-theme-primary-dark/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../assets/themes/documenter-light.css" data-theme-name="documenter-light" data-theme-primary/><script src="../assets/themeswap.js"></script></head><body><div id="documenter"><nav class="docs-sidebar"><div class="docs-package-name"><span class="docs-autofit"><a href="../">PartonDensity.jl</a></span></div><button class="docs-search-query input is-rounded is-small is-clickable my-2 mx-auto py-1 px-2" id="documenter-search-query">Search docs (Ctrl + /)</button><ul class="docs-menu"><li><a class="tocitem" href="../">Introduction</a></li><li><span class="tocitem">Examples</span><ul><li class="is-active"><a class="tocitem" href>Input PDF parametrisation and priors</a><ul class="internal"><li><a class="tocitem" href="#&quot;Full-Dirichlet&quot;-approach"><span>&quot;Full Dirichlet&quot; approach</span></a></li><li><a class="tocitem" href="#&quot;Valence-shape-Dirichlet&quot;-approach"><span>&quot;Valence shape + Dirichlet&quot; approach</span></a></li><li><a class="tocitem" href="#PDF-Parametrisation-interface"><span>PDF Parametrisation interface</span></a></li></ul></li><li><a class="tocitem" href="../zeus_interface/">ZEUS interface</a></li><li><a class="tocitem" href="../forward_model/">Forward model</a></li></ul></li><li><a class="tocitem" href="../api/">API</a></li></ul><div class="docs-version-selector field has-addons"><div class="control"><span class="docs-label button is-static is-size-7">Version</span></div><div class="docs-selector control is-expanded"><div class="select is-fullwidth is-size-7"><select id="documenter-version-selector"></select></div></div></div></nav><div class="docs-main"><header class="docs-navbar"><a class="docs-sidebar-button docs-navbar-link fa-solid fa-bars is-hidden-desktop" id="documenter-sidebar-button" href="#"></a><nav class="breadcrumb"><ul class="is-hidden-mobile"><li><a class="is-disabled">Examples</a></li><li class="is-active"><a href>Input PDF parametrisation and priors</a></li></ul><ul class="is-hidden-tablet"><li class="is-active"><a href>Input PDF parametrisation and priors</a></li></ul></nav><div class="docs-right"><a class="docs-navbar-link" href="https://github.com/cescalara/PartonDensity.jl" title="View the repository on GitHub"><span class="docs-icon fa-brands"></span><span class="docs-label is-hidden-touch">GitHub</span></a><a class="docs-navbar-link" href="https://github.com/cescalara/PartonDensity.jl/blob/main/examples/pdf_parametrisation.jl" title="Edit source on GitHub"><span class="docs-icon fa-solid"></span></a><a class="docs-settings-button docs-navbar-link fa-solid fa-gear" id="documenter-settings-button" href="#" title="Settings"></a><a class="docs-article-toggle-button fa-solid fa-chevron-up" id="documenter-article-toggle-button" href="javascript:;" title="Collapse all docstrings"></a></div></header><article class="content" id="documenter-page"><h1 id="Input-PDF-parametrisation-and-priors"><a class="docs-heading-anchor" href="#Input-PDF-parametrisation-and-priors">Input PDF parametrisation and priors</a><a id="Input-PDF-parametrisation-and-priors-1"></a><a class="docs-heading-anchor-permalink" href="#Input-PDF-parametrisation-and-priors" title="Permalink"></a></h1><p>An important part of PDF fitting is defining a useful parametrisation for the PDF shapes, as well as meaningful prior distributions that encode our knowledge of the problem.</p><p>In this notebook, and in the <code>PartonDensity</code> package, we explore two different approaches:</p><ul><li><em>Full Dirichlet</em></li><li><em>Valence shape + Dirichlet</em></li></ul><p>We plan to explore the implementation of more parameterisations in the future, and our package is set up in a modular way to handle this.</p><pre><code class="language-julia hljs">using Distributions, Plots, SpecialFunctions, Printf
+const sf = SpecialFunctions;</code></pre><h2 id="&quot;Full-Dirichlet&quot;-approach"><a class="docs-heading-anchor" href="#&quot;Full-Dirichlet&quot;-approach">&quot;Full Dirichlet&quot; approach</a><a id="&quot;Full-Dirichlet&quot;-approach-1"></a><a class="docs-heading-anchor-permalink" href="#&quot;Full-Dirichlet&quot;-approach" title="Permalink"></a></h2><p>A clean way to ensure the momentum sum rule is to sample different contributions of the momentrum density integral from a Dirichlet distribution, then use these weights to set the parameters on the individual Beta distributions.</p><p>9 components of decreasing importance</p><pre><code class="language-julia hljs">dirichlet = Dirichlet([3.0, 2.0, 1, 0.5, 0.3, 0.2, 0.1, 0.1, 0.1])
+data = rand(dirichlet, 1000);</code></pre><p>Have a look</p><pre><code class="language-julia hljs">plot()
+for i in 1:9
+    histogram!(data[i, :], bins=range(0, stop=1, length=20), alpha=0.7)
+end
+plot!(xlabel=&quot;I_i = A_i B_i&quot;)</code></pre><img src="0a57c149.svg" alt="Example block output"/><p>This is great as the sum rule is automatically conserved</p><pre><code class="language-julia hljs">sum(data, dims=1)</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">1×1000 Matrix{Float64}:
+ 1.0  1.0  1.0  1.0  1.0  1.0  1.0  1.0  …  1.0  1.0  1.0  1.0  1.0  1.0  1.0</code></pre><p>But, it is still non-trivial to choose the Dirichlet weights for a sensible prior, and connect to the physics of the problem. We recommend simulating from the prior and visualising the results as a useful workflow in this case (see e.g. prior predictive checks).</p><pre><code class="language-julia hljs">I = rand(dirichlet)</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">9-element Vector{Float64}:
+ 0.09181578543725147
+ 0.587674828087985
+ 0.14045051063482022
+ 0.1722730951214369
+ 0.006805994400099501
+ 2.1879175607554406e-5
+ 0.00024757464217521196
+ 0.0007103325005265421
+ 9.758828375779679e-14</code></pre><p>As we are more interested in <code>K_u</code> and <code>K_d</code> than <code>λ_u</code> and <code>λ_d</code> for our high-x data, we can set the <code>λ</code>s according to the <code>K</code>s.</p><pre><code class="language-julia hljs">K_u = rand(Uniform(2, 10))</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">7.598431813008848</code></pre><p>Integral of number density must = 2, and integral of momentum density must = <code>I[1]</code>. This implies the following:</p><pre><code class="language-julia hljs">λ_u = (I[1] * (K_u + 1)) / (2 - I[1])</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">0.41372932676783575</code></pre><p>Let&#39;s check this</p><pre><code class="language-julia hljs">A_u = 2 / sf.beta(λ_u, K_u + 1)
+
+I[1] ≈ A_u * sf.beta(λ_u + 1, K_u + 1)</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">true</code></pre><p>While this approach also has its advantages, it is hard to set priors on the shape of the valence distributions, as the <code>λ_u</code> and <code>λ_d</code> are now derived parameters, dependent on the specified Dirichlet weights and <code>K_u</code>/<code>K_d</code> values. However, sensible prior choices can be made using e.g. prior predictive checks, as already mentioned above.</p><h2 id="&quot;Valence-shape-Dirichlet&quot;-approach"><a class="docs-heading-anchor" href="#&quot;Valence-shape-Dirichlet&quot;-approach">&quot;Valence shape + Dirichlet&quot; approach</a><a id="&quot;Valence-shape-Dirichlet&quot;-approach-1"></a><a class="docs-heading-anchor-permalink" href="#&quot;Valence-shape-Dirichlet&quot;-approach" title="Permalink"></a></h2><p>An alternative approach is to specify constraints on the valence params through the shape of their Beta distributions, then using a Dirichlet to specify the weights of the gluon and sea components. The problem here is it isn&#39;t clear how to specify that the d contribution must be less than the u contribution. However, it is possible to do this indirectly through priors on the shape parameters. Doing so would require some further investigation.</p><pre><code class="language-julia hljs">x = range(0, stop=1, length=50)</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">0.0:0.02040816326530612:1.0</code></pre><p>High-level priors</p><pre><code class="language-julia hljs">λ_u = 0.7
+K_u = 4
+λ_d = 0.5
+K_d = 6
+
+u_V = Beta(λ_u, K_u + 1)
+A_u = 2 / sf.beta(λ_u, K_u + 1)
+
+d_V = Beta(λ_d, K_d + 1)
+A_d = 1 / sf.beta(λ_d, K_d + 1)</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">1.46630859375</code></pre><p>Integral contributions</p><pre><code class="language-julia hljs">I_u = A_u * sf.beta(λ_u + 1, K_u + 1)
+I_d = A_d * sf.beta(λ_d + 1, K_d + 1)
+
+plot(x, x .* A_u .* x .^ λ_u .* (1 .- x) .^ K_u * 2, alpha=0.7, label=&quot;x u(x)&quot;, lw=3)
+plot!(x, x .* A_d .* x .^ λ_d .* (1 .- x) .^ K_d, alpha=0.7, label=&quot;x d(x)&quot;, lw=3)
+plot!(xlabel=&quot;x&quot;, legend=:topright)</code></pre><img src="f89c7b4d.svg" alt="Example block output"/><pre><code class="language-julia hljs">@printf(&quot;I_u = %.2f\n&quot;, I_u)
+@printf(&quot;I_d = %.2f\n&quot;, I_d)</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">I_u = 0.25
+I_d = 0.07</code></pre><p>The remaining 7 integrals can be dirichlet-sampled with decreasing importance</p><pre><code class="language-julia hljs">remaining = 1 - (I_u + I_d)
+dirichlet = Dirichlet([3.0, 2.0, 1, 0.5, 0.3, 0.2, 0.1])
+I = rand(dirichlet) * remaining;
+sum(I) ≈ remaining</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">true</code></pre><p>Gluon contributions</p><pre><code class="language-julia hljs">λ_g1 = rand(Uniform(-1, 0))
+λ_g2 = rand(Uniform(0, 1))
+K_g = rand(Uniform(2, 10))
+K_q = rand(Uniform(3, 7))
+A_g2 = I[1] / sf.beta(λ_g2 + 1, K_g + 1)
+A_g1 = I[2] / sf.beta(λ_g1 + 1, K_q + 1);</code></pre><p>Sea quark contributions</p><pre><code class="language-julia hljs">λ_q = rand(Uniform(-1, 0))
+A_ubar = I[3] / (2 * sf.beta(λ_q + 1, K_q + 1))
+A_dbar = I[4] / (2 * sf.beta(λ_q + 1, K_q + 1))
+A_s = I[5] / (2 * sf.beta(λ_q + 1, K_q + 1))
+A_c = I[6] / (2 * sf.beta(λ_q + 1, K_q + 1))
+A_b = I[7] / (2 * sf.beta(λ_q + 1, K_q + 1));
+
+total = A_u * sf.beta(λ_u + 1, K_u + 1) + A_d * sf.beta(λ_d + 1, K_d + 1)
+total += A_g1 * sf.beta(λ_g1 + 1, K_q + 1) + A_g2 * sf.beta(λ_g2 + 1, K_g + 1)
+total += 2 * (A_ubar + A_dbar + A_s + A_c + A_b) * sf.beta(λ_q + 1, K_q + 1)
+total ≈ 1</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">true</code></pre><pre><code class="language-julia hljs">x = 10 .^ range(-2, stop=0, length=500)</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">500-element Vector{Float64}:
+ 0.010000000000000002
+ 0.010092715146305713
+ 0.010186289902446875
+ 0.010280732238308653
+ 0.010376050197669117
+ 0.010472251898884349
+ 0.010569345535579883
+ 0.010667339377348576
+ 0.010766241770454934
+ 0.010866061138545975
+ ⋮
+ 0.92882922501725
+ 0.9374408787662997
+ 0.946132375589077
+ 0.9549044557518083
+ 0.963757866384109
+ 0.9726933615426174
+ 0.9817117022752193
+ 0.9908136566858671
+ 1.0</code></pre><p>How does it look?</p><pre><code class="language-julia hljs">xg2 = A_g2 * x .^ λ_g2 .* (1 .- x) .^ K_g
+xg1 = A_g1 * x .^ λ_g1 .* (1 .- x) .^ K_q
+plot(x, x .* A_u .* x .^ λ_u .* (1 .- x) .^ K_u * 2, alpha=0.7, label=&quot;x u(x)&quot;, lw=3)
+plot!(x, x .* A_d .* x .^ λ_d .* (1 .- x) .^ K_d, alpha=0.7, label=&quot;x d(x)&quot;, lw=3)
+plot!(x, xg1 + xg2, alpha=0.7, label=&quot;x g(x)&quot;, lw=3)
+plot!(x, A_ubar * x .^ λ_q .* (1.0 .- x) .^ K_q, alpha=0.7, label=&quot;x ubar(x)&quot;, lw=3)
+plot!(x, A_dbar * x .^ λ_q .* (1.0 .- x) .^ K_q, alpha=0.7, label=&quot;x dbar(x)&quot;, lw=3)
+plot!(x, A_s * x .^ λ_q .* (1.0 .- x) .^ K_q, alpha=0.7, label=&quot;x s(x)&quot;, lw=3)
+plot!(x, A_c * x .^ λ_q .* (1.0 .- x) .^ K_q, alpha=0.7, label=&quot;x c(x)&quot;, lw=3)
+plot!(x, A_b * x .^ λ_q .* (1.0 .- x) .^ K_q, alpha=0.7, label=&quot;x b(x)&quot;, lw=3)
+plot!(xlabel=&quot;x&quot;, legend=:bottomleft, xscale=:log, ylims=(1e-8, 10), yscale=:log)</code></pre><img src="a23d77f9.svg" alt="Example block output"/><h3 id="Prior-predictive-checks"><a class="docs-heading-anchor" href="#Prior-predictive-checks">Prior predictive checks</a><a id="Prior-predictive-checks-1"></a><a class="docs-heading-anchor-permalink" href="#Prior-predictive-checks" title="Permalink"></a></h3><p>We can start to visualise the type of PDFs that are allowed by the combination of the choice of parametrisation and prior distributions with some simple prior predictive checks, as done below for the valence style parametrisation...</p><pre><code class="language-julia hljs">N = 100
+alpha = 0.03
+total = Array{Float64,1}(undef, N)
+first = true
+leg = 0
+
+plot()
+for i in 1:N
+
+    λ_u_i = rand(Uniform(0, 1))
+    K_u_i = rand(Uniform(2, 10))
+    λ_d_i = rand(Uniform(0, 1))
+    K_d_i = rand(Uniform(2, 10))
+    A_u_i = 2 / sf.beta(λ_u_i, K_u_i + 1)
+    A_d_i = 1 / sf.beta(λ_d_i, K_d_i + 1)
+    I_u_i = A_u * sf.beta(λ_u_i + 1, K_u_i + 1)
+    I_d_i = A_d * sf.beta(λ_d_i + 1, K_d_i + 1)
+    u_V_i = Beta(λ_u_i, K_u_i + 1)
+    d_V_i = Beta(λ_d_i, K_d_i + 1)
+
+    remaining_i = 1 - (I_u_i + I_d_i)
+    dirichlet_i = Dirichlet([3.0, 2.0, 1, 0.5, 0.3, 0.2, 0.1])
+    I_i = rand(dirichlet_i) * remaining_i
+
+    λ_g1_i = rand(Uniform(-1, 0))
+    λ_g2_i = rand(Uniform(0, 1))
+    K_g_i = rand(Uniform(2, 10))
+    A_g2_i = I_i[1] / sf.beta(λ_g2_i + 1, K_g_i + 1)
+    A_g1_i = I_i[2] / sf.beta(λ_g1_i + 1, 5 + 1)
+
+    λ_q_i = rand(Uniform(-1, 0))
+    K_q_i = rand(Uniform(3, 7))
+    A_ubar_i = I_i[3] / (2 * sf.beta(λ_q_i + 1, K_q_i + 1))
+    A_dbar_i = I_i[4] / (2 * sf.beta(λ_q_i + 1, K_q_i + 1))
+    A_s_i = I_i[5] / (2 * sf.beta(λ_q_i + 1, K_q_i + 1))
+    A_c_i = I_i[6] / (2 * sf.beta(λ_q_i + 1, K_q_i + 1))
+    A_b_i = I_i[7] / (2 * sf.beta(λ_q_i + 1, K_q_i + 1))
+
+    total[i] = A_u_i * sf.beta(λ_u_i + 1, K_u_i + 1) + A_d_i * sf.beta(λ_d_i + 1, K_d_i + 1)
+    total[i] += A_g1_i * sf.beta(λ_g1_i + 1, K_q_i + 1) + A_g2_i * sf.beta(λ_g2_i + 1, K_g_i + 1)
+    total[i] += 2 * (A_ubar_i + A_dbar_i + A_s_i + A_c_i + A_b_i) * sf.beta(λ_q_i + 1, K_q_i + 1)
+
+    xg2_i = A_g2_i * x .^ λ_g2_i .* (1 .- x) .^ K_g_i
+    xg1_i = A_g1_i * x .^ λ_g1_i .* (1 .- x) .^ K_q_i
+    plot!(x, [x .* A_u_i .* x .^ λ_u_i .* (1 .- x) .^ K_u_i * 2], alpha=alpha, color=&quot;blue&quot;, lw=3)
+    plot!(x, x .* A_d_i .* x .^ λ_d_i .* (1 .- x) .^ K_d_i, alpha=alpha, color=&quot;orange&quot;, lw=3)
+    plot!(x, xg1_i + xg2_i, alpha=alpha, color=&quot;green&quot;, lw=3)
+    plot!(x, A_ubar_i * x .^ λ_q_i .* (1 .- x) .^ K_q_i, alpha=alpha, color=&quot;red&quot;, lw=3)
+    plot!(x, A_dbar_i * x .^ λ_q_i .* (1 .- x) .^ K_q_i, alpha=alpha, color=&quot;purple&quot;, lw=3)
+    plot!(x, A_s_i * x .^ λ_q_i .* (1 .- x) .^ K_q_i, alpha=alpha, color=&quot;brown&quot;, lw=3)
+    plot!(x, A_c_i * x .^ λ_q_i .* (1 .- x) .^ K_q_i, alpha=alpha, color=&quot;pink&quot;, lw=3)
+    plot!(x, A_b_i * x .^ λ_q_i .* (1 .- x) .^ K_q_i, alpha=alpha, color=&quot;grey&quot;, lw=3)
+end
+
+plot!(xlabel=&quot;x&quot;, ylabel=&quot;x f(x)&quot;, xscale=:log, legend=false,
+    ylims=(1e-8, 10), yscale=:log)</code></pre><img src="1e0ee352.svg" alt="Example block output"/><h2 id="PDF-Parametrisation-interface"><a class="docs-heading-anchor" href="#PDF-Parametrisation-interface">PDF Parametrisation interface</a><a id="PDF-Parametrisation-interface-1"></a><a class="docs-heading-anchor-permalink" href="#PDF-Parametrisation-interface" title="Permalink"></a></h2><p><code>PartonDensity</code> provides a handy interface to both the parametrisations through the <code>DirichletPDFParams</code> and <code>ValencePDFParams</code> options.</p><pre><code class="language-julia hljs">using PartonDensity</code></pre><p>Let&#39;s try the Dirichlet specification...</p><pre><code class="language-julia hljs">weights_dir = [3.0, 1.0, 5.0, 5.0, 1.0, 1.0, 1.0, 0.5, 0.5]
+θ_dir = rand(Dirichlet(weights_dir))
+
+pdf_params = DirichletPDFParams(K_u=4.0, K_d=6.0, λ_g1=0.7, λ_g2=-0.4,
+    K_g=6.0, λ_q=-0.5, K_q=5.0, θ=θ_dir);
+
+plot_input_pdfs(pdf_params)</code></pre><img src="3fe0c4e4.svg" alt="Example block output"/><pre><code class="language-julia hljs">int_xtotx(pdf_params) ≈ 1</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">true</code></pre><p>And now the valence specification...</p><pre><code class="language-julia hljs">weights_val = [5.0, 5.0, 1.0, 1.0, 1.0, 0.5, 0.5]
+λ_u = 0.7
+K_u = 4.0
+λ_d = 0.5
+K_d = 6.0
+θ_val = get_θ_val(λ_u, K_u, λ_d, K_d, weights_val)
+pdf_params = ValencePDFParams(λ_u=λ_u, K_u=K_u, λ_d=λ_d, K_d=K_d, λ_g1=0.7, λ_g2=-0.4,
+    K_g=6.0, λ_q=-0.5, K_q=5.0, θ=θ_val);
+
+plot_input_pdfs(pdf_params)</code></pre><img src="fbab8569.svg" alt="Example block output"/><pre><code class="language-julia hljs">int_xtotx(pdf_params) ≈ 1</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">true</code></pre><hr/><p><em>This page was generated using <a href="https://github.com/fredrikekre/Literate.jl">Literate.jl</a>.</em></p></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="../">« Introduction</a><a class="docs-footer-nextpage" href="../zeus_interface/">ZEUS interface »</a><div class="flexbox-break"></div><p class="footer-message">Powered by <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> and the <a href="https://julialang.org/">Julia Programming Language</a>.</p></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="auto">Automatic (OS)</option><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option><option value="catppuccin-latte">catppuccin-latte</option><option value="catppuccin-frappe">catppuccin-frappe</option><option value="catppuccin-macchiato">catppuccin-macchiato</option><option value="catppuccin-mocha">catppuccin-mocha</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> version 1.8.0 on <span class="colophon-date" title="Thursday 12 December 2024 08:33">Thursday 12 December 2024</span>. Using Julia version 1.11.2.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>
