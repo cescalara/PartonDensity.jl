@@ -58,11 +58,10 @@ end
 Go from input PDF parameters to the expected number of events in bins.
 """
 function forward_model(pdf_params::AbstractPDFParams,
-                       qcdnum_params::QCDNUM.EvolutionParams,
-                       splint_params::QCDNUM.SPLINTParams, 
-                       quark_coeffs::QuarkCoefficients,
-                       md::MetaData
-                       ,sys_err_params::Vector{Float64}=zeros(8))
+    qcdnum_params::QCDNUM.EvolutionParams,
+    splint_params::QCDNUM.SPLINTParams,
+    quark_coeffs::QuarkCoefficients,
+    md::MetaData, sys_err_params::Vector{Float64}=zeros(8))
 
     # Get input PDF function
     my_func = get_input_pdf_func(pdf_params)
@@ -72,8 +71,9 @@ function forward_model(pdf_params::AbstractPDFParams,
     iq0 = QCDNUM.iqfrmq(qcdnum_params.q0)
     ϵ = QCDNUM.evolfg(qcdnum_params.output_pdf_loc, input_pdf, iq0)
 
-    # Debugging
-    if ϵ > 0.05
+    # Debugging spline issues
+    ϵ_lim = QCDNUM.getval("elim")
+    if ϵ > ϵ_lim && ϵ_lim > 0.0
 
         @warn "QCDNUM.evolfg(): Spline issues detected" ϵ pdf_params
 
@@ -118,7 +118,7 @@ function forward_model(pdf_params::AbstractPDFParams,
         integ_xsec_em[i] = QCDNUM.dsp_ints2(iaF_eM, md.m_xbins_M_begin[i], md.m_xbins_M_end[i], md.m_q2bins_M_begin[i], md.m_q2bins_M_end[i], md.sqrtS, 4)
     end
 
-    counts_pred_ep, counts_pred_em = md.f_cross_section_to_counts(md.Ld_ePp,md.Ld_eMp, integ_xsec_ep,integ_xsec_em,sys_err_params)
+    counts_pred_ep, counts_pred_em = md.f_cross_section_to_counts(md.Ld_ePp, md.Ld_eMp, integ_xsec_ep, integ_xsec_em, sys_err_params)
     return counts_pred_ep, counts_pred_em
 end
 
